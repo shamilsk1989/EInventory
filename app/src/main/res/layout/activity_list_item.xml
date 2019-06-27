@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:appNs="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/txtCount"
+        android:text="0"
+        android:textSize="30dp"
+        android:textColor="@android:color/black"
+        android:background="@drawable/border_line"
+
+
+        />
+
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/txtCount"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/item_list_rv"
+            android:scrollbars="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </android.support.v7.widget.RecyclerView>
+    </android.support.v4.widget.NestedScrollView>
+
+
+    <TextView
+
+        android:layout_below="@+id/scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/txtEmpty"
+        android:gravity="center"
+        android:textSize="30sp"
+        android:visibility="gone"
+        android:text="No Items"
+        />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_height"
+        android:background="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        android:text="Export"
+        android:id="@+id/btnSave"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="10dp"
+
+        />
+
+
+
+
+</RelativeLayout>

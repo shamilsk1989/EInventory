@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.alhikmahpro.www.e_inventory">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".View.SplashActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".View.HomeActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".View.LoginActivity" />
+        <activity android:name=".View.ScanBarcodeActivity" />
+        <activity android:name=".View.ZXingBrcodeScanActivity" />
+        <activity
+            android:name=".View.CaptureActivityPortrait"
+            android:screenOrientation="portrait"
+            android:stateNotNeeded="true"
+            android:windowSoftInputMode="stateAlwaysHidden" />
+        <activity android:name=".View.PriceCheckerActivity" />
+        <activity android:name=".View.SettingsActivity" />
+        <activity android:name=".View.ListDocActivity" />
+        <activity android:name=".View.InventoryActivity" />
+        <activity android:name=".View.ListItemActivity" />
+        <activity android:name=".View.GoodsReceiverActivity" />
+        <activity android:name=".View.InvoiceActivity" />
+        <activity android:name=".View.GoodsItemListActivity" />
+        <activity android:name=".View.CustomerListActivity" />
+        <activity android:name=".View.SalesActivity" />
+        <activity android:name=".View.CheckCustomerActivity" />
+        <activity android:name=".View.ViewCartActivity" />
+
+        <activity android:name=".View.PaymentActivity" />
+        <activity android:name=".View.PrintViewActivity" />
+        <activity android:name=".View.PrinterSettingsActivity" />
+        <activity android:name=".View.PaperSettingsActivity" />
+        <activity android:name=".View.AddPrinterActivity" />
+        <activity android:name=".View.DeviceListActivity" />
+        <activity android:name=".View.ListSalesActivity"></activity>
+    </application>
+
+</manifest>

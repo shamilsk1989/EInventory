@@ -1,0 +1,28 @@
+{
+  "Invoice": [
+    {
+      "invoice_number": "INV-1",
+      "invoice_date": "19-06-2019 17:43:14",
+      "customer_code": "IZDIHAR LIBRARY",
+      "salesman_id": "S001",
+      "total_amount": 15,
+      "discount_amount": 10,
+      "net_amount": 5,
+      "payment_type": "Cash"
+    }
+  ],
+  "Details": [
+    {
+      "invoice_number": "INV-1",
+      "bar_code": "5136910",
+      "product_code": "513691",
+      "product_name": "3+1ST ACTIVITY BOOK ENGLISH",
+      "quantity": 1,
+      "selected_unit": "EA",
+      "rate": 15,
+      "discount": 0,
+      "net_amount": 15,
+      "sale_type": "Sale"
+    }
+  ]
+}
