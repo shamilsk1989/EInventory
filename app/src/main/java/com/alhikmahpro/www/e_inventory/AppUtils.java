@@ -80,7 +80,7 @@ public class AppUtils {
 
     public static String getFormattedDate() {
         SimpleDateFormat dateFormat = new SimpleDateFormat(
-                "dd-MM-yyyy - hh:mm:ss", Locale.getDefault());
+                "ddMMyyyy-hh:mm:ss", Locale.getDefault());
         Date date = new Date();
         return dateFormat.format(date);
     }
