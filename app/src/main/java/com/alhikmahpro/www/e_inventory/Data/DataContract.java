@@ -63,10 +63,14 @@ public class DataContract {
         public static final String COL_DOCUMENT_NUMBER="document_number";
         public static final String COL_ORDER_NUMBER="order_no";
         public static final String COL_SUPPLIER_CODE="supplier_code";
+        public static final String COL_SUPPLIER_NAME="supplier_name";
         public static final String COL_INVOICE_NUMBER="invoice_no";
         public static final String COL_INVOICE_DATE="invoice_date";
         public static final String COL_STAFF_NAME="staff_name";
         public static final String COL_TOTAL="total";
+        public static final String COL_DISCOUNT_AMOUNT="discount_amount";
+        public static final String COL_NET_AMOUNT="net_amount";
+        public static final String COL_PAYMENT_TYPE="payment_type";
         public static final String COL_DATE_TIME="date_time";
         public static final String COL_IS_SYNC="is_sync";
 
@@ -129,6 +133,12 @@ public class DataContract {
         public static final String COL_PRODUCT_NAME="product_name";
         public static final String COL_UNIT="selected_unit";
         public static final String COL_QUANTITY="quantity";
+        public static final String COL_UNIT1="unit1";
+        public static final String COL_UNIT2="unit2";
+        public static final String COL_UNIT3="unit3";
+        public static final String COL_UN_QTY1="un_qty1";
+        public static final String COL_UN_QTY2="un_qty2";
+        public static final String COL_UN_QTY3="un_qty3";
         public static final String COL_RATE="rate";
         public static final String COL_DISCOUNT="discount";
         public static final String COL_NET_AMOUNT="net_amount";
