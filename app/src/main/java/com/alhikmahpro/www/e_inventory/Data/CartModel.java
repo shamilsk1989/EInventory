@@ -3,13 +3,66 @@ package com.alhikmahpro.www.e_inventory.Data;
 public class CartModel {
 
     //used for invoice details
-    String barcode;
-    String productCode;
-    String productName;
-    String saleType;
-    String selectedUnit;
-    double qty,net,rate,discount;
+    private String barcode,productCode,productName;
+    private String saleType,selectedUnit,unit1,unit2,unit3;
+    private double qty,net,rate,discount;
+    int unit1Qty,unit2Qty,unit3Qty,unitIndex;
 
+    public String getUnit1() {
+        return unit1;
+    }
+
+    public void setUnit1(String unit1) {
+        this.unit1 = unit1;
+    }
+
+    public String getUnit2() {
+        return unit2;
+    }
+
+    public void setUnit2(String unit2) {
+        this.unit2 = unit2;
+    }
+
+    public String getUnit3() {
+        return unit3;
+    }
+
+    public void setUnit3(String unit3) {
+        this.unit3 = unit3;
+    }
+
+    public int getUnit1Qty() {
+        return unit1Qty;
+    }
+
+    public void setUnit1Qty(int unit1Qty) {
+        this.unit1Qty = unit1Qty;
+    }
+
+    public int getUnit2Qty() {
+        return unit2Qty;
+    }
+
+    public void setUnit2Qty(int unit2Qty) {
+        this.unit2Qty = unit2Qty;
+    }
+
+    public int getUnit3Qty() {
+        return unit3Qty;
+    }
+
+    public void setUnit3Qty(int unit3Qty) {
+        this.unit3Qty = unit3Qty;
+    }
+
+    public int getUnitIndex() {
+        return unitIndex;
+    }
+
+    public void setUnitIndex(int unitIndex) {
+        this.unitIndex = unitIndex;
+    }
 
     public String getSelectedUnit() {
         return selectedUnit;
