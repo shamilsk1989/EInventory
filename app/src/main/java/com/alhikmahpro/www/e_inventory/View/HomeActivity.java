@@ -98,27 +98,36 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             fragmentTransaction.commit();
         }
         initView();
-        hideMenu();
+        //hideMenu();
     }
 
     private void hideMenu() {
-        Log.d(TAG, "hideMenu: " + SessionHandler.getInstance(this).isSetInventory());
+        Log.d("menu", "hideMenu: ");
         //hide sales menu
         //sale.setVisible(false);
-
-
         if (user.equals("User")) {
             admin.setVisible(false);
-
-            if (!SessionHandler.getInstance(this).isSetInventory()) {
-                Log.d(TAG, "Inventory false");
-                inventory.setVisible(false);
-            }
-            if (!SessionHandler.getInstance(this).isSetGoodsReceive()) {
-                Log.d(TAG, "goods false");
-                goods.setVisible(false);
-            }
         }
+
+        if (!SessionHandler.getInstance(this).isSetInventory()) {
+            Log.d("menu", "Inventory false");
+            inventory.setVisible(false);
+        }else {
+            inventory.setVisible(true);
+        }
+        if (!SessionHandler.getInstance(this).isSetGoodsReceive()) {
+            Log.d("menu", "goods false");
+            goods.setVisible(false);
+        }else{
+            goods.setVisible(true);
+        }
+        if (!SessionHandler.getInstance(this).isSetSale()) {
+            Log.d("menu", "sales false");
+            sale.setVisible(false);
+        }else {
+            sale.setVisible(true);
+        }
+
     }
 
 
@@ -397,5 +406,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: ");
+        hideMenu();
+    }
 }
