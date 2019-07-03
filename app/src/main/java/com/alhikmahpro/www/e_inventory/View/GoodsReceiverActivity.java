@@ -61,7 +61,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class GoodsReceiverActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener,ListItemFragment.OnCompleteListener {
+public class GoodsReceiverActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, ListItemFragment.OnCompleteListener {
 
     @BindView(R.id.txtDate)
     TextView txtDate;
@@ -143,7 +143,8 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
 
-   // public static List<ItemModel>itemCart=new ArrayList<>();
+
+    // public static List<ItemModel>itemCart=new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -279,22 +280,28 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         return true;
     }
 
-    @Override
-    public void onBackPressed() {
-
+    double ParseDouble(String strNumber) {
+        if (strNumber != null && strNumber.length() > 0) {
+            try {
+                return Double.parseDouble(strNumber);
+            } catch (Exception e) {
+                return -1;   // or some value to mark this field is wrong. or make a function validates field first ...
+            }
+        } else return 0;
     }
 
     private void calculateNetValue() {
-        try {
-            double qty = Double.valueOf(editTextQuantity.getText().toString());
-            double rate = Double.valueOf(editTextRate.getText().toString());
-            double disc = Double.valueOf(editTextDiscount.getText().toString());
-            double net = (qty * rate) - disc;
-            editTextNet.setText(String.valueOf(net));
+        double net, rate, quantity;
 
-        } catch (NumberFormatException e) {
+        quantity = ParseDouble(editTextQuantity.getText().toString());
+        rate = ParseDouble(editTextRate.getText().toString());
+        discount = ParseDouble(editTextDiscount.getText().toString());
 
-        }
+        Log.d(TAG, "calculateNetValue: " + quantity + "rate :" + rate + "discount :" + discount);
+
+        net = (quantity * rate) - (quantity * discount);
+        editTextNet.setText(String.valueOf(net));
+
     }
 
 
@@ -316,9 +323,17 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     @OnClick(R.id.imgSearch)
     public void onImgSearchClicked() {
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        ListItemFragment listItemFragment = new ListItemFragment();
-        listItemFragment.show(fragmentManager, "Items");
+        String item_key = editTextBarcode.getText().toString();
+        if (item_key.length() < 3) {
+            editTextBarcode.setError("Minimum 3 letters");
+        } else {
+            Bundle bundle = new Bundle();
+            bundle.putString("ITEM_NAME", item_key);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            ListItemFragment listItemFragment = new ListItemFragment();
+            listItemFragment.setArguments(bundle);
+            listItemFragment.show(fragmentManager, "Items");
+        }
 
 
     }
@@ -329,75 +344,47 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
         if (TextUtils.isEmpty(editTextProductCode.getText())) {
             editTextProductCode.setError("Invalid Item");
-        }else {
-            //set added items view
+        } else {
 
-            txtAddedBarcode.setText(barCode);
-            txtAddedQuantity.setText(editTextQuantity.getText().toString());
-            txtAddedPrice.setText(editTextSale.getText().toString());
 
-            // add items into the cart
-            addToCart();
-            // clear the view and set focus into barcode
+            double qty, free_qty;
+            try {
+                qty = Double.valueOf(editTextQuantity.getText().toString());
+                free_qty = Double.valueOf(editTextFreeQuantity.getText().toString());
 
-            editTextBarcode.setText("");
-            clearView();
-            editTextBarcode.setFocusableInTouchMode(true);
-            editTextBarcode.requestFocus();
+            } catch (NumberFormatException e) {
+                qty = 0;
+                free_qty = 0;
+            }
+            Log.d(TAG, "onBtnAddClicked: qty=" + qty + "Free=" + free_qty);
+            if (qty == 0 && free_qty < 1) {
+                editTextQuantity.setError("invalid quantity");
+            } else {
+
+                //set added items view
+
+                txtAddedBarcode.setText(barCode);
+                txtAddedQuantity.setText(editTextQuantity.getText().toString());
+                txtAddedPrice.setText(editTextSale.getText().toString());
+
+                // add items into the cart
+                addToCart();
+                // clear the view and set focus into barcode
+
+                editTextBarcode.setText("");
+                clearView();
+                editTextBarcode.setFocusableInTouchMode(true);
+                editTextBarcode.requestFocus();
+            }
 
 
         }
-
-//        Log.d(TAG, "invoice date: " + invoiceDate + "inv no" + invoiceNo);
-//
-//        double qty = 0, rate = 0, disc = 0, net = 0, free_qty;
-//
-//        try {
-//            qty = Double.valueOf(editTextQuantity.getText().toString());
-//            free_qty = Double.valueOf(editTextFreeQuantity.getText().toString());
-//            rate = Double.valueOf(editTextRate.getText().toString());
-//            disc = Double.valueOf(editTextDiscount.getText().toString());
-//            String stock = editTextStock.getText().toString();
-//            net = Double.valueOf(editTextNet.getText().toString());
-//            dbHelper helper = new dbHelper(this);
-//            if (qty > 0) {
-//                if (is_first) {
-//                    double tot = 0;
-//                    boolean res = helper.saveGoods(mDoc, orderNo, supplierCode, invoiceNo, invoiceDate, User, tot, mDate);
-//                    if (res) {
-//                        is_first = false;
-//                    }
-//                }
-//
-//
-//                helper.saveGoodsDetails(
-//                        mDoc, barCode, editTextProductCode.getText().toString(),
-//                        editTextProductName.getText().toString(), selectedUnit, selectedFreeUnit, qty, free_qty,
-//                        rate, disc, salePrice, cost, stock, net, unit1,
-//                        unit2, unit3, unit1Qty, unit2Qty, unit3Qty);
-//
-//                txtAddedBarcode.setText(barCode);
-//                txtAddedQuantity.setText(editTextQuantity.getText().toString());
-//                txtAddedPrice.setText(editTextSale.getText().toString());
-//
-//                editTextBarcode.setText("");
-//                clearView();
-//                editTextBarcode.setFocusableInTouchMode(true);
-//                editTextBarcode.requestFocus();
-//
-//            } else {
-//                editTextQuantity.setError("invalid quantity");
-//            }
-//
-//        } catch (NumberFormatException e) {
-//            Toast.makeText(this, "invalid number", Toast.LENGTH_SHORT).show();
-//        }
 
 
     }
 
     private void addToCart() {
-        double qty = 0, rate = 0, disc = 0, net = 0, free_qty,old_qty=0;
+        double qty = 0, rate = 0, disc = 0, net = 0, free_qty, old_qty = 0;
         String stock;
         qty = Double.valueOf(editTextQuantity.getText().toString());
         free_qty = Double.valueOf(editTextFreeQuantity.getText().toString());
@@ -406,8 +393,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         stock = editTextStock.getText().toString();
         net = Double.valueOf(editTextNet.getText().toString());
 
-        Log.d(TAG, "addToCart: net amount "+net);
-
+        Log.d(TAG, "addToCart: net amount " + net);
 
 
         // add to added items view
@@ -419,101 +405,100 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         // add items in to the cart...........................
 
         //check cart empty or not
-        if(Cart.gCart.size()>0){
-            boolean isFound=false;
-            int position;
+//        if (Cart.gCart.size() > 0) {
+//            boolean isFound = false;
+//            int position;
+//
+//            //check item already added into the cart
+//            for (position = 0; position < Cart.gCart.size(); position++) {
+//                ItemModel itemModel = Cart.gCart.get(position);
+//                if (itemModel.getProductCode().equals(editTextProductCode.getText().toString())) {
+//                    old_qty = itemModel.getQty();
+//                    isFound = true;
+//                    break;
+//                }
+//            }
+//
+//            //if item found then update cart
+//
+//            if (isFound) {
+//                ItemModel itemModel = new ItemModel();
+//                Cart.gCart.remove(position);
+//
+//                itemModel.setDocNo(mDoc);
+//                itemModel.setBarCode(barCode);
+//                itemModel.setProductCode(editTextProductCode.getText().toString());
+//                itemModel.setProductName(editTextProductName.getText().toString());
+//                itemModel.setQty(qty + old_qty);
+//                itemModel.setFreeQty(free_qty);
+//                itemModel.setSelectedPackage(selectedUnit);
+//                itemModel.setSelectedFreePackage(selectedFreeUnit);
+//                itemModel.setRate(rate);
+//                itemModel.setDiscount(discount);
+//                itemModel.setCostPrice(costPrice);
+//                itemModel.setSalePrice(salePrice);
+//                itemModel.setStock(stock);
+//                itemModel.setUnit1(unit1);
+//                itemModel.setUnit2(unit2);
+//                itemModel.setUnit3(unit3);
+//                itemModel.setUnit1Qty(unit1Qty);
+//                itemModel.setUnit2Qty(unit2Qty);
+//                itemModel.setUnit3Qty(unit3Qty);
+//                itemModel.setNet(net);
+//                Cart.gCart.add(position, itemModel);
+//
+//            }//item not found in cart add to cart
+//            else {
+//                ItemModel itemModel = new ItemModel();
+//                itemModel.setDocNo(mDoc);
+//                itemModel.setBarCode(barCode);
+//                itemModel.setProductCode(editTextProductCode.getText().toString());
+//                itemModel.setProductName(editTextProductName.getText().toString());
+//                itemModel.setQty(qty);
+//                itemModel.setFreeQty(free_qty);
+//                itemModel.setSelectedPackage(selectedUnit);
+//                itemModel.setSelectedFreePackage(selectedFreeUnit);
+//                itemModel.setRate(rate);
+//                itemModel.setDiscount(discount);
+//                itemModel.setCostPrice(costPrice);
+//                itemModel.setSalePrice(salePrice);
+//                itemModel.setStock(stock);
+//                itemModel.setUnit1(unit1);
+//                itemModel.setUnit2(unit2);
+//                itemModel.setUnit3(unit3);
+//                itemModel.setUnit1Qty(unit1Qty);
+//                itemModel.setUnit2Qty(unit2Qty);
+//                itemModel.setUnit3Qty(unit3Qty);
+//                itemModel.setNet(net);
+//                Cart.gCart.add(itemModel);
+//            }
+//
+//        } // Cart is empty add new items
+//        else {
 
-            //check item already added into the cart
-            for (position = 0; position < Cart.gCart.size(); position++) {
-                ItemModel itemModel = Cart.gCart.get(position);
-                if (itemModel.getProductCode().equals(editTextProductCode.getText().toString())) {
-                    old_qty = itemModel.getQty();
-                    isFound = true;
-                    break;
-                }
-            }
-
-            //if item found then update cart
-
-            if (isFound) {
-                ItemModel itemModel = new ItemModel();
-                Cart.gCart.remove(position);
-
-                itemModel.setDocNo(mDoc);
-                itemModel.setBarCode(barCode);
-                itemModel.setProductCode(editTextProductCode.getText().toString());
-                itemModel.setProductName(editTextProductName.getText().toString());
-                itemModel.setQty(qty+old_qty);
-                itemModel.setFreeQty(free_qty);
-                itemModel.setSelectedPackage(selectedUnit);
-                itemModel.setSelectedFreePackage(selectedFreeUnit);
-                itemModel.setRate(rate);
-                itemModel.setDiscount(discount);
-                itemModel.setCostPrice(costPrice);
-                itemModel.setSalePrice(salePrice);
-                itemModel.setStock(stock);
-                itemModel.setUnit1(unit1);
-                itemModel.setUnit2(unit2);
-                itemModel.setUnit3(unit3);
-                itemModel.setUnit1Qty(unit1Qty);
-                itemModel.setUnit2Qty(unit2Qty);
-                itemModel.setUnit3Qty(unit3Qty);
-                itemModel.setNet(net);
-                Cart.gCart.add(position,itemModel);
-
-            }//item not found in cart add to cart
-            else {
-                ItemModel itemModel=new ItemModel();
-                itemModel.setDocNo(mDoc);
-                itemModel.setBarCode(barCode);
-                itemModel.setProductCode(editTextProductCode.getText().toString());
-                itemModel.setProductName(editTextProductName.getText().toString());
-                itemModel.setQty(qty);
-                itemModel.setFreeQty(free_qty);
-                itemModel.setSelectedPackage(selectedUnit);
-                itemModel.setSelectedFreePackage(selectedFreeUnit);
-                itemModel.setRate(rate);
-                itemModel.setDiscount(discount);
-                itemModel.setCostPrice(costPrice);
-                itemModel.setSalePrice(salePrice);
-                itemModel.setStock(stock);
-                itemModel.setUnit1(unit1);
-                itemModel.setUnit2(unit2);
-                itemModel.setUnit3(unit3);
-                itemModel.setUnit1Qty(unit1Qty);
-                itemModel.setUnit2Qty(unit2Qty);
-                itemModel.setUnit3Qty(unit3Qty);
-                itemModel.setNet(net);
-                Cart.gCart.add(itemModel);
-            }
-
-        } // Cart is empty add new items
-        else{
-
-            ItemModel itemModel=new ItemModel();
-            itemModel.setDocNo(mDoc);
-            itemModel.setBarCode(barCode);
-            itemModel.setProductCode(editTextProductCode.getText().toString());
-            itemModel.setProductName(editTextProductName.getText().toString());
-            itemModel.setQty(qty);
-            itemModel.setFreeQty(free_qty);
-            itemModel.setSelectedPackage(selectedUnit);
-            itemModel.setSelectedFreePackage(selectedFreeUnit);
-            itemModel.setRate(rate);
-            itemModel.setDiscount(discount);
-            itemModel.setCostPrice(costPrice);
-            itemModel.setSalePrice(salePrice);
-            itemModel.setStock(stock);
-            itemModel.setUnit1(unit1);
-            itemModel.setUnit2(unit2);
-            itemModel.setUnit3(unit3);
-            itemModel.setUnit1Qty(unit1Qty);
-            itemModel.setUnit2Qty(unit2Qty);
-            itemModel.setUnit3Qty(unit3Qty);
-            itemModel.setNet(net);
-            Cart.gCart.add(itemModel);
-        }
-
+        ItemModel itemModel = new ItemModel();
+        itemModel.setDocNo(mDoc);
+        itemModel.setBarCode(barCode);
+        itemModel.setProductCode(editTextProductCode.getText().toString());
+        itemModel.setProductName(editTextProductName.getText().toString());
+        itemModel.setQty(qty);
+        itemModel.setFreeQty(free_qty);
+        itemModel.setSelectedPackage(selectedUnit);
+        itemModel.setSelectedFreePackage(selectedFreeUnit);
+        itemModel.setRate(rate);
+        itemModel.setDiscount(discount);
+        itemModel.setCostPrice(costPrice);
+        itemModel.setSalePrice(salePrice);
+        itemModel.setStock(stock);
+        itemModel.setUnit1(unit1);
+        itemModel.setUnit2(unit2);
+        itemModel.setUnit3(unit3);
+        itemModel.setUnit1Qty(unit1Qty);
+        itemModel.setUnit2Qty(unit2Qty);
+        itemModel.setUnit3Qty(unit3Qty);
+        itemModel.setNet(net);
+        Cart.gCart.add(itemModel);
+        // }
 
 
     }
@@ -527,9 +512,11 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
         Intent intent = new Intent(this, GoodsItemListActivity.class);
         //intent.putExtra("DocNo", Integer.valueOf(txtDocNo.getText().toString()));
-        intent.putExtra("DOC_NO",mDoc);
-        intent.putExtra("ORD_NO",orderNo);
-        intent.putExtra("SUPP_CODE",supplierCode);
+        intent.putExtra("ACTION", "New");
+        intent.putExtra("DOC_NO", mDoc);
+        intent.putExtra("ORD_NO", orderNo);
+        intent.putExtra("SUPP_CODE", supplierCode);
+        intent.putExtra("SUPP_NAME", supplierName);
         intent.putExtra("INV_NO", invoiceNo);
         intent.putExtra("INV_DATE", invoiceDate);
         intent.putExtra("USER", User);
