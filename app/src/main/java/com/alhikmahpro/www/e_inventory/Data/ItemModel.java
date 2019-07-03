@@ -2,20 +2,31 @@ package com.alhikmahpro.www.e_inventory.Data;
 
 public class ItemModel {
 
-    //its used for invoice
 
-    String barCode;
-    String productCode;
-    String productName;
-    String date;
-    String staffName;
-    String unit1,unit2,unit3;
-    String SupplierCode;
-    String invoiceNo,invoiceDate,orderNo;
-    String stock;
-    double rate;
-    double discount;
-    String customerCode;
+    private String barCode,productCode,productName,stock,unit1,unit2,unit3,selectedFreePackage,selectedPackage;
+    private String  date;
+    private String staffName;
+    private String SupplierCode;
+
+    private String SupplierName;
+    private String invoiceNo;
+    private String invoiceDate;
+    private String orderNo;
+    private String customerName;
+    private String customerCode;
+    private String paymentType;
+    private double rate,discount,qty,freeQty,salePrice,costPrice,total,net;
+    private int is_sync ,docNo,unit1Qty,unit2Qty,unit3Qty,unitIndex, _id;
+
+    public String getSupplierName() {
+        return SupplierName;
+    }
+
+    public void setSupplierName(String supplierName) {
+        SupplierName = supplierName;
+    }
+
+
 
     public String getCustomerName() {
         return customerName;
@@ -25,7 +36,7 @@ public class ItemModel {
         this.customerName = customerName;
     }
 
-    String customerName;
+
     public String getCustomerCode() {
         return customerCode;
     }
@@ -42,7 +53,7 @@ public class ItemModel {
         this.paymentType = paymentType;
     }
 
-    String paymentType;
+
 
 
     public int getIs_sync() {
@@ -53,7 +64,7 @@ public class ItemModel {
         this.is_sync = is_sync;
     }
 
-    int is_sync;
+
 
     public String getSupplierCode() {
         return SupplierCode;
@@ -119,7 +130,7 @@ public class ItemModel {
         this.net = net;
     }
 
-    double net;
+
 
     public int get_id() {
         return _id;
@@ -129,7 +140,7 @@ public class ItemModel {
         this._id = _id;
     }
 
-    int _id;
+
 
     public String getSelectedPackage() {
         return selectedPackage;
@@ -139,7 +150,7 @@ public class ItemModel {
         this.selectedPackage = selectedPackage;
     }
 
-    String selectedPackage;
+
 
     public String getSelectedFreePackage() {
         return selectedFreePackage;
@@ -157,9 +168,7 @@ public class ItemModel {
         this.freeQty = freeQty;
     }
 
-    String selectedFreePackage;
-    double qty,freeQty,salePrice,costPrice,total;
-    int docNo,unit1Qty,unit2Qty,unit3Qty,unitIndex;
+
 
     public String getUnit1() {
         return unit1;
