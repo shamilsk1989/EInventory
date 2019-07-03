@@ -249,23 +249,7 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
             if (qty < 1) {
                 Toast.makeText(this, "Invalid Quantity", Toast.LENGTH_SHORT).show();
             } else {
-//                ArrayList<ItemModel>listItem=new ArrayList<>();
-//                ItemModel itemModel = new ItemModel();
-//                itemModel.setBarCode(barCode);
-//                itemModel.setProductCode(txtCode.getText().toString());
-//                itemModel.setProductName(txtName.getText().toString());
-//                itemModel.setQty(Double.valueOf(txtQuantity.getText().toString()));
-//                itemModel.setUnit1(unit1);
-//                itemModel.setUnit2(unit2);
-//                itemModel.setUnit3(unit3);
-//                itemModel.setUnit1Qty(unit1Qty);
-//                itemModel.setUnit2Qty(unit2Qty);
-//                itemModel.setUnit3Qty(unit3Qty);
-//                itemModel.setUnitIndex(unitIndex);
-//                itemModel.setCostPrice(cost);
-//                itemModel.setSalePrice(Double.valueOf(txtSalePrice.getText().toString()));
-//                itemModel.setSelectedPackage(selectedUnit);
-//                listItem.add(itemModel);
+
                 Log.d(TAG, "onBtnAddClicked: ");
 
                 if (is_first) {//first time..... so insert to Stock table;
@@ -302,10 +286,20 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
         txtAddedPrice.setText("");
         txtAddedQuantity.setText("");
 
-        Intent intent = new Intent(this, ListItemActivity.class);
-        intent.putExtra("Action", "New");
-        intent.putExtra("DocNo", Integer.valueOf(txtDocNo.getText().toString()));
-        intent.putExtra("User", txtUser.getText().toString());
+        int docNo;
+        try {
+            docNo = Integer.parseInt(txtDocNo.getText().toString());
+        }
+        catch (NumberFormatException e)
+        {
+            e.printStackTrace();
+            docNo = 0;
+        }
+        Log.d(TAG, "onBtnNextClicked: document no :"+docNo);
+        Intent intent = new Intent(InventoryActivity.this, ListItemActivity.class);
+        intent.putExtra("ACTION", "New");
+        intent.putExtra("DOC_NO",docNo);
+        intent.putExtra("USER", txtUser.getText().toString());
         startActivity(intent);
 
 
