@@ -55,10 +55,14 @@ public class dbHelper extends SQLiteOpenHelper {
             DataContract.GoodsReceive.COL_DOCUMENT_NUMBER + " INTEGER ," +
             DataContract.GoodsReceive.COL_ORDER_NUMBER + " TEXT ," +
             DataContract.GoodsReceive.COL_SUPPLIER_CODE + " TEXT ," +
+            DataContract.GoodsReceive.COL_SUPPLIER_NAME + " TEXT ," +
             DataContract.GoodsReceive.COL_INVOICE_NUMBER + " TEXT ," +
             DataContract.GoodsReceive.COL_INVOICE_DATE + " TEXT ," +
             DataContract.GoodsReceive.COL_STAFF_NAME + " TEXT ," +
             DataContract.GoodsReceive.COL_TOTAL + " REAL ," +
+            DataContract.GoodsReceive.COL_DISCOUNT_AMOUNT + " REAL ," +
+            DataContract.GoodsReceive.COL_NET_AMOUNT + " REAL ," +
+            DataContract.GoodsReceive.COL_PAYMENT_TYPE + " TEXT ," +
             DataContract.GoodsReceive.COL_DATE_TIME + " TEXT ," +
             DataContract.GoodsReceive.COL_IS_SYNC + " INTEGER DEFAULT 0 " + ");";
 
@@ -113,6 +117,12 @@ public class dbHelper extends SQLiteOpenHelper {
             DataContract.InvoiceDetails.COL_PRODUCT_NAME + " TEXT ," +
             DataContract.InvoiceDetails.COL_UNIT + " TEXT ," +
             DataContract.InvoiceDetails.COL_QUANTITY + " REAL ," +
+            DataContract.InvoiceDetails.COL_UNIT1 + " TEXT ," +
+            DataContract.InvoiceDetails.COL_UNIT2 + " TEXT ," +
+            DataContract.InvoiceDetails.COL_UNIT3 + " TEXT ," +
+            DataContract.InvoiceDetails.COL_UN_QTY1 + " INTEGER ," +
+            DataContract.InvoiceDetails.COL_UN_QTY2 + " INTEGER ," +
+            DataContract.InvoiceDetails.COL_UN_QTY3 + " INTEGER ," +
             DataContract.InvoiceDetails.COL_RATE + " REAL ," +
             DataContract.InvoiceDetails.COL_DISCOUNT + " REAL ," +
             DataContract.InvoiceDetails.COL_NET_AMOUNT + " REAL ," +
@@ -251,8 +261,8 @@ public class dbHelper extends SQLiteOpenHelper {
 
     }
 
-    public boolean saveGoods(int docNo, String orderNo, String supplierCode, String invoiceNo, String invoiceDate,
-                             String staffName, double total, String date) {
+    public boolean saveGoods(int docNo, String orderNo, String supplierCode,String supplierName, String invoiceNo, String invoiceDate,
+                             String staffName, double total,double disc,double net,String payment, String date,int status) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -260,62 +270,20 @@ public class dbHelper extends SQLiteOpenHelper {
             contentValues.put(DataContract.GoodsReceive.COL_DOCUMENT_NUMBER, docNo);
             contentValues.put(DataContract.GoodsReceive.COL_ORDER_NUMBER, orderNo);
             contentValues.put(DataContract.GoodsReceive.COL_SUPPLIER_CODE, supplierCode);
+            contentValues.put(DataContract.GoodsReceive.COL_SUPPLIER_CODE, supplierName);
             contentValues.put(DataContract.GoodsReceive.COL_INVOICE_NUMBER, invoiceNo);
             contentValues.put(DataContract.GoodsReceive.COL_INVOICE_DATE, invoiceDate);
             contentValues.put(DataContract.GoodsReceive.COL_STAFF_NAME, staffName);
             contentValues.put(DataContract.GoodsReceive.COL_TOTAL, total);
+            contentValues.put(DataContract.GoodsReceive.COL_DISCOUNT_AMOUNT, disc);
+            contentValues.put(DataContract.GoodsReceive.COL_NET_AMOUNT, net);
+            contentValues.put(DataContract.GoodsReceive.COL_TOTAL, net);
+            contentValues.put(DataContract.GoodsReceive.COL_PAYMENT_TYPE, payment);
             contentValues.put(DataContract.GoodsReceive.COL_DATE_TIME, date);
+            contentValues.put(DataContract.GoodsReceive.COL_IS_SYNC, status);
             database.insert(DataContract.GoodsReceive.TABLE_NAME, null, contentValues);
             database.close();
             Log.d(TAG, "one row inserted in goods table ......... ");
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-
-
-    }
-
-    public boolean saveGoodsDetails(int docNo, String barCode, String proCode, String proName, String unit, String free_unit,
-                                    double qty, double free_qty, double rate, double disc, double price, double cost, String stock, double net,
-                                    String unit1, String unit2, String unit3, int unQty1, int unQty2, int unQty3) {
-
-        Log.d(TAG, "saveGoodsDetails: " + "unit 1" + unit1 + "Unit 2" + unit2 + "unit 3" + unit3);
-
-
-        boolean res = false;
-        SQLiteDatabase database = getWritableDatabase();
-
-        try {
-            ContentValues contentValues = new ContentValues();
-
-
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_DOCUMENT_NUMBER, docNo);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_BAR_CODE, barCode);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_PRODUCT_CODE, proCode);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_PRODUCT_NAME, proName);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_UNIT, unit);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_FREE_UNIT, free_unit);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_QUANTITY, qty);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_FREE_QUANTITY, free_qty);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_RATE, rate);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_DISCOUNT, disc);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_SALES_PRICE, price);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_COST_PRICE, cost);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_STOCK, stock);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_NET_VALUE, net);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_UNIT1, unit1);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_UNIT2, unit2);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_UNIT3, unit3);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_UN_QTY1, unQty1);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_UN_QTY2, unQty2);
-            contentValues.put(DataContract.GoodsReceiveDetails.COL_UN_QTY3, unQty3);
-
-
-            database.insert(DataContract.GoodsReceiveDetails.TABLE_NAME, null, contentValues);
-
-            Log.d(TAG, "one row inserted in Goods  Details table ......... ");
-
             return true;
         } catch (Exception e) {
             return false;
@@ -409,6 +377,13 @@ public class dbHelper extends SQLiteOpenHelper {
                 contentValues.put(DataContract.InvoiceDetails.COL_PRODUCT_NAME, model.getProductName());
                 contentValues.put(DataContract.InvoiceDetails.COL_QUANTITY, model.getQty());
                 contentValues.put(DataContract.InvoiceDetails.COL_UNIT, model.getSelectedUnit());
+
+                contentValues.put(DataContract.InvoiceDetails.COL_UNIT1, model.getUnit1());
+                contentValues.put(DataContract.InvoiceDetails.COL_UNIT2, model.getUnit2());
+                contentValues.put(DataContract.InvoiceDetails.COL_UNIT3, model.getUnit3());
+                contentValues.put(DataContract.InvoiceDetails.COL_UN_QTY1, model.getUnit1Qty());
+                contentValues.put(DataContract.InvoiceDetails.COL_UN_QTY2, model.getUnit2Qty());
+                contentValues.put(DataContract.InvoiceDetails.COL_UN_QTY3, model.getUnit3Qty());
                 contentValues.put(DataContract.InvoiceDetails.COL_RATE, model.getRate());
                 contentValues.put(DataContract.InvoiceDetails.COL_DISCOUNT, model.getDiscount());
                 contentValues.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, model.getNet());
@@ -595,9 +570,13 @@ public class dbHelper extends SQLiteOpenHelper {
         Log.d(TAG, "getGoods: ");
         String[] projection = {DataContract.GoodsReceive.COL_DOCUMENT_NUMBER,
                 DataContract.GoodsReceive.COL_ORDER_NUMBER,
-                DataContract.GoodsReceive.COL_SUPPLIER_CODE, DataContract.GoodsReceive.COL_INVOICE_NUMBER,
-                DataContract.GoodsReceive.COL_INVOICE_DATE, DataContract.GoodsReceive.COL_STAFF_NAME,
-                DataContract.GoodsReceive.COL_TOTAL, DataContract.GoodsReceive.COL_DATE_TIME
+                DataContract.GoodsReceive.COL_SUPPLIER_CODE,
+                DataContract.GoodsReceive.COL_SUPPLIER_NAME,
+                DataContract.GoodsReceive.COL_INVOICE_NUMBER,
+                DataContract.GoodsReceive.COL_INVOICE_DATE,
+                DataContract.GoodsReceive.COL_STAFF_NAME,
+                DataContract.GoodsReceive.COL_TOTAL,
+                DataContract.GoodsReceive.COL_DATE_TIME
                 , DataContract.GoodsReceive.COL_IS_SYNC};
         String orderBy = DataContract.GoodsReceive.COL_ID + " DESC ";
         Cursor cursor = database.query(DataContract.GoodsReceive.TABLE_NAME, projection, null, null, null, null, orderBy);
