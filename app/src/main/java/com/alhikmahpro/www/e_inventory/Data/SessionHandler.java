@@ -9,6 +9,7 @@ public class SessionHandler {
     private static final String USER_TYPE = "user_type";
     private static final String INVENTORY="inventory_module";
     private static final String GOODS_RECEIVE="goods_receive_module";
+    private static final String SALE="sale_module";
     private static final String APP_FIRST_TIME="app_first";
     private static final String HOST = "host";
     private static final String PRINTER_NAME="printer_name";
@@ -84,6 +85,22 @@ public class SessionHandler {
         editor.apply();
 
     }
+    public void setSale(boolean set){
+        SharedPreferences.Editor editor=mPref.edit();
+        editor.putBoolean(SALE,set);
+        editor.apply();
+
+    }
+    public boolean isSetSale() {
+        return mPref.getBoolean(SALE, false);
+    }
+    public void resetSale(){
+        SharedPreferences.Editor editor=mPref.edit();
+        editor.remove(SALE);
+        editor.apply();
+
+    }
+
 
 
     public void setAppFirstTime(boolean first){
