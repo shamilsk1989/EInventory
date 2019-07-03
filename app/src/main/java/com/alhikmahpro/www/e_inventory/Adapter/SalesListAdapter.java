@@ -41,8 +41,10 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
 
         ItemModel itemModel=saleList.get(position);
         holder.invoiceNo.setText(itemModel.getInvoiceNo());
-        holder.invoiceDate.setText(itemModel.getDate());
+        String date=itemModel.getDate();
+        holder.invoiceDate.setText(date.substring(0,10));
         holder.invoiceAmount.setText(currencyFormatter(itemModel.getNet()));
+        holder.customerName.setText(itemModel.getCustomerName());
         holder.imgEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -64,6 +66,7 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
         TextView invoiceAmount;
         TextView invoiceDate;
         ImageView imgEdit;
+        TextView customerName;
 
 
 
@@ -73,6 +76,7 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
             invoiceAmount=itemView.findViewById(R.id.rv_amount);
             invoiceDate=itemView.findViewById(R.id.rv_date);
             imgEdit=itemView.findViewById(R.id.rv_img_edit);
+            customerName=itemView.findViewById(R.id.rv_customer);
 
         }
 

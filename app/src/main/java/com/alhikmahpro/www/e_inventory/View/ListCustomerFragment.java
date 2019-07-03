@@ -195,33 +195,30 @@ public class ListCustomerFragment extends DialogFragment implements SwipeRefresh
                         e.printStackTrace();
                     }
                     Log.d(TAG, "onResponse: " + supplierArrayList.size());
-                    adapter = new SupplierAdapter(supplierArrayList, new OnAdapterClickListener() {
-                        @Override
-                        public void OnItemClicked(int position) {
-
-                            SupplierModel model = supplierArrayList.get(position);
-                            String code = model.getSupplierCode();
-
-                            Toast.makeText(getActivity(), "code is" + code, Toast.LENGTH_SHORT).show();
-                            mListener.onComplete(code);
-                            Dialog dialog = getDialog();
-                            dialog.dismiss();
-
-
-                        }
-
-                        @Override
-                        public void OnDeleteClicked(int position) {
-
-                        }
-                    });
                     if(supplierArrayList.size()>0){
 
+                        adapter = new SupplierAdapter(supplierArrayList, new OnAdapterClickListener() {
+                            @Override
+                            public void OnItemClicked(int position) {
+
+                                SupplierModel model = supplierArrayList.get(position);
+                                String code = model.getSupplierCode();
+
+                                Toast.makeText(getActivity(), "code is" + code, Toast.LENGTH_SHORT).show();
+                                mListener.onComplete(code);
+                                Dialog dialog = getDialog();
+                                dialog.dismiss();
+
+
+                            }
+
+                            @Override
+                            public void OnDeleteClicked(int position) {
+
+                            }
+                        });
                         rvCustomerList.setAdapter(adapter);
                     }
-
-
-
                 } else {
                     Toast.makeText(getActivity(), "No data found !", Toast.LENGTH_SHORT).show();
                 }
@@ -234,11 +231,16 @@ public class ListCustomerFragment extends DialogFragment implements SwipeRefresh
             @Override
             public void notifyError(String requestType, VolleyError error) {
                 mSwipeRefreshLayout.setRefreshing(false);
-                Toast.makeText(getActivity(), "No data found ", Toast.LENGTH_SHORT).show();
+               handleError(error);
 
             }
         };
 
+    }
+
+    private void handleError(VolleyError error) {
+        Log.d(TAG, "handleError: "+error);
+        Toast.makeText(getActivity(), "Network Error", Toast.LENGTH_SHORT).show();
     }
 
     @Override

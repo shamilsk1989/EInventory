@@ -1,5 +1,6 @@
 package com.alhikmahpro.www.e_inventory.View;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -78,15 +79,17 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
 
     @OnClick(R.id.btnNext)
     public void onViewClicked() {
+
         Intent intent_payment = new Intent(ViewCartActivity.this, PaymentActivity.class);
+        intent_payment.putExtra("TYPE","SAL");
         intent_payment.putExtra("CUS_NAME", customerName);
         intent_payment.putExtra("CUS_CODE", customerCode);
         intent_payment.putExtra("SALESMAN_ID", salesmanId);
-        intent_payment.putExtra("DOC_NO", invoiceNo);
-        intent_payment.putExtra("DOC_DATE", invoiceDate);
+        intent_payment.putExtra("INV_NO", invoiceNo);
+        intent_payment.putExtra("INV_DATE", invoiceDate);
+        intent_payment.putExtra("TOTAL_ROW", Cart.mCart.size());
         intent_payment.putExtra("TOTAL",total);
         startActivity(intent_payment);
-
     }
 
     @Override
@@ -96,12 +99,29 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
     }
 
     @Override
-    public void onItemClick(int position) {
+    public void onItemClick(final int position) {
 
-        Cart.mCart.remove(position);
-        saleCartAdapter.notifyItemRemoved(position);
-        saleCartAdapter.notifyItemRangeChanged(position, Cart.mCart.size());
-        calculate();
+        new android.app.AlertDialog.Builder(ViewCartActivity.this)
+                .setTitle("Confirm")
+                .setMessage("Remove Item From Cart ?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Cart.mCart.remove(position);
+                        saleCartAdapter.notifyItemRemoved(position);
+                        saleCartAdapter.notifyItemRangeChanged(position, Cart.mCart.size());
+                        calculate();
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                }).create().show();
+
+
     }
 
     private void calculate() {

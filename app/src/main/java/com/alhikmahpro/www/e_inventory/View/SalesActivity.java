@@ -118,7 +118,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
 
-    double price1 = 0, price2 = 0, price3 = 0, cost = 0, costPrice = 0, salePrice = 0, discount = 0, rate = 0;
+    double price1 = 0, price2 = 0, price3 = 0, cost = 0, costPrice = 0, salePrice = 0, quantity, discount = 0, rate = 0;
     int unit1Qty, unit2Qty, unit3Qty, unitIndex;
     String barCode, productCode, productName, saleType, selectedUnit, unit1, unit2, unit3, packing1, packing2, packing3, mDate, invoiceNo;
     ArrayList<String> list;
@@ -175,6 +175,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
             @Override
             public void afterTextChanged(Editable editable) {
+                //String qty=editTextQuantity.getText().toString();
                 calculateNetValue();
             }
         });
@@ -208,36 +209,34 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
             @Override
             public void afterTextChanged(Editable editable) {
+
                 calculateNetValue();
             }
         });
     }
 
     private void calculateNetValue() {
-
-        Log.d(TAG, "calculateNetValue: " + saleType);
+        double net, rate;
         int saleValue = 1;
         if (saleType.equals("Return"))
             saleValue = -1;
         else if (saleType.equals("Free"))
             saleValue = 0;
+        quantity=ParseDouble(editTextQuantity.getText().toString());
+        discount=ParseDouble(editTextDiscount.getText().toString());
+        rate=ParseDouble(editTextRate.getText().toString());
+        Log.d(TAG, "calculateNetValue: " + quantity + "rate :" + rate + "discount :" + discount);
 
-
-        try {
-            double qty = Double.valueOf(editTextQuantity.getText().toString());
-            double rate = Double.valueOf(editTextRate.getText().toString());
-            double disc = Double.valueOf(editTextDiscount.getText().toString());
-            double net = (qty * rate) - disc;
-            net = net * saleValue;
-            editTextNet.setText(String.valueOf(net));
-
-        } catch (NumberFormatException e) {
-
-        }
+        net = (quantity * rate) - (quantity * discount);
+        //set free, sale, return
+        net = net * saleValue;
+        editTextNet.setText(String.valueOf(net));
     }
 
     private void clearView() {
 
+        radioButton = findViewById(R.id.radioSale);
+        radioButton.setChecked(true);
         textViewProductName.setText("");
         editTextProductCode.setText("");
         editTextQuantity.setText("");
@@ -258,9 +257,11 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
             @Override
             public void notifySuccess(String requestType, JSONObject response) {
                 progressDialog.cancel();
-                if (response.length() > 0)
+                if (response.length() > 0) {
+                    editTextQuantity.setFocusableInTouchMode(true);
+                    editTextQuantity.requestFocus();
                     setValues(response);
-                else
+                } else
                     showAlert("Not Found");
             }
 
@@ -335,28 +336,10 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         saleType = radioButton.getText().toString();
         double qty, rate, disc, net, free_qty, old_qty = 0;
         int position;
-        try {
-            qty = Double.valueOf(editTextQuantity.getText().toString());
-        } catch (NumberFormatException e) {
-            qty = 0;
-        }
-        try {
-            rate = Double.valueOf(editTextRate.getText().toString());
-        } catch (NumberFormatException e) {
-            rate = 0;
-        }
-        try {
-            disc = Double.valueOf(editTextDiscount.getText().toString());
-
-        } catch (NumberFormatException e) {
-            disc = 0;
-        }
-        try {
-            net = Double.valueOf(editTextNet.getText().toString());
-        } catch (NumberFormatException e) {
-            net = 0;
-        }
-
+        qty = ParseDouble(editTextQuantity.getText().toString());
+        rate = ParseDouble(editTextRate.getText().toString());
+        disc = ParseDouble(editTextDiscount.getText().toString());
+        net = ParseDouble(editTextNet.getText().toString());
 
         // add to added items view
         txtAddedBarcode.setText(barCode);
@@ -366,63 +349,81 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         //add item into cart
 
         //check the cart is empty or not
-        boolean is_found = false;
-        if (Cart.mCart.size() > 0) {
-            //check item already added into the cart
-            for (position = 0; position < Cart.mCart.size(); position++) {
-                CartModel cartModel = Cart.mCart.get(position);
-                if (cartModel.getProductCode() == productCode) {
-                    old_qty = cartModel.getQty();
-                    is_found = true;
-                    break;
-                }
-            }
-            //if item found in cart update item
-            if (is_found) {
-                CartModel cartModel = new CartModel();
-                Cart.mCart.remove(position);
-                cartModel.setBarcode(barCode);
-                cartModel.setProductCode(productCode);
-                cartModel.setProductName(productName);
-                cartModel.setSaleType(saleType);
-                cartModel.setQty(qty + old_qty);
-                cartModel.setSelectedUnit(selectedUnit);
-                cartModel.setRate(rate);
-                cartModel.setDiscount(disc);
-                cartModel.setNet(net);
-                Cart.mCart.add(position, cartModel);
-            }
-            // if not found add items in to cart
-            else {
-                CartModel cartModel = new CartModel();
-                cartModel.setBarcode(barCode);
-                cartModel.setProductCode(productCode);
-                cartModel.setProductName(productName);
-                cartModel.setSaleType(saleType);
-                cartModel.setQty(qty);
-                cartModel.setSelectedUnit(selectedUnit);
-                cartModel.setRate(rate);
-                cartModel.setDiscount(disc);
-                cartModel.setNet(net);
-                Cart.mCart.add(cartModel);
-
-            }
-        }
+//        boolean is_found = false;
+//        if (Cart.mCart.size() > 0) {
+//            //check item already added into the cart
+//            for (position = 0; position < Cart.mCart.size(); position++) {
+//                CartModel cartModel = Cart.mCart.get(position);
+//                if (cartModel.getProductCode() == productCode) {
+//                    old_qty = cartModel.getQty();
+//                    is_found = true;
+//                    break;
+//                }
+//            }
+//            //if item found in cart update item
+//            if (is_found) {
+//                CartModel cartModel = new CartModel();
+//                Cart.mCart.remove(position);
+//                cartModel.setBarcode(barCode);
+//                cartModel.setProductCode(productCode);
+//                cartModel.setProductName(productName);
+//                cartModel.setSaleType(saleType);
+//                cartModel.setQty(qty + old_qty);
+//                cartModel.setSelectedUnit(selectedUnit);
+//                cartModel.setUnit1(unit1);
+//                cartModel.setUnit2(unit2);
+//                cartModel.setUnit3(unit3);
+//                cartModel.setUnit1Qty(unit1Qty);
+//                cartModel.setUnit2Qty(unit2Qty);
+//                cartModel.setUnit3Qty(unit3Qty);
+//                cartModel.setRate(rate);
+//                cartModel.setDiscount(disc);
+//                cartModel.setNet(net);
+//                Cart.mCart.add(position, cartModel);
+//            }
+        // if not found add items in to cart
+//            else {
+//                CartModel cartModel = new CartModel();
+//                cartModel.setBarcode(barCode);
+//                cartModel.setProductCode(productCode);
+//                cartModel.setProductName(productName);
+//                cartModel.setSaleType(saleType);
+//                cartModel.setQty(qty);
+//                cartModel.setSelectedUnit(selectedUnit);
+//                cartModel.setUnit1(unit1);
+//                cartModel.setUnit2(unit2);
+//                cartModel.setUnit3(unit3);
+//                cartModel.setUnit1Qty(unit1Qty);
+//                cartModel.setUnit2Qty(unit2Qty);
+//                cartModel.setUnit3Qty(unit3Qty);
+//                cartModel.setRate(rate);
+//                cartModel.setDiscount(disc);
+//                cartModel.setNet(net);
+//                Cart.mCart.add(cartModel);
+//
+//            }
+        // }
         //the cart is empty; add items in to the cart
-        else {
+        //  else {
 
-            CartModel cartModel = new CartModel();
-            cartModel.setBarcode(barCode);
-            cartModel.setProductCode(productCode);
-            cartModel.setProductName(productName);
-            cartModel.setSaleType(saleType);
-            cartModel.setQty(qty);
-            cartModel.setSelectedUnit(selectedUnit);
-            cartModel.setRate(rate);
-            cartModel.setDiscount(disc);
-            cartModel.setNet(net);
-            Cart.mCart.add(cartModel);
-        }
+        CartModel cartModel = new CartModel();
+        cartModel.setBarcode(barCode);
+        cartModel.setProductCode(productCode);
+        cartModel.setProductName(productName);
+        cartModel.setSaleType(saleType);
+        cartModel.setQty(qty);
+        cartModel.setSelectedUnit(selectedUnit);
+        cartModel.setUnit1(unit1);
+        cartModel.setUnit2(unit2);
+        cartModel.setUnit3(unit3);
+        cartModel.setUnit1Qty(unit1Qty);
+        cartModel.setUnit2Qty(unit2Qty);
+        cartModel.setUnit3Qty(unit3Qty);
+        cartModel.setRate(rate);
+        cartModel.setDiscount(disc);
+        cartModel.setNet(net);
+        Cart.mCart.add(cartModel);
+        // }
 
 
         //clear the view and focus into barcode text
@@ -431,8 +432,6 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         clearView();
         editTextBarcode.setFocusableInTouchMode(true);
         editTextBarcode.requestFocus();
-
-
         for (CartModel model : Cart.mCart) {
             Log.d(TAG, "addToCart: " + model.getProductName());
 
@@ -616,10 +615,11 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
             salePrice = price3;
             costPrice = cost * unit2Qty * unit3Qty;
         }
-        Log.d(TAG, "onItemSelected: " + position);
+        Log.d(TAG, "onItemSelected: Rate " + salePrice);
         DecimalFormat format = new DecimalFormat("#,###,##0.00");
 //        editTextSale.setText(format.format(salePrice));
 //        editTextCost.setText(format.format(costPrice));
+
         editTextRate.setText(String.valueOf(salePrice));
         calculateNetValue();
     }
@@ -664,7 +664,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         //mDate = sdf.format(new Date());
-        mDate=AppUtils.getDateAndTime();
+        mDate = AppUtils.getDateAndTime();
         helper = new dbHelper(this);
         int last_no = helper.getLastInvoiceNo();
         Log.d(TAG, "setDoc: " + last_no + mDate);
@@ -695,11 +695,30 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
     @OnClick(R.id.imgSearch)
     public void onImgSearchClicked() {
+        String item_key = editTextBarcode.getText().toString();
+        if (item_key.length() < 3) {
+            editTextBarcode.setError("Minimum 3 letters");
+        } else {
+            Bundle bundle = new Bundle();
+            bundle.putString("ITEM_NAME", item_key);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            ListItemFragment listItemFragment = new ListItemFragment();
+            listItemFragment.setArguments(bundle);
+            listItemFragment.show(fragmentManager, "Items");
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        ListItemFragment listItemFragment = new ListItemFragment();
-        listItemFragment.show(fragmentManager, "Items");
+        }
 
+
+    }
+
+    double ParseDouble(String strNumber) {
+        if (strNumber != null && strNumber.length() > 0) {
+            try {
+                return Double.parseDouble(strNumber);
+            } catch (Exception e) {
+                return -1;   // or some value to mark this field is wrong. or make a function validates field first ...
+            }
+        } else return 0;
     }
 
     @OnClick(R.id.btnAdd)
@@ -707,16 +726,10 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         if (TextUtils.isEmpty(editTextProductCode.getText())) {
             editTextProductCode.setError("Invalid Item");
         } else {
-            double qty;
-            try{
-                qty=Double.valueOf(editTextQuantity.getText().toString());
-
-            }catch (NumberFormatException e){
-                qty=0;
-            }
-            if(qty<1){
+            double qty = ParseDouble(editTextQuantity.getText().toString());
+            if (qty < 1) {
                 editTextQuantity.setError("invalid quantity");
-            }else {
+            } else {
                 addToCart();
             }
 

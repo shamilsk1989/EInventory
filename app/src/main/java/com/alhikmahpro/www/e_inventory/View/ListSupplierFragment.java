@@ -143,7 +143,7 @@ public class ListSupplierFragment extends DialogFragment implements SwipeRefresh
             @Override
             public void run() {
                 mSwipeRefreshLayout.setRefreshing(true);
-                loadRecyclerView();
+                getVolleyData();
             }
         });
 
@@ -165,62 +165,22 @@ public class ListSupplierFragment extends DialogFragment implements SwipeRefresh
 
             }
         });
-
-
         return view;
     }
 
     private void initVolleyCallBack() {
+
         mVolleyListener = new volleyListener() {
             @Override
             public void notifySuccess(String requestType, JSONObject response) {
 
                 if (response.length() > 0) {
                     // in json array format
-                    JSONArray jsonArray = null;
-                    try {
-                        jsonArray = response.getJSONArray("response");
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            //SupplierModel model=new SupplierModel();
-                            JSONObject object = jsonArray.getJSONObject(i);
-                            String code = object.getString("SUBS_CODE");
-                            String name = object.getString("SUBS_NAME");
-                            supplierArrayList.add(new SupplierModel(code, name));
+                    loadRecyclerView(response);
 
-
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    Log.d(TAG, "onResponse: " + supplierArrayList.size());
-                    adapter = new SupplierAdapter(supplierArrayList, new OnAdapterClickListener() {
-                        @Override
-                        public void OnItemClicked(int position) {
-
-                            SupplierModel model = supplierArrayList.get(position);
-                            String code = model.getSupplierCode();
-                            Toast.makeText(getActivity(), "code is" + code, Toast.LENGTH_SHORT).show();
-                            mListener.onComplete(code);
-                            Dialog dialog = getDialog();
-                            dialog.dismiss();
-
-
-                        }
-
-                        @Override
-                        public void OnDeleteClicked(int position) {
-
-                        }
-                    });
-                    if(supplierArrayList.size()>0){
-                        rvSupplierList.setAdapter(adapter);
-                    }else {
-                        Toast.makeText(getActivity(), "Something went wrong...", Toast.LENGTH_SHORT).show();
-                    }
                 } else {
                     Toast.makeText(getActivity(), "No data found !", Toast.LENGTH_SHORT).show();
                 }
-
                 mSwipeRefreshLayout.setRefreshing(false);
 
 
@@ -229,13 +189,53 @@ public class ListSupplierFragment extends DialogFragment implements SwipeRefresh
             @Override
             public void notifyError(String requestType, VolleyError error) {
                 mSwipeRefreshLayout.setRefreshing(false);
-               // Toast.makeText(getActivity(), "No data found ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Network Error ", Toast.LENGTH_SHORT).show();
 
             }
         };
     }
 
-    private void loadRecyclerView() {
+    private void loadRecyclerView(JSONObject response) {
+        JSONArray jsonArray;
+        try {
+            jsonArray = response.getJSONArray("response");
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject object = jsonArray.getJSONObject(i);
+                String code = object.getString("SUBS_CODE");
+                String name = object.getString("SUBS_NAME");
+                supplierArrayList.add(new SupplierModel(code, name));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "onResponse: " + supplierArrayList.size());
+        if(supplierArrayList.size()>0){
+
+            adapter = new SupplierAdapter(supplierArrayList, new OnAdapterClickListener() {
+                @Override
+                public void OnItemClicked(int position) {
+                    SupplierModel model = supplierArrayList.get(position);
+                    String code = model.getSupplierCode();
+                    Toast.makeText(getActivity(), "code is" + code, Toast.LENGTH_SHORT).show();
+                    mListener.onComplete(code);
+                    Dialog dialog = getDialog();
+                    dialog.dismiss();
+                }
+
+                @Override
+                public void OnDeleteClicked(int position) {
+
+                }
+            });
+            rvSupplierList.setAdapter(adapter);
+        }
+        else {
+            Toast.makeText(getActivity(), "Parsing Error..", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    private void getVolleyData() {
 
         Toast.makeText(getActivity(), "loading RecyclerView", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "loadRecyclerView: ");
@@ -255,7 +255,7 @@ public class ListSupplierFragment extends DialogFragment implements SwipeRefresh
 
     @Override
     public void onRefresh() {
-        loadRecyclerView();
+        getVolleyData();
 
     }
 

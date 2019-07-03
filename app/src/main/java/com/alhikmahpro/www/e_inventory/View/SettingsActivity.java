@@ -17,6 +17,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alhikmahpro.www.e_inventory.AppUtils;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
@@ -44,22 +45,24 @@ public class SettingsActivity extends AppCompatActivity {
     EditText txtHost;
     @BindView(R.id.content_layout)
     LinearLayout contentLayout;
-    @BindView(R.id.txt_inventory)
-    TextView txtInventory;
+//    @BindView(R.id.txt_inventory)
+//    TextView txtInventory;
     @BindView(R.id.switch_inventory)
     Switch switchInventory;
-    @BindView(R.id.txt_goods)
-    TextView txtGoods;
+//    @BindView(R.id.txt_goods)
+//    TextView txtGoods;
     @BindView(R.id.switch_goods)
     Switch switchGoods;
-    @BindView(R.id.txt_empty)
-    TextView txtEmpty;
+//    @BindView(R.id.txt_empty)
+//    TextView txtEmpty;
     @BindView(R.id.btnSearch)
     Button btnSearch;
     dbHelper helper;
 
     private static final String TAG = "SettingsActivity";
-    boolean goods=false,inv=false;
+    boolean goods = false, inv = false,sale=false;
+    @BindView(R.id.switch_sale)
+    Switch switchSale;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,53 +76,67 @@ public class SettingsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
 
-
-        if(SessionHandler.getInstance(SettingsActivity.this).isSetInventory()){
-            Log.i(TAG, "inventory on");
+        if (SessionHandler.getInstance(SettingsActivity.this).isSetInventory()) {
+            Log.i("menu", "inventory on");
             switchInventory.setChecked(true);
-            inv=true;
+            inv = true;
 
         }
 
-        if(SessionHandler.getInstance(SettingsActivity.this).isSetGoodsReceive()){
-            Log.i(TAG, "goods receive  on");
+        if (SessionHandler.getInstance(SettingsActivity.this).isSetGoodsReceive()) {
+            Log.i("menu", "goods receive  on");
             switchGoods.setChecked(true);
-            goods=true;
+            goods = true;
 
         }
+        if (SessionHandler.getInstance(SettingsActivity.this).isSetSale()) {
+            Log.i("menu", "sale  on");
+            switchSale.setChecked(true);
+            goods = true;
+
+        }
+
 
         switchInventory.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(switchInventory.isChecked()){
-                   // Toast.makeText(SettingsActivity.this, "inventory activated", Toast.LENGTH_SHORT).show();
+                if (switchInventory.isChecked()) {
+                    // Toast.makeText(SettingsActivity.this, "inventory activated", Toast.LENGTH_SHORT).show();
                     //SessionHandler.getInstance(SettingsActivity.this).setInventory(true);
-                    inv=true;
+                    inv = true;
 
-                }
-                else {
-                   // SessionHandler.getInstance(SettingsActivity.this).resetInventory();
-                    inv=false;
+                } else {
+                    // SessionHandler.getInstance(SettingsActivity.this).resetInventory();
+                    inv = false;
                     //Toast.makeText(SettingsActivity.this, "inventory disabled", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
 
-
         switchGoods.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(switchInventory.isChecked()){
+                if (switchInventory.isChecked()) {
                     Toast.makeText(SettingsActivity.this, "goods receive activated", Toast.LENGTH_SHORT).show();
                     //SessionHandler.getInstance(SettingsActivity.this).setGoodsReceive(true);
-                    goods=true;
+                    goods = true;
 
-                }
-                else {
+                } else {
                     //SessionHandler.getInstance(SettingsActivity.this).resetGoodsReceive();
-                    goods=false;
-                  //  Toast.makeText(SettingsActivity.this, "goods receive disabled", Toast.LENGTH_SHORT).show();
+                    goods = false;
+                    //  Toast.makeText(SettingsActivity.this, "goods receive disabled", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+        switchSale.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(switchSale.isChecked()){
+                    sale=true;
+                }else {
+                    sale=false;
                 }
 
             }
@@ -139,34 +156,41 @@ public class SettingsActivity extends AppCompatActivity {
         String c_name = txtCompanyName.getText().toString();
         String c_code = txtCompanyCode.getText().toString();
         String b_code = txtBranchCode.getText().toString();
-        String l_code=  txtLocationCode.getText().toString();
-        String p_code=  txtPeriodCode.getText().toString();
+        String l_code = txtLocationCode.getText().toString();
+        String p_code = txtPeriodCode.getText().toString();
         String device = txtDeviceId.getText().toString();
         String ip = txtHost.getText().toString();
         if (validate(c_code, ip)) {
 
-            helper.saveSettings(c_code, c_name, b_code,l_code,p_code,device);
+            helper.saveSettings(c_code, c_name, b_code, l_code, p_code, device);
             SessionHandler.getInstance(this).setHost(ip);
-            if(goods){
+            if (goods) {
                 SessionHandler.getInstance(SettingsActivity.this).setGoodsReceive(true);
-               // Toast.makeText(SettingsActivity.this, "Goods Receive activated", Toast.LENGTH_SHORT).show();
-                Log.i(TAG, "Goods Receive on");
-            }
-            else {
+                // Toast.makeText(SettingsActivity.this, "Goods Receive activated", Toast.LENGTH_SHORT).show();
+                Log.i("menu", "Goods Receive on");
+            } else {
                 SessionHandler.getInstance(SettingsActivity.this).resetGoodsReceive();
                 //Toast.makeText(SettingsActivity.this, "Goods Receive disabled", Toast.LENGTH_SHORT).show();
-                Log.i(TAG, "Goods Receive off");
+                Log.i("menu", "Goods Receive off");
             }
 
-            if(inv){
+            if (inv) {
                 SessionHandler.getInstance(SettingsActivity.this).setInventory(true);
                 //Toast.makeText(SettingsActivity.this, "inventory activated", Toast.LENGTH_SHORT).show();
-                Log.i(TAG, "Inventory on");
-            }
-            else {
+                Log.i("menu", "Inventory on");
+            } else {
                 SessionHandler.getInstance(SettingsActivity.this).resetInventory();
                 //Toast.makeText(SettingsActivity.this, "inventory disabled", Toast.LENGTH_SHORT).show();
-                Log.i(TAG, "Inventory off");
+                Log.i("menu", "Inventory off");
+            }
+            if (sale) {
+                SessionHandler.getInstance(SettingsActivity.this).setSale(true);
+                //Toast.makeText(SettingsActivity.this, "inventory activated", Toast.LENGTH_SHORT).show();
+                Log.i("menu", "Sale on");
+            } else {
+                SessionHandler.getInstance(SettingsActivity.this).resetSale();
+                //Toast.makeText(SettingsActivity.this, "inventory disabled", Toast.LENGTH_SHORT).show();
+                Log.i("menu", "Sale off");
             }
             Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
             finish();
@@ -174,13 +198,13 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
 
-
     private void closeKey() {
         View view = this.getCurrentFocus();
-        if (view != null) {
-            InputMethodManager methodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            methodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        }
+        AppUtils.hideKeyboard(this,view);
+//        if (view != null) {
+//            InputMethodManager methodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+//            methodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+//        }
     }
 
 
@@ -206,8 +230,6 @@ public class SettingsActivity extends AppCompatActivity {
         cursor.close();
         sqLiteDatabase.close();
     }
-
-
 
 
     private boolean validate(String code, String ip) {

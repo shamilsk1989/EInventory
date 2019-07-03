@@ -41,8 +41,8 @@ public class DocAdapter extends RecyclerView.Adapter<DocAdapter.ViewHolder> {
     public void onBindViewHolder(ViewHolder holder, final int position) {
         ItemModel itemsModel = mList.get(position);
 
-        holder.rvDocNo.setText(String.valueOf(itemsModel.getInvoiceNo()));
-        holder.rvStaffName.setText(String.valueOf(itemsModel.getStaffName()));
+        holder.rvDocNo.setText(String.valueOf(itemsModel.getDocNo()));
+        holder.rvStaffName.setText(itemsModel.getStaffName());
 
         holder.rvDate.setText(itemsModel.getDate());
 

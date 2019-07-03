@@ -58,57 +58,16 @@ public class ListDocActivity extends AppCompatActivity {
 
         Intent mIntent = getIntent();
         type = mIntent.getStringExtra("Type");
-        list= new ArrayList<>();
-        if(type.equals("INV")){
-            getSupportActionBar().setTitle("Inventory");
-            loadInventory();
+        list = new ArrayList<>();
 
-        }else if(type.equals("GDS")){
-            getSupportActionBar().setTitle("Goods Receive");
-            loadGoods();
-        }
-        else if(type.equals("SAL")){
-            getSupportActionBar().setTitle("Sales");
-            loadSales();
-        }
-        populateRecycler();
-    }
-
-
-
-    private void loadSales() {
-
-        dbHelper helper = new dbHelper(ListDocActivity.this);
-        SQLiteDatabase database = helper.getReadableDatabase();
-        Cursor cursor = helper.getInvoice(database);
-        if (cursor.moveToFirst()) {
-
-            txtEmpty.setVisibility(View.GONE);
-            do {
-                ItemModel model = new ItemModel();
-                model.setInvoiceNo(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_INVOICE_NUMBER)));
-                model.setDate(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_INVOICE_DATE)));
-                model.setStaffName(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_SALESMAN_ID)));
-                model.setCustomerCode(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_CUSTOMER_CODE)));
-                model.setTotal(cursor.getDouble(cursor.getColumnIndex(DataContract.Invoice.COL_TOTAL_AMOUNT)));
-                model.setDiscount(cursor.getDouble(cursor.getColumnIndex(DataContract.Invoice.COL_DISCOUNT_AMOUNT)));
-                model.setNet(cursor.getDouble(cursor.getColumnIndex(DataContract.Invoice.COL_NET_AMOUNT)));
-                model.setPaymentType(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_PAYMENT_TYPE)));
-                model.setIs_sync(cursor.getInt(cursor.getColumnIndex(DataContract.Invoice.COL_IS_SYNC)));
-
-                list.add(model);
-            } while (cursor.moveToNext());
-        }else {
-            txtEmpty.setVisibility(View.VISIBLE);
-        }
-        cursor.close();
-        database.close();
     }
 
 
 
 
-    private void loadInventory(){
+
+
+    private void loadInventory() {
 
         dbHelper helper = new dbHelper(ListDocActivity.this);
         SQLiteDatabase database = helper.getReadableDatabase();
@@ -117,20 +76,22 @@ public class ListDocActivity extends AppCompatActivity {
 
             txtEmpty.setVisibility(View.GONE);
             do {
+                Log.d(TAG, "loadInventory: "+cursor.getInt(cursor.getColumnIndex(DataContract.Stocks.COL_DOCUMENT_NUMBER)));
                 ItemModel model = new ItemModel();
-                model.setInvoiceNo(cursor.getString(cursor.getColumnIndex(DataContract.Stocks.COL_DOCUMENT_NUMBER)));
+                model.setDocNo(cursor.getInt(cursor.getColumnIndex(DataContract.Stocks.COL_DOCUMENT_NUMBER)));
                 model.setStaffName(cursor.getString(cursor.getColumnIndex(DataContract.Stocks.COL_STAFF_NAME)));
                 model.setTotal(cursor.getDouble(cursor.getColumnIndex(DataContract.Stocks.COL_TOTAL)));
                 model.setDate(cursor.getString(cursor.getColumnIndex(DataContract.Stocks.COL_DATE_TIME)));
                 model.setIs_sync(cursor.getInt(cursor.getColumnIndex(DataContract.Stocks.COL_IS_SYNC)));
                 list.add(model);
             } while (cursor.moveToNext());
-        }else {
+        } else {
             txtEmpty.setVisibility(View.VISIBLE);
         }
         cursor.close();
         database.close();
     }
+
     private void loadGoods() {
         dbHelper helper = new dbHelper(ListDocActivity.this);
         SQLiteDatabase database = helper.getReadableDatabase();
@@ -140,14 +101,14 @@ public class ListDocActivity extends AppCompatActivity {
             txtEmpty.setVisibility(View.GONE);
             do {
                 ItemModel model = new ItemModel();
-                model.setInvoiceNo(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_DOCUMENT_NUMBER)));
+                model.setDocNo(cursor.getInt(cursor.getColumnIndex(DataContract.GoodsReceive.COL_DOCUMENT_NUMBER)));
                 model.setStaffName(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_STAFF_NAME)));
                 model.setTotal(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceive.COL_TOTAL)));
                 model.setDate(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_DATE_TIME)));
                 model.setIs_sync(cursor.getInt(cursor.getColumnIndex(DataContract.Stocks.COL_IS_SYNC)));
                 list.add(model);
             } while (cursor.moveToNext());
-        }else {
+        } else {
             txtEmpty.setVisibility(View.VISIBLE);
         }
         cursor.close();
@@ -155,66 +116,92 @@ public class ListDocActivity extends AppCompatActivity {
     }
 
 
-    private void populateRecycler(){
+    private void populateRecycler() {
 
         layoutManager = new LinearLayoutManager(this);
         docListRv.setLayoutManager(layoutManager);
         docListRv.setItemAnimator(new DefaultItemAnimator());
         docListRv.setHasFixedSize(true);
-        adapter=new DocAdapter(list, new OnAdapterClickListener() {
+        adapter = new DocAdapter(list, new OnAdapterClickListener() {
             @Override
             public void OnItemClicked(int position) {
-
-                if(type.equals("SAL")){
-                    Toast.makeText(ListDocActivity.this, "Edit option not available ", Toast.LENGTH_SHORT).show();
-                }
-                else{
-                    ItemModel itemModel=list.get(position);
-                    String docNo=itemModel.getInvoiceNo();
-                   // int no=itemModel.getDocNo();
-                    int no;
-                    try {
-                        no = Integer.parseInt(docNo);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        no = 0;
-                    }
-                    String user=itemModel.getStaffName();
-                    editDoc(no,user);
-                }
-
+                editDoc(position);
             }
+
             @Override
-            public void OnDeleteClicked(int position) { }
+            public void OnDeleteClicked(int position) {
+            }
         });
 
         docListRv.setAdapter(adapter);
-        ViewCompat.setNestedScrollingEnabled(docListRv,false);
+        ViewCompat.setNestedScrollingEnabled(docListRv, false);
+    }
+
+    private void editDoc(int position) {
+
+        ItemModel itemModel = list.get(position);
+        if (type.equals("INV")) {
+            Intent intent = new Intent(this, ListItemActivity.class);
+            intent.putExtra("ACTION", "Edit");
+            intent.putExtra("DOC_NO",itemModel.getDocNo());
+            intent.putExtra("USER", itemModel.getStaffName());
+            startActivity(intent);
+        }
+        else if(type.equals("GDS")){
+            Intent intent=new Intent(this,GoodsItemListActivity.class);
+            intent.putExtra("ACTION","Edite");
+            intent.putExtra("DOC_NO",itemModel.getDocNo());
+            intent.putExtra("ORD_NO",itemModel.getOrderNo());
+            intent.putExtra("SUPP_CODE",itemModel.getSupplierCode());
+            intent.putExtra("SUPP_NAME",itemModel.getSupplierName());
+            intent.putExtra("INV_NO", itemModel.getInvoiceNo());
+            intent.putExtra("INV_DATE",itemModel.getInvoiceDate());
+            intent.putExtra("USER",itemModel.getStaffName());
+            startActivity(intent);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         RuntimeData.mCartData.clear();
-    }
-    private void editDoc(int no,String user) {
+        if (type.equals("INV")) {
+            getSupportActionBar().setTitle("Inventory");
+            loadInventory();
 
-        if(type.equals("INV")){
-            Intent intent=new Intent(this,ListItemActivity.class);
-            intent.putExtra("Action","Edit");
-            intent.putExtra("DocNo",no);
-            intent.putExtra("User",user);
-            startActivity(intent);
-        }else if(type.equals("GDS")){
-            Intent intent=new Intent(this,GoodsItemListActivity.class);
-            intent.putExtra("DocNo",no);
-            startActivity(intent);
+        } else if (type.equals("GDS")) {
+            getSupportActionBar().setTitle("Goods Receive");
+            loadGoods();
         }
-
-
-
+        populateRecycler();
     }
+
+
+//    private void editDoc(int no,String user) {
+//
+//        if(type.equals("INV")){
+//            Intent intent=new Intent(this,ListItemActivity.class);
+//            intent.putExtra("Action","Edit");
+//            intent.putExtra("DocNo",no);
+//            intent.putExtra("User",user);
+//            startActivity(intent);
+//        }else if(type.equals("GDS")){
+//
+//            //Toast.makeText(this, "edit option not available", Toast.LENGTH_SHORT).show();
+//            Intent intent=new Intent(this,GoodsItemListActivity.class);
+//            intent.putExtra("TYPE","edit");
+//            int docNo = mIntent.getIntExtra("DOC_NO", 0);
+//            String orderNo = mIntent.getStringExtra("ORD_NO");
+//            String supplierCode = mIntent.getStringExtra("SUPP_CODE");
+//            String supplierName = mIntent.getStringExtra("SUPP_NAME");
+//            String invoiceNo = mIntent.getStringExtra("INV_NO");
+//            String user = mIntent.getStringExtra("USER");
+//            String invoiceDate = mIntent.getStringExtra("INV_DATE");
+//            startActivity(intent);
+//        }
+
+
+    //  }
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -225,19 +212,16 @@ public class ListDocActivity extends AppCompatActivity {
 
     @OnClick(R.id.fab)
     public void onViewClicked() {
-        if(type.equals("INV")){
-            Intent intent=new Intent(ListDocActivity.this,InventoryActivity.class);
+        if (type.equals("INV")) {
+            Intent intent = new Intent(ListDocActivity.this, InventoryActivity.class);
             startActivity(intent);
-        }else if(type.equals("GDS")){
-            Intent intent=new Intent(ListDocActivity.this,InvoiceActivity.class);
+        } else if (type.equals("GDS")) {
+            Intent intent = new Intent(ListDocActivity.this, InvoiceActivity.class);
             startActivity(intent);
-        }else if(type.equals("SAL")){
-            Intent intent=new Intent(ListDocActivity.this,CheckCustomerActivity.class);
+        } else if (type.equals("SAL")) {
+            Intent intent = new Intent(ListDocActivity.this, CheckCustomerActivity.class);
             startActivity(intent);
         }
-
-
-
 
 
     }

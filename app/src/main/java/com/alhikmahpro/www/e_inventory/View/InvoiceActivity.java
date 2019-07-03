@@ -243,10 +243,10 @@ public class InvoiceActivity extends AppCompatActivity implements ListSupplierFr
 
     private boolean validate() {
         if (TextUtils.isEmpty(User)) {
-            editTextUser.setError("Invalid Supplier Code");
+            editTextUser.setError("Invalid User");
             return false;
         } else if (TextUtils.isEmpty(supplierCode)) {
-            editTextSupplierCode.setError("Invalid User");
+            editTextSupplierCode.setError("Invalid Supplier Code");
             return false;
         } else if (TextUtils.isEmpty(invoiceNo)) {
             editTextInvoiceNo.setError("Invalid Invoice");

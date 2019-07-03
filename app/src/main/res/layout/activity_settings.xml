@@ -1,237 +1,240 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginBottom="16dp"
     android:layout_marginLeft="16dp"
-    android:layout_marginTop="16dp"
     android:layout_marginRight="16dp"
-    android:layout_marginBottom="16dp">
+    android:layout_marginTop="16dp"
+    android:orientation="vertical">
 
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <RelativeLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
+        <LinearLayout
+            android:id="@+id/content_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+
+            android:weightSum="2">
 
             <LinearLayout
-                android:id="@+id/content_layout"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="2">
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:text="Company Name"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:text="Company Name"
-                        android:textColor="@android:color/black"
-                        android:textSize="18sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
+                    android:text="Company Code"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="20dp"
-                        android:text="Company Code"
-                        android:textColor="@android:color/black"
-                        android:textSize="18sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
+                    android:text="Branch Code"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="20dp"
-                        android:text="Branch Code"
-                        android:textColor="@android:color/black"
-                        android:textSize="18sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
+                    android:text="Location Code"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="20dp"
-                        android:text="Location Code"
-                        android:textColor="@android:color/black"
-                        android:textSize="18sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
+                    android:text="Period Code"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="20dp"
-                        android:text="Period Code"
-                        android:textColor="@android:color/black"
-                        android:textSize="18sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
+                    android:text="Device Id"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="20dp"
-                        android:text="Device Id"
-                        android:textColor="@android:color/black"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="20dp"
-                        android:text="Host"
-                        android:textColor="@android:color/black"
-                        android:textSize="18sp" />
-
-                </LinearLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
+                    android:text="Host"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
 
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:text="Inventory"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
 
 
-                    <EditText
-                        android:id="@+id/txtCompanyName"
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:inputType="text"
-                        android:padding="5dp"
-                        android:textColor="@android:color/black"
-                        android:textSize="18sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:text="Goods Receive"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
 
 
-                    <EditText
-                        android:id="@+id/txtCompanyCode"
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="20dp"
-                        android:inputType="text"
-                        android:padding="5dp"
-                        android:textColor="@android:color/black"
-                        android:textSize="18sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:text="Sale"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
 
-
-                    <EditText
-                        android:id="@+id/txtBranchCode"
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="20dp"
-                        android:inputType="text"
-                        android:padding="5dp"
-                        android:textColor="@android:color/black"
-                        android:textSize="18sp" />
-
-                    <EditText
-                        android:id="@+id/txtLocationCode"
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="20dp"
-                        android:inputType="text"
-                        android:padding="5dp"
-                        android:textColor="@android:color/black"
-                        android:textSize="18sp" />
-
-                    <EditText
-                        android:id="@+id/txtPeriodCode"
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="20dp"
-                        android:inputType="text"
-                        android:padding="5dp"
-                        android:textColor="@android:color/black"
-                        android:textSize="18sp" />
-
-                    <EditText
-                        android:id="@+id/txtDeviceId"
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="20dp"
-                        android:inputType="text"
-                        android:padding="5dp"
-                        android:textColor="@android:color/black"
-                        android:textSize="18sp" />
-
-                    <EditText
-                        android:id="@+id/txtHost"
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="20dp"
-                        android:inputType="text"
-                        android:padding="5dp"
-                        android:textColor="@android:color/black"
-                        android:textSize="18sp" />
-                </LinearLayout>
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/txt_inventory"
-                android:layout_width="match_parent"
+
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/content_layout"
-                android:layout_marginTop="20dp"
-                android:text="Inventory"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"
-
-                />
-
-            <Switch
-                android:id="@+id/switch_inventory"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/content_layout"
-                android:layout_alignParentEnd="true"
-                android:layout_marginTop="20dp"
-                android:checked="false" />
-
-            <TextView
-                android:id="@+id/txt_goods"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/txt_inventory"
-                android:layout_marginTop="20dp"
-                android:text="Receive Goods"
-                android:textColor="@android:color/black"
-                android:textSize="18sp" />
-
-            <Switch
-                android:id="@+id/switch_goods"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/switch_inventory"
-                android:layout_alignParentEnd="true"
-                android:layout_marginTop="20dp"
-                android:checked="false" />
-
-            <TextView
-                android:id="@+id/txt_empty"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_below="@+id/txt_goods"
-                android:layout_marginTop="20dp"
-                android:textColor="@android:color/black"
-                android:textSize="18sp" />
+                android:layout_weight="1"
+                android:orientation="vertical">
 
 
+                <EditText
+                    android:id="@+id/txtCompanyName"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:inputType="text"
+                    android:padding="5dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
 
-        </RelativeLayout>
 
-    </ScrollView>
+                <EditText
+                    android:id="@+id/txtCompanyCode"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
+                    android:inputType="text"
+                    android:padding="5dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
 
 
-    <Button
-        android:id="@+id/btnSearch"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginTop="@dimen/login_button_margin_top"
-        android:background="@android:color/holo_green_dark"
-        android:text="Save"
-        android:textColor="@android:color/white" />
+                <EditText
+                    android:id="@+id/txtBranchCode"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
+                    android:inputType="text"
+                    android:padding="5dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
 
-</RelativeLayout>
+                <EditText
+                    android:id="@+id/txtLocationCode"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
+                    android:inputType="text"
+                    android:padding="5dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/txtPeriodCode"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
+                    android:inputType="text"
+                    android:padding="5dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/txtDeviceId"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
+                    android:inputType="text"
+                    android:padding="5dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/txtHost"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
+                    android:inputType="text"
+                    android:padding="5dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
+
+
+                <Switch
+                    android:id="@+id/switch_inventory"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:checked="false" />
+
+                <Switch
+                    android:id="@+id/switch_goods"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:checked="false" />
+
+                <Switch
+                    android:id="@+id/switch_sale"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:checked="false" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/holo_green_dark"
+            android:text="Save"
+            android:textColor="@android:color/white" />
+
+    </LinearLayout>
+
+
+
+
+
+
+
+
+
+
+</ScrollView>

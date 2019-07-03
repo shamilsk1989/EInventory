@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -18,6 +19,7 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -36,11 +38,29 @@ import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.PrinterCommands;
 import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
+import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
+import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
 import com.alhikmahpro.www.e_inventory.R;
+import com.android.volley.VolleyError;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.draw.LineSeparator;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -53,6 +73,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,10 +128,13 @@ public class PrintViewActivity extends AppCompatActivity {
     Button btnSync;
     @BindView(R.id.btn_pdf)
     Button btnPdf;
+
 //    @BindView(R.id.toolbar)
 //    Toolbar toolbar;
 
     private ProgressDialog dialog;
+    volleyListener mVolleyListener;
+    VolleyServiceGateway serviceGateway;
     BluetoothAdapter bluetoothAdapter;
     BluetoothSocket bluetoothSocket;
     BluetoothDevice bluetoothDevice;
@@ -141,6 +165,8 @@ public class PrintViewActivity extends AppCompatActivity {
     private String path;
     private File pdfFile;
     private File dir;
+    dbHelper helper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,12 +185,60 @@ public class PrintViewActivity extends AppCompatActivity {
         discountAmount = intent.getDoubleExtra("DISCOUNT", 0);
         netAmount = intent.getDoubleExtra("NET", 0);
         paymentMode = intent.getStringExtra("PAY_MOD");
-        Log.d(TAG, "onCreate: " + netAmount);
+        Log.d(TAG, "onCreate: " + customerName);
         invoiceDate = AppUtils.getDateAndTime();
+        helper = new dbHelper(this);
         initView();
+        initVolleyCallBack();
+    }
+
+    private void initVolleyCallBack() {
+        mVolleyListener=new volleyListener() {
+            @Override
+            public void notifySuccess(String requestType, JSONObject response) {
+                dialog.cancel();
+                Log.d(TAG, "notifySuccess: "+response);
+                String res ="";
+                try {
+                    res = response.getString("Status");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                if (res.equals("success")) {
+                    helper.updateInvoiceSync(invoiceNo);
+
+                }else {
+                    Toast.makeText(PrintViewActivity.this, "something went wrong pls try again later", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
+            @Override
+            public void notifyError(String requestType, VolleyError error) {
+                dialog.cancel();
+                Toast.makeText(PrintViewActivity.this, "server error", Toast.LENGTH_SHORT).show();
+
+            }
+        };
     }
 
     private void initView() {
+
+
+        SQLiteDatabase database = helper.getReadableDatabase();
+        Cursor cursor = helper.getPaperSettings(database);
+
+        if (cursor.moveToFirst()) {
+            companyName = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_NAME));
+            companyAddress = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_ADDRESS));
+            companyPhone = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_PHONE));
+            footer = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_FOOTER));
+        }
+        Log.d(TAG, "initView: " + companyName);
+
+        cursor.close();
+        database.close();
+
         txtInvoice.setText(invoiceNo);
         txtDate.setText(invoiceDate);
         txtCustomerName.setText(customerName);
@@ -353,22 +427,6 @@ public class PrintViewActivity extends AppCompatActivity {
     private void printData() {
 
         final DecimalFormat decimalFormat = new DecimalFormat("0.00");
-
-        dbHelper helper = new dbHelper(this);
-        SQLiteDatabase database = helper.getReadableDatabase();
-        Cursor cursor = helper.getPaperSettings(database);
-
-        if (cursor.moveToFirst()) {
-            companyName = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_NAME));
-            companyAddress = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_ADDRESS));
-            companyPhone = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_PHONE));
-            footer = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_FOOTER));
-        }
-
-        cursor.close();
-        database.close();
-
-
         Log.d(TAG, "printBill");
         Thread thread = new Thread() {
 
@@ -555,7 +613,6 @@ public class PrintViewActivity extends AppCompatActivity {
         }
         //  str1.append(temp);
         return str1.toString();
-
     }
 
 
@@ -616,6 +673,82 @@ public class PrintViewActivity extends AppCompatActivity {
 
     @OnClick(R.id.btn_sync)
     public void onBtnSyncClicked() {
+        //create invoice json array
+
+        JSONArray invoiceArray = new JSONArray();
+        JSONObject invoiceObject = new JSONObject();
+        try {
+            invoiceObject.put(DataContract.Invoice.COL_INVOICE_NUMBER, invoiceNo);
+            invoiceObject.put(DataContract.Invoice.COL_INVOICE_DATE, mDate);
+            invoiceObject.put(DataContract.Invoice.COL_CUSTOMER_CODE, customerCode);
+            invoiceObject.put(DataContract.Invoice.COL_CUSTOMER_NAME, customerName);
+            invoiceObject.put(DataContract.Invoice.COL_SALESMAN_ID, salesmanId);
+            invoiceObject.put(DataContract.Invoice.COL_TOTAL_AMOUNT,base_total);
+            invoiceObject.put(DataContract.Invoice.COL_DISCOUNT_AMOUNT,discountAmount);
+            invoiceObject.put(DataContract.Invoice.COL_NET_AMOUNT, netAmount);
+            invoiceObject.put(DataContract.Invoice.COL_PAYMENT_TYPE, paymentMode);
+
+            invoiceArray.put(invoiceObject);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //create invoiceDetails json array
+        JSONArray invoiceDetailsArray = new JSONArray();
+        int slNo=0;
+
+        for (CartModel cartModel : Cart.mCart) {
+            slNo++;
+
+            JSONObject detailsObject = new JSONObject();
+            try {
+                detailsObject.put("serial_no", slNo);
+                detailsObject.put(DataContract.InvoiceDetails.COL_INVOICE_NUMBER, invoiceNo);
+                detailsObject.put(DataContract.InvoiceDetails.COL_BAR_CODE, cartModel.getBarcode());
+                detailsObject.put(DataContract.InvoiceDetails.COL_PRODUCT_CODE, cartModel.getProductCode());
+                detailsObject.put(DataContract.InvoiceDetails.COL_PRODUCT_NAME, cartModel.getProductName());
+                detailsObject.put(DataContract.InvoiceDetails.COL_QUANTITY, cartModel.getQty());
+                detailsObject.put(DataContract.InvoiceDetails.COL_UNIT1, cartModel.getUnit1());
+                detailsObject.put(DataContract.InvoiceDetails.COL_UNIT2, cartModel.getUnit2());
+                detailsObject.put(DataContract.InvoiceDetails.COL_UNIT3, cartModel.getUnit3());
+                detailsObject.put(DataContract.InvoiceDetails.COL_UNIT, cartModel.getSelectedUnit());
+                detailsObject.put(DataContract.InvoiceDetails.COL_UN_QTY1, cartModel.getUnit1Qty());
+                detailsObject.put(DataContract.InvoiceDetails.COL_UN_QTY2, cartModel.getUnit2Qty());
+                detailsObject.put(DataContract.InvoiceDetails.COL_UN_QTY3, cartModel.getUnit3Qty());
+                detailsObject.put(DataContract.InvoiceDetails.COL_RATE, cartModel.getRate());
+                detailsObject.put(DataContract.InvoiceDetails.COL_DISCOUNT, cartModel.getDiscount());
+                detailsObject.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, cartModel.getNet());
+
+
+
+                detailsObject.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, cartModel.getNet());
+                detailsObject.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, cartModel.getNet());
+                detailsObject.put(DataContract.InvoiceDetails.COL_SALE_TYPE, cartModel.getSaleType());
+
+
+
+
+                invoiceDetailsArray.put(detailsObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        JSONObject result = new JSONObject();
+
+        try {
+            result.put("Invoice", invoiceArray);
+            result.put("Details", invoiceDetailsArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //send to volley
+        View view = this.getCurrentFocus();
+        AppUtils.hideKeyboard(this, view);
+        dialog = AppUtils.showProgressDialog(this, "Loading....");
+        serviceGateway = new VolleyServiceGateway(mVolleyListener, this);
+        serviceGateway.postDataVolley("POSTCALL", "PriceChecker/sales_invoice.php", result);
     }
 
     @OnClick(R.id.btn_pdf)
@@ -719,7 +852,7 @@ public class PrintViewActivity extends AppCompatActivity {
                                         }
                                     }).create().show();
 
-                        }else {
+                        } else {
                             Toast.makeText(this, "permission denied", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -727,87 +860,229 @@ public class PrintViewActivity extends AppCompatActivity {
 
         }
 
-//        if(requestCode==STORAGE_PERMISSION_CODE){
-//            if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
-//                Log.d(TAG, "Permission granted: ");
-//                createPdfWrapper();
-//            }
-//            else{
-//                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
-//            }
-//        }
+
     }
 
     private void createPdfWrapper() {
-        //create directory
 
-        String directoryPath=Environment.getExternalStorageDirectory().getAbsolutePath()+"/Invoices00";
-        dir=new File(directoryPath);
-        if(!dir.exists()){
-            dir.mkdir();
-        }
-        String folderName="Invoice";
-        String fileName="sample";
-        Document document=new Document();
-        pdfFile=new File(dir,"sampleee"+".pdf");
+        final DecimalFormat decimalFormat = new DecimalFormat("0.00");
 
-        //String mFilePath=Environment.getExternalStorageDirectory()+"/"+fileName+ ".pdf";
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        String mDate = sdf.format(new Date());
+        Document document = new Document();
         try {
 
+            //create directory
+            String directoryPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Invoice";
+            dir = new File(directoryPath);
+            if (!dir.exists()) {
+                dir.mkdir();
+            }
+
+            String fileName = invoiceNo + "-" + invoiceDate+".pdf";
+            pdfFile = new File(dir, fileName);
+
             //PdfWriter.getInstance(document,new FileOutputStream(mFilePath));
-            FileOutputStream stream=new FileOutputStream(pdfFile);
+            FileOutputStream stream = new FileOutputStream(pdfFile);
             //PdfWriter pdfWriter=PdfWriter.getInstance(document,stream);
-            PdfWriter.getInstance(document,stream);
+            PdfWriter.getInstance(document, stream);
             //open document
 
             document.open();
-            //add author of document
-            document.addAuthor("sk");
+            //document settings
 
-            //add paragraph
+            document.setPageSize(PageSize.A4);
+            document.addCreationDate();
+            BaseColor mColorAccent = new BaseColor(0, 153, 204, 255);
+            float mHeadingFontSize = 13.0f;
+            float mValueFontSize = 15.0f;
+            float mItemFontSize = 10.0f;
+            Paragraph paragraph = new Paragraph("");
 
-            document.add(new Paragraph(invoiceNo));
+            //adding title image
+//            Image image=Image.getInstance("src/resource/logo.png");
+//            image.scaleAbsolute(540f,75f);
 
-            //close document
 
+            //font
+            BaseFont urName = BaseFont.createFont("assets/fonts/brandon_medium.otf", "UTF-8", BaseFont.EMBEDDED);
+
+            Font heading = new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD, new BaseColor(0, 0, 0));
+            Font normal = new Font(Font.FontFamily.TIMES_ROMAN, 12);
+
+            // LINE SEPARATOR
+            LineSeparator lineSeparator = new LineSeparator();
+            lineSeparator.setLineColor(new BaseColor(0, 0, 0, 68));
+
+            // Title Order Details...
+            // Adding Title....
+
+            Font mOrderDetailsTitleFont = new Font(urName, 25.0f, Font.NORMAL, BaseColor.BLACK);
+            Chunk mOrderDetailsTitleChunk = new Chunk(companyName, mOrderDetailsTitleFont);
+            Paragraph mOrderDetailsTitleParagraph = new Paragraph(mOrderDetailsTitleChunk);
+            mOrderDetailsTitleParagraph.setAlignment(Element.ALIGN_CENTER);
+            document.add(mOrderDetailsTitleParagraph);
+
+            Font mOrderDetailsTitle2Font = new Font(urName, 22.0f, Font.NORMAL, BaseColor.BLACK);
+            Chunk mOrderDetailsTitle2Chunk = new Chunk(companyAddress, mOrderDetailsTitle2Font);
+            Paragraph mOrderDetailsTitle2Paragraph = new Paragraph(mOrderDetailsTitle2Chunk);
+            mOrderDetailsTitle2Paragraph.setAlignment(Element.ALIGN_CENTER);
+            document.add(mOrderDetailsTitle2Paragraph);
+
+            Font mOrderDetailsTitle3Font = new Font(urName, 20.0f, Font.NORMAL, BaseColor.BLACK);
+            Chunk mOrderDetailsTitle3Chunk = new Chunk(companyPhone, mOrderDetailsTitle3Font);
+            Paragraph mOrderDetailsTitle3Paragraph = new Paragraph(mOrderDetailsTitle3Chunk);
+            mOrderDetailsTitle3Paragraph.setAlignment(Element.ALIGN_CENTER);
+            document.add(mOrderDetailsTitle3Paragraph);
+
+
+            // Fields of Order Details...
+            // Adding Chunks for Title and value
+
+            Font mOrderIdFont = new Font(urName, mHeadingFontSize, Font.NORMAL, mColorAccent);
+            Chunk mOrderIdChunk = new Chunk("Invoice No:", mOrderIdFont);
+            Paragraph mOrderIdParagraph = new Paragraph(mOrderIdChunk);
+            document.add(mOrderIdParagraph);
+
+            Font mOrderIdValueFont = new Font(urName, mValueFontSize, Font.NORMAL, BaseColor.BLACK);
+            Chunk mOrderIdValueChunk = new Chunk("#" + invoiceNo, mOrderIdValueFont);
+            Paragraph mOrderIdValueParagraph = new Paragraph(mOrderIdValueChunk);
+            document.add(mOrderIdValueParagraph);
+
+            // Adding Line Breakable Space....
+            document.add(new Paragraph(""));
+            // Adding Horizontal Line...
+            //  document.add(new Chunk(lineSeparator));
+            // Adding Line Breakable Space....
+            document.add(new Paragraph(""));
+
+            // Fields of Order Details...
+            Font mOrderDateFont = new Font(urName, mHeadingFontSize, Font.NORMAL, mColorAccent);
+            Chunk mOrderDateChunk = new Chunk("Order Date:", mOrderDateFont);
+            Paragraph mOrderDateParagraph = new Paragraph(mOrderDateChunk);
+            document.add(mOrderDateParagraph);
+
+            Font mOrderDateValueFont = new Font(urName, mValueFontSize, Font.NORMAL, BaseColor.BLACK);
+            Chunk mOrderDateValueChunk = new Chunk(invoiceDate, mOrderDateValueFont);
+            Paragraph mOrderDateValueParagraph = new Paragraph(mOrderDateValueChunk);
+            document.add(mOrderDateValueParagraph);
+
+            document.add(new Paragraph(""));
+            //document.add(new Chunk(lineSeparator));
+            document.add(new Paragraph(""));
+
+            // Fields of Order Details...
+            Font mOrderAcNameFont = new Font(urName, mHeadingFontSize, Font.NORMAL, mColorAccent);
+            Chunk mOrderAcNameChunk = new Chunk("Customer Name:", mOrderAcNameFont);
+            Paragraph mOrderAcNameParagraph = new Paragraph(mOrderAcNameChunk);
+            document.add(mOrderAcNameParagraph);
+
+            Font mOrderAcNameValueFont = new Font(urName, mValueFontSize, Font.NORMAL, BaseColor.BLACK);
+            Chunk mOrderAcNameValueChunk = new Chunk(customerName, mOrderAcNameValueFont);
+            Paragraph mOrderAcNameValueParagraph = new Paragraph(mOrderAcNameValueChunk);
+            document.add(mOrderAcNameValueParagraph);
+
+            document.add(new Paragraph(""));
+            //document.add(new Chunk(lineSeparator));
+            document.add(new Paragraph(""));
+
+            // Fields of Order Details...
+            Font mOrderSalesmanFont = new Font(urName, mHeadingFontSize, Font.NORMAL, mColorAccent);
+            Chunk mOrderSalesmanChunk = new Chunk("Salesman:", mOrderSalesmanFont);
+            Paragraph mOrderSalesmanParagraph = new Paragraph(mOrderSalesmanChunk);
+            document.add(mOrderSalesmanParagraph);
+
+            Font mOrderSalesmanValueFont = new Font(urName, mValueFontSize, Font.NORMAL, BaseColor.BLACK);
+            Chunk mOrderSalesmanValueChunk = new Chunk(salesmanId, mOrderSalesmanValueFont);
+            Paragraph mOrderSalesmanValueParagraph = new Paragraph(mOrderSalesmanValueChunk);
+            document.add(mOrderSalesmanValueParagraph);
+
+            document.add(new Paragraph(""));
+            document.add(new Chunk(lineSeparator));
+            document.add(new Paragraph(""));
+
+            //float[]columnWidth={}
+            PdfPTable pTable = new PdfPTable(3);
+            pTable.setWidthPercentage(100);
+            //insert heading
+
+            insertCell(pTable, " Item Name", Element.ALIGN_RIGHT, 1, heading);
+            insertCell(pTable, " Quantity", Element.ALIGN_LEFT, 1, heading);
+            insertCell(pTable, " Total", Element.ALIGN_LEFT, 1, heading);
+            pTable.setHeaderRows(1);
+
+            for (CartModel mm : Cart.mCart) {
+
+                String item = mm.getProductName();
+                String qty = String.valueOf(mm.getQty());
+                String price = String.valueOf(decimalFormat.format(mm.getRate()));
+                String sub_total = String.valueOf(decimalFormat.format(mm.getNet()));
+                String item_format = price + " X " + mm.getQty();
+
+                insertCell(pTable, item, Element.ALIGN_RIGHT, 1, normal);
+                insertCell(pTable, item_format, Element.ALIGN_LEFT, 1, normal);
+                insertCell(pTable, price, Element.ALIGN_LEFT, 1, normal);
+
+            }
+            insertCell(pTable, "", Element.ALIGN_LEFT, 3, heading);
+            insertCell(pTable, "Total ", Element.ALIGN_RIGHT, 2, normal);
+            insertCell(pTable, decimalFormat.format(base_total), Element.ALIGN_RIGHT, 1, normal);
+            insertCell(pTable, "Discount ", Element.ALIGN_RIGHT, 2, normal);
+            insertCell(pTable, decimalFormat.format(discountAmount), Element.ALIGN_RIGHT, 1, normal);
+            insertCell(pTable, "Net :", Element.ALIGN_RIGHT, 2, normal);
+            insertCell(pTable, decimalFormat.format(netAmount), Element.ALIGN_RIGHT, 1, normal);
+            paragraph.add(pTable);
+            document.add(paragraph);
+
+
+            //previewPDF(fileName,dir);
+
+        } catch (DocumentException de) {
+            Toast.makeText(this, "Error " + de.getMessage(), Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "createPdfWrapper: " + de.getMessage());
+            //Log.d(TAG, "createPdfWrapper: "+ex.;
+            de.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
             document.close();
-
-            previewPDF();
-
-        }catch (Exception e){
-            Toast.makeText(this, "Error "+e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-
-//        dir=new File(path);
-//        if(!dir.exists()){
-//            dir.mkdir();
-//            Log.i(TAG, "Directory created: ");
-//
-//
-//        }
+    }
 
 
+    private void insertCell(PdfPTable pTable, String text, int align, int colspan, Font font) {
 
-
-
+        PdfPCell cell = new PdfPCell(new Phrase(text.trim(), font));
+        cell.setHorizontalAlignment(align);
+        cell.setColspan(colspan);
+        if (text.trim().equalsIgnoreCase("")) {
+            cell.setMinimumHeight(10f);
+        }
+        pTable.addCell(cell);
 
     }
 
-    private void previewPDF() {
-        PackageManager packageManager = getPackageManager();
-        Intent testIntent = new Intent(Intent.ACTION_VIEW);
-        testIntent.setType("application/pdf");
-        List list = packageManager.queryIntentActivities(testIntent, PackageManager.MATCH_DEFAULT_ONLY);
-        if (list.size() > 0) {
-            Intent intent = new Intent();
-            intent.setAction(Intent.ACTION_VIEW);
-            Uri uri = Uri.fromFile(pdfFile);
-            intent.setDataAndType(uri, "application/pdf");
-
-            startActivity(intent);
-        }else{
-            Toast.makeText(this,"Download a PDF Viewer to see the generated PDF",Toast.LENGTH_SHORT).show();
+    private void previewPDF(String fileName, File dir) {
+        String path="/sdcard/pdffromlayout.pdf";
+                //Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+dir+"/"+fileName;
+        Log.d(TAG, "previewPDF: path "+path);
+        File file=new File(path);
+        if(file.exists()){
+            Intent pdfIntent=new Intent(Intent.ACTION_VIEW);
+            Uri uri=Uri.fromFile(file);
+            pdfIntent.setDataAndType(uri,"application/pdf");
+            pdfIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            try {
+                startActivity(pdfIntent);
+            } catch (ActivityNotFoundException ae) {
+                ae.printStackTrace();
+                Toast.makeText(this, "Can't read file", Toast.LENGTH_SHORT).show();
+            }
+        }else {
+            Log.d(TAG, "previewPDF: no file ");
         }
+
     }
+
 
 }

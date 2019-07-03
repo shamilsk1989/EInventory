@@ -72,6 +72,7 @@ public class ListItemFragment extends DialogFragment implements SwipeRefreshLayo
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
     String companyCode, companyName, deviceId, branchCode, periodCode, locationCode;
+    String itemName;
     private static final String TAG = "ListItemFragment";
     public static final String DIALOG_FRAGMENT_TYPE="Items";
     public ListItemFragment() {
@@ -110,6 +111,10 @@ public class ListItemFragment extends DialogFragment implements SwipeRefreshLayo
         });
         toolbar.setTitle("Choose Items..");
 
+        Bundle bundle=getArguments();
+        itemName=bundle.getString("ITEM_NAME").toUpperCase();
+
+
         helper = new dbHelper(getActivity());
         itemArrayList = new ArrayList<>();
         SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
@@ -127,7 +132,7 @@ public class ListItemFragment extends DialogFragment implements SwipeRefreshLayo
         sqLiteDatabase.close();
         rvCustomerList.setHasFixedSize(true);
         rvCustomerList.setLayoutManager(new LinearLayoutManager(getContext()));
-        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
+        mSwipeRefreshLayout = view.findViewById(R.id.swipe_container);
         mSwipeRefreshLayout.setOnRefreshListener(this);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary, android.R.color.holo_green_dark,
                 android.R.color.holo_orange_dark, android.R.color.holo_blue_dark);
@@ -229,12 +234,19 @@ public class ListItemFragment extends DialogFragment implements SwipeRefreshLayo
 
     }
     private void loadRecyclerView() {
+        Log.d(TAG, "loadRecyclerView: "+itemName);
         Toast.makeText(getActivity(), "loading RecyclerView", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "loadRecyclerView: ");
         mSwipeRefreshLayout.setRefreshing(true);
         itemArrayList.clear();
+        JSONObject postParam = new JSONObject();
+        try {
+            postParam.put("Code",itemName);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         serviceGateway = new VolleyServiceGateway(mVolleyListener, getContext());
-        serviceGateway.getDataVolley("POSTCALL", "PriceChecker/item_list.php");
+        serviceGateway.postDataVolley("POSTCALL", "PriceChecker/item_list.php",postParam);
     }
 
     @Override

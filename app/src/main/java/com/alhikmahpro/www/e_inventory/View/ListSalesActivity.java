@@ -72,7 +72,7 @@ public class ListSalesActivity extends AppCompatActivity {
                 model.setDate(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_INVOICE_DATE)));
                 model.setStaffName(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_SALESMAN_ID)));
                 model.setCustomerCode(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_CUSTOMER_CODE)));
-                model.setCustomerCode(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_CUSTOMER_NAME)));
+                model.setCustomerName(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_CUSTOMER_NAME)));
                 model.setTotal(cursor.getDouble(cursor.getColumnIndex(DataContract.Invoice.COL_TOTAL_AMOUNT)));
                 model.setDiscount(cursor.getDouble(cursor.getColumnIndex(DataContract.Invoice.COL_DISCOUNT_AMOUNT)));
                 model.setNet(cursor.getDouble(cursor.getColumnIndex(DataContract.Invoice.COL_NET_AMOUNT)));
@@ -112,6 +112,7 @@ public class ListSalesActivity extends AppCompatActivity {
     private void goToNext(int position) {
         ItemModel itemModel=list.get(position);
         String invoiceNo=itemModel.getInvoiceNo();
+        Log.d(TAG, "goToNext: "+itemModel.getCustomerName());
         dbHelper helper=new dbHelper(this);
 
         //get invoice details and add to the cart

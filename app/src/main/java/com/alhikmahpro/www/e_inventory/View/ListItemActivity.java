@@ -71,11 +71,14 @@ public class ListItemActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         progressDialog = new ProgressDialog(this);
         Intent mIntent = getIntent();
-        action = mIntent.getStringExtra("Action");
-        docNo = mIntent.getIntExtra("DocNo", 0);
-        staffName = mIntent.getStringExtra("User");
+        action = mIntent.getStringExtra("ACTION");
+        Log.d(TAG, "onCreate Action: "+action);
+        docNo=mIntent.getIntExtra("DOC_NO",0);
+        staffName = mIntent.getStringExtra("USER");
+
+        Log.d(TAG, "onCreate: document NO "+docNo+ "user "+staffName);
         helper = new dbHelper(this);
-        Log.d(TAG, "onCreate: ");
+
         getSupportActionBar().setTitle("Document  " + docNo);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);

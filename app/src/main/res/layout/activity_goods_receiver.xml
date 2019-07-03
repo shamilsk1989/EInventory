@@ -339,7 +339,7 @@
 
                             android:background="@drawable/border_line"
                             android:gravity="center|left"
-                            android:inputType="numberDecimal"
+                            android:inputType="numberDecimal|numberSigned"
                             android:padding="5dp"
                             android:text="0"
                             android:textColor="@android:color/black"

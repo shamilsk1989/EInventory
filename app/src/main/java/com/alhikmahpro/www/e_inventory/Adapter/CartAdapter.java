@@ -45,7 +45,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
         ItemModel itemsModel = mList.get(position);
 
         holder.rvBarcode.setText(itemsModel.getBarCode());
-        holder.txtQuantity.setText(String.valueOf(itemsModel.getQty()));
+        holder.txtQuantity.setText(String.valueOf(itemsModel.getQty())+" X "+String.valueOf(itemsModel.getCostPrice()));
         holder.txtUnit.setText(String.valueOf(itemsModel.getSelectedPackage()));
         holder.rvItemName.setText(itemsModel.getProductName());
 

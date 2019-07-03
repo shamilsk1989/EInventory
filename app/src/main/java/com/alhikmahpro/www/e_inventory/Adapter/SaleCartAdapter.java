@@ -37,18 +37,26 @@ public class SaleCartAdapter extends RecyclerView.Adapter<SaleCartAdapter.SalesC
 
     @Override
     public SalesCartViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_row, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.rv_sales_cart_row, parent, false);
         return new SalesCartViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(SalesCartViewHolder holder, int position) {
+    public void onBindViewHolder(SalesCartViewHolder holder, final int position) {
 
         CartModel model = Cart.mCart.get(position);
-        holder.rvBarcode.setText(model.getProductName());
-        holder.rvItemName.setText(String.valueOf(model.getRate()));
-        holder.txtQuantity.setText(String.valueOf(model.getQty()));
-        holder.txtUnit.setText(String.valueOf(model.getNet()));
+        holder.txtItemName.setText(model.getProductName());
+        holder.txtNetAmount.setText(String.valueOf(model.getNet()));
+        holder.txtUnitPrice.setText(String.valueOf(model.getQty()+ " X "+String.valueOf(model.getRate())));
+        holder.imgDel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(mListener!=null){
+                    mListener.onItemClick(position);
+                }
+            }
+        });
+
     }
 
     @Override
@@ -68,33 +76,31 @@ public class SaleCartAdapter extends RecyclerView.Adapter<SaleCartAdapter.SalesC
 //        ImageView rvImgDel;
 //        @BindView(R.id.rv_item_name)
 //        TextView rvItemName;
-        TextView rvBarcode;
-        TextView txtQuantity;
-        TextView txtUnit;
-        ImageView rvImgDel;
-        TextView rvItemName;
+        TextView txtItemName;
+        TextView txtNetAmount;
+        ImageView imgDel;
+        TextView txtUnitPrice;
 
 
         public SalesCartViewHolder(View itemView) {
             super(itemView);
 
-            rvBarcode=itemView.findViewById(R.id.rv_barcode);
-            txtQuantity=itemView.findViewById(R.id.txt_quantity);
-            txtUnit=itemView.findViewById(R.id.txtUnit);
-            rvImgDel=itemView.findViewById(R.id.rv_img_del);
-            rvItemName=itemView.findViewById(R.id.rv_item_name);
+            txtItemName=itemView.findViewById(R.id.rv_item_name);
+            txtNetAmount=itemView.findViewById(R.id.rv_net_amount);
+            imgDel=itemView.findViewById(R.id.rv_img_del);
+            txtUnitPrice=itemView.findViewById(R.id.rv_unit_price);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (mListener != null) {
-                        int position = getAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
-                            mListener.onItemClick(position);
-                        }
-                    }
-                }
-            });
+//            itemView.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    if (mListener != null) {
+//                        int position = getAdapterPosition();
+//                        if (position != RecyclerView.NO_POSITION) {
+//                            mListener.onItemClick(position);
+//                        }
+//                    }
+//                }
+//            });
 
 
         }
