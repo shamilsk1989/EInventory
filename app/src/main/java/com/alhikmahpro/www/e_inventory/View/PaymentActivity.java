@@ -19,7 +19,11 @@ import com.alhikmahpro.www.e_inventory.AppUtils;
 import com.alhikmahpro.www.e_inventory.Data.Cart;
 import com.alhikmahpro.www.e_inventory.Data.CartModel;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
+import com.alhikmahpro.www.e_inventory.Data.GoodsData;
 import com.alhikmahpro.www.e_inventory.Data.ItemModel;
+import com.alhikmahpro.www.e_inventory.Data.SaleData;
+import com.alhikmahpro.www.e_inventory.Data.SaveGoods;
+import com.alhikmahpro.www.e_inventory.Data.SaveSales;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
 import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
@@ -182,7 +186,7 @@ public class PaymentActivity extends AppCompatActivity {
     private void saveGoods(int syncStatus) {
         boolean res = helper.saveGoods(docNo, orderNo, customerCode,customerName, invoiceNo, invoiceDate, salesmanId, base_total, disc, netAmount, paymentMode, mDate, syncStatus);
         if (res) {
-            if (helper.saveGoodsDetails1(invoiceNo, syncStatus)) {
+            if (helper.saveGoodsDetails1(docNo, syncStatus)) {
                 generateGoodsJSON();
             }
         }
@@ -394,14 +398,26 @@ public class PaymentActivity extends AppCompatActivity {
 
     @OnClick(R.id.btn_pay)
     public void onViewClicked() {
-        if (type.equals("GDS"))
-            saveGoods(DataContract.SYNC_STATUS_FAILED);
-        else
-            saveSales(DataContract.SYNC_STATUS_FAILED);
+        if (type.equals("GDS")){
+            // saveGoods(DataContract.SYNC_STATUS_FAILED);
+            GoodsData data=new GoodsData(docNo, orderNo, customerCode,customerName, invoiceNo, invoiceDate, salesmanId, base_total, disc, netAmount, paymentMode, mDate, DataContract.SYNC_STATUS_FAILED);
+            SaveGoods saveGoods=new SaveGoods(this);
+            saveGoods.execute(data);
+        }
+
+        else{
+            //saveSales(DataContract.SYNC_STATUS_FAILED);
+            SaleData saleData=new SaleData(invoiceNo,customerCode,customerName,invoiceDate,salesmanId,base_total,disc,netAmount,paymentMode,mDate,DataContract.SYNC_STATUS_FAILED);
+            SaveSales saveSales=new SaveSales(this);
+            saveSales.execute(saleData);
+        }
 
         gotoNext();
 
     }
+
+
+
 
     public String currencyFormatter(double val) {
         NumberFormat format = NumberFormat.getCurrencyInstance();
