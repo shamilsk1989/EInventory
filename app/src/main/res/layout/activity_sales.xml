@@ -6,6 +6,18 @@
     android:layout_height="match_parent"
     tools:context=".View.SalesActivity">
 
+
+
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:indeterminate="true"
+        android:id="@+id/progressBar"
+        android:layout_gravity="center"
+        android:theme="@style/progressBarTheme" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">

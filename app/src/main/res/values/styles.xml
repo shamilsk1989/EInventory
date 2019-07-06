@@ -50,4 +50,8 @@
         <item name="android:popupBackground">#DFFFFFFF</item>
     </style>
 
+    <style name="progressBarTheme">
+        <item name="colorAccent">@color/colorProgressBar</item>
+    </style>
+
 </resources>

@@ -187,10 +187,7 @@ public class PaymentActivity extends AppCompatActivity {
             }
         }
     }
-
-
     //save sales and sales details into local db
-
     private void saveSales(int syncStatus) {
         boolean res = helper.saveInvoice(invoiceNo, invoiceDate, salesmanId, customerCode, customerName, base_total, disc, netAmount, paymentMode, mDate, syncStatus);
         if (res) {
@@ -247,16 +244,9 @@ public class PaymentActivity extends AppCompatActivity {
                 detailsObject.put(DataContract.InvoiceDetails.COL_RATE, cartModel.getRate());
                 detailsObject.put(DataContract.InvoiceDetails.COL_DISCOUNT, cartModel.getDiscount());
                 detailsObject.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, cartModel.getNet());
-
-
-
                 detailsObject.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, cartModel.getNet());
                 detailsObject.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, cartModel.getNet());
                 detailsObject.put(DataContract.InvoiceDetails.COL_SALE_TYPE, cartModel.getSaleType());
-
-
-
-
                 invoiceDetailsArray.put(detailsObject);
             } catch (JSONException e) {
                 e.printStackTrace();

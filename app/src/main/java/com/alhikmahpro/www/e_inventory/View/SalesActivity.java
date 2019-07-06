@@ -1,13 +1,11 @@
 package com.alhikmahpro.www.e_inventory.View;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -27,6 +25,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -52,7 +51,6 @@ import org.json.JSONObject;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -112,9 +110,9 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     RadioButton radioButton;
     private static final String TAG = "SalesActivity";
     private static final int CAMERA_PERMISSION_CODE = 101;
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
     private String customerName, salesmanId, customerCode;
-    ProgressDialog progressDialog;
-    private ConnectivityManager connectivityManager;
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
 
@@ -222,9 +220,9 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
             saleValue = -1;
         else if (saleType.equals("Free"))
             saleValue = 0;
-        quantity=ParseDouble(editTextQuantity.getText().toString());
-        discount=ParseDouble(editTextDiscount.getText().toString());
-        rate=ParseDouble(editTextRate.getText().toString());
+        quantity = ParseDouble(editTextQuantity.getText().toString());
+        discount = ParseDouble(editTextDiscount.getText().toString());
+        rate = ParseDouble(editTextRate.getText().toString());
         Log.d(TAG, "calculateNetValue: " + quantity + "rate :" + rate + "discount :" + discount);
 
         net = (quantity * rate) - (quantity * discount);
@@ -256,7 +254,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         mVolleyListener = new volleyListener() {
             @Override
             public void notifySuccess(String requestType, JSONObject response) {
-                progressDialog.cancel();
+                hideProgressBar();
                 if (response.length() > 0) {
                     editTextQuantity.setFocusableInTouchMode(true);
                     editTextQuantity.requestFocus();
@@ -267,11 +265,19 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
             @Override
             public void notifyError(String requestType, VolleyError error) {
-                progressDialog.cancel();
+                hideProgressBar();
                 showAlert("Network Error");
 
             }
         };
+    }
+
+    private void showProgressBar() {
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressBar() {
+        progressBar.setVisibility(View.INVISIBLE);
     }
 
 
@@ -457,7 +463,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
                 e.printStackTrace();
             }
 
-            progressDialog = AppUtils.showProgressDialog(this, "Loading....");
+            showProgressBar();
             serviceGateway = new VolleyServiceGateway(mVolleyListener, this);
             serviceGateway.postDataVolley("POSTCALL", "PriceChecker/check_price.php", postParam);
         }
@@ -552,6 +558,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
     @Override
     public void onBackPressed() {
+        hideProgressBar();
         if (Cart.mCart.size() > 0) {
             new android.app.AlertDialog.Builder(SalesActivity.this)
                     .setTitle("Warning")
@@ -765,4 +772,11 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     public void onComplete(String code) {
         editTextBarcode.setText(code);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        hideProgressBar();
+    }
+
 }

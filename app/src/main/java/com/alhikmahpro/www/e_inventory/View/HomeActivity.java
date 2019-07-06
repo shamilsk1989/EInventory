@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -27,6 +29,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -58,6 +61,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private String scanData = "", user;
     Menu navMenu;
     MenuItem admin, inventory, goods, sale;
+    ImageView imgLogo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +77,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         View headerView = navigationView.getHeaderView(0);
         navShopName = (TextView) headerView.findViewById(R.id.textShop);
         navUser = (TextView) headerView.findViewById(R.id.textUser);
+        imgLogo= (ImageView) headerView.findViewById(R.id.logo_img);
         navigationView.setNavigationItemSelectedListener(this);
 
         fragmentManager = getSupportFragmentManager();
@@ -97,38 +102,38 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             fragmentTransaction.replace(R.id.fragment_container, homeFragment, null);
             fragmentTransaction.commit();
         }
-        initView();
+        //initView();
         //hideMenu();
     }
 
-    private void hideMenu() {
-        Log.d("menu", "hideMenu: ");
-        //hide sales menu
-        //sale.setVisible(false);
-        if (user.equals("User")) {
-            admin.setVisible(false);
-        }
-
-        if (!SessionHandler.getInstance(this).isSetInventory()) {
-            Log.d("menu", "Inventory false");
-            inventory.setVisible(false);
-        }else {
-            inventory.setVisible(true);
-        }
-        if (!SessionHandler.getInstance(this).isSetGoodsReceive()) {
-            Log.d("menu", "goods false");
-            goods.setVisible(false);
-        }else{
-            goods.setVisible(true);
-        }
-        if (!SessionHandler.getInstance(this).isSetSale()) {
-            Log.d("menu", "sales false");
-            sale.setVisible(false);
-        }else {
-            sale.setVisible(true);
-        }
-
-    }
+//    private void hideMenu() {
+//        Log.d("menu", "hideMenu: ");
+//        //hide sales menu
+//        //sale.setVisible(false);
+//        if (user.equals("User")) {
+//            admin.setVisible(false);
+//        }
+//
+//        if (!SessionHandler.getInstance(this).isSetInventory()) {
+//            Log.d("menu", "Inventory false");
+//            inventory.setVisible(false);
+//        }else {
+//            inventory.setVisible(true);
+//        }
+//        if (!SessionHandler.getInstance(this).isSetGoodsReceive()) {
+//            Log.d("menu", "goods false");
+//            goods.setVisible(false);
+//        }else{
+//            goods.setVisible(true);
+//        }
+//        if (!SessionHandler.getInstance(this).isSetSale()) {
+//            Log.d("menu", "sales false");
+//            sale.setVisible(false);
+//        }else {
+//            sale.setVisible(true);
+//        }
+//
+//    }
 
 
     private void initView() {
@@ -138,6 +143,39 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         Cursor cursor = helper.getSettings(database);
         if (cursor.moveToFirst()) {
             navShopName.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME)));
+
+            int is_inv=cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_INV));
+            int is_gds=cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_GDS));
+            int is_sale=cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_SALE));
+            byte[] img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO));
+            Log.d(TAG, "inventory: "+is_inv);
+            Log.d(TAG, "goods: "+is_gds);
+            Log.d(TAG, "sales: "+is_sale);
+
+            if(is_inv==DataContract.INV_ON)
+                inventory.setVisible(true);
+
+            else
+                inventory.setVisible(false);
+
+            if(is_gds==DataContract.GDS_ON)
+                goods.setVisible(true);
+            else
+                goods.setVisible(false);
+
+            if(is_sale==DataContract.SALE_ON)
+                sale.setVisible(true);
+            else
+                sale.setVisible(false);
+
+            Log.d(TAG, "Logo" + img.toString());
+
+            try {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(img, 0, img.length);
+                imgLogo.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 60, 60, false));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         user = SessionHandler.getInstance(HomeActivity.this).getUser();
         navUser.setText(user);
@@ -410,6 +448,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume: ");
-        hideMenu();
+        initView();
     }
 }

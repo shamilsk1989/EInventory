@@ -153,15 +153,15 @@ public class SetupFragment extends Fragment {
         String device = txtDeviceId.getText().toString();
         String ip = txtHost.getText().toString();
 
-        if (validate(c_code, ip)) {
-
-            helper.saveSettings(c_code, c_name, b_code,l_code,p_code,device);
-            SessionHandler.getInstance(getContext()).setHost(ip);
-            Toast.makeText(getContext(), "Saved", Toast.LENGTH_SHORT).show();
-            fragmentActionListener.onBackInterface();
-
-
-        }
+//        if (validate(c_code, ip)) {
+//
+//            helper.saveSettings(c_code, c_name, b_code,l_code,p_code,device);
+//            SessionHandler.getInstance(getContext()).setHost(ip);
+//            Toast.makeText(getContext(), "Saved", Toast.LENGTH_SHORT).show();
+//            fragmentActionListener.onBackInterface();
+//
+//
+//        }
 
 
     }

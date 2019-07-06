@@ -2,14 +2,10 @@ package com.alhikmahpro.www.e_inventory.View;
 
 import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -24,37 +20,24 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.AppUtils;
-import com.alhikmahpro.www.e_inventory.Data.DataContract;
-import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
 import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
 import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
-import com.alhikmahpro.www.e_inventory.Network.VolleySingleton;
-import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.R;
-import com.android.volley.AuthFailureError;
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.CaptureActivity;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -84,15 +67,17 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
 
     private static final int CAMERA_PERMISSION_CODE = 100;
     private static final String TAG = "CheckCustomerActivity";
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
     private ConnectivityManager connectivityManager;
-    ProgressDialog progressDialog;
     String companyCode, companyName, deviceId, locationCode, branchCode, periodCode;
-    String customerCode,customerName,lastInvoiceNo,lastReceiptNo,balanceAmount;
+    String customerCode, customerName, lastInvoiceNo, lastReceiptNo, balanceAmount;
 
     String BASE_URL = "";
 
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,7 +103,7 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                if(editTextBarcode.getText().toString().contains("\n")||(editTextBarcode.getText().toString().contains("\r"))){
+                if (editTextBarcode.getText().toString().contains("\n") || (editTextBarcode.getText().toString().contains("\r"))) {
                     Log.d(TAG, "onTextChanged:  enter key pressed");
                     getDataFromVolley();
 
@@ -137,12 +122,11 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
 
     private void initVolleyCallBack() {
 
-        mVolleyListener=new volleyListener() {
+        mVolleyListener = new volleyListener() {
             @Override
             public void notifySuccess(String requestType, JSONObject response) {
-                progressDialog.dismiss();
+                hideProgressBar();
                 if (response.length() > 0) {
-
                     try {
                         customerCode = response.getString("CustomerCode");
                         customerName = response.getString("CustomerName");
@@ -167,7 +151,7 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
 
             @Override
             public void notifyError(String requestType, VolleyError error) {
-                progressDialog.cancel();
+                hideProgressBar();
                 showAlert("Network error");
 
             }
@@ -177,8 +161,8 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
 
     void getDataFromVolley() {
         String code = editTextBarcode.getText().toString();
-        Log.d(TAG, "old code: "+code+"f");
-        code=code.replace("\n", "").replace("\r", "");
+        Log.d(TAG, "old code: " + code + "f");
+        code = code.replace("\n", "").replace("\r", "");
         if (validate(code)) {
             Log.d(TAG, "getDataFromVolley: ");
             View view = this.getCurrentFocus();
@@ -190,13 +174,14 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            progressDialog = AppUtils.showProgressDialog(this, "Loading....");
+            showProgressBar();
             serviceGateway = new VolleyServiceGateway(mVolleyListener, this);
             serviceGateway.postDataVolley("POSTCALL", "PriceChecker/check_cust.php", postParam);
 
         }
 
     }
+
     private void showAlert(String Message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Error Message");
@@ -284,14 +269,13 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
     }
 
 
-
-
     @OnClick(R.id.imgSearch)
     public void onImgSearchClicked() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         ListCustomerFragment listCustomerFragment = new ListCustomerFragment();
         listCustomerFragment.show(fragmentManager, "Customer");
     }
+
     @OnClick(R.id.imgSubmit)
     public void onImgSubmitClicked() {
 
@@ -304,15 +288,13 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
     public void onBtnNextClicked() {
         if (TextUtils.isEmpty(textViewCustomerName.getText().toString())) {
             textViewCustomerName.setError("Invalid customer");
-        }
-        else{
+        } else {
             clearView();
-            Intent intent_sale=new Intent(CheckCustomerActivity.this,SalesActivity.class);
-            intent_sale.putExtra("Customer",customerName);
-            intent_sale.putExtra("CustomerCode",customerCode);
+            Intent intent_sale = new Intent(CheckCustomerActivity.this, SalesActivity.class);
+            intent_sale.putExtra("Customer", customerName);
+            intent_sale.putExtra("CustomerCode", customerCode);
             startActivity(intent_sale);
         }
-
 
 
     }
@@ -355,5 +337,24 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
     @Override
     public void onComplete(String code) {
         editTextBarcode.setText(code);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        hideProgressBar();
+    }
+    private void showProgressBar() {
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressBar() {
+        progressBar.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        hideProgressBar();
     }
 }

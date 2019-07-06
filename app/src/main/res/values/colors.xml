@@ -5,4 +5,5 @@
     <color name="colorAccent">#FF4081</color>
     <color name="user_input_text">#333333</color>
     <color name="colorWhite">#ffffff</color>
+    <color name="colorProgressBar">#9C27B0</color>
 </resources>

@@ -22,7 +22,11 @@ public class dbHelper extends SQLiteOpenHelper {
             DataContract.Settings.COL_BRANCH_CODE + " TEXT," +
             DataContract.Settings.COL_LOCATION_CODE + " TEXT," +
             DataContract.Settings.COL_PERIOD_CODE + " TEXT," +
-            DataContract.Settings.COL_DEVICE_ID + " TEXT " + ");";
+            DataContract.Settings.COL_LOGO + " BLOB, " +
+            DataContract.Settings.COL_IS_SALE + " INTEGER DEFAULT 0, " +
+            DataContract.Settings.COL_IS_GDS + " INTEGER DEFAULT 0, " +
+            DataContract.Settings.COL_IS_INV + " INTEGER DEFAULT 0, " +
+            DataContract.Settings.COL_DEVICE_ID + " INTEGER DEFAULT 0 " + ");";
 
     private final String SQL_CREATE_LOGIN_TABLE = "CREATE TABLE IF NOT EXISTS " + DataContract.Login.TABLE_NAME + " (" +
             DataContract.Login.COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -175,7 +179,8 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
     //insertion********************
-    public boolean saveSettings(String CCode, String CCName, String BCode, String LCode, String PCode, String deviceId) {
+    public boolean saveSettings(String CCode, String CCName, String BCode, String LCode, String PCode, String deviceId,
+    byte[]logo,int saleStat,int invStat,int gdsStat) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -187,6 +192,10 @@ public class dbHelper extends SQLiteOpenHelper {
             contentValues.put(DataContract.Settings.COL_LOCATION_CODE, LCode);
             contentValues.put(DataContract.Settings.COL_PERIOD_CODE, PCode);
             contentValues.put(DataContract.Settings.COL_DEVICE_ID, deviceId);
+            contentValues.put(DataContract.Settings.COL_LOGO, logo);
+            contentValues.put(DataContract.Settings.COL_IS_SALE, saleStat);
+            contentValues.put(DataContract.Settings.COL_IS_INV, invStat);
+            contentValues.put(DataContract.Settings.COL_IS_GDS, gdsStat);
             database.insert(DataContract.Settings.TABLE_NAME, null, contentValues);
             database.close();
             Log.d(TAG, "one row inserted in Settings table ......... ");
@@ -426,7 +435,50 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
 
-    //************************insertion end
+    /************************insertion end*******************************************************/
+
+    /************************update query ******************************************************/
+    public boolean updateSettings(int _id,String CCode, String CCName, String BCode, String LCode, String PCode, String deviceId,
+                                byte[]logo,int saleStat,int invStat,int gdsStat) {
+
+        SQLiteDatabase database = getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        String selection = DataContract.Settings.COL_ID + " = " + _id;
+        try {
+
+            contentValues.put(DataContract.Settings.COL_COMPANY_CODE, CCode);
+            contentValues.put(DataContract.Settings.COL_COMPANY_NAME, CCName);
+            contentValues.put(DataContract.Settings.COL_BRANCH_CODE, BCode);
+            contentValues.put(DataContract.Settings.COL_LOCATION_CODE, LCode);
+            contentValues.put(DataContract.Settings.COL_PERIOD_CODE, PCode);
+            contentValues.put(DataContract.Settings.COL_DEVICE_ID, deviceId);
+            contentValues.put(DataContract.Settings.COL_LOGO, logo);
+            contentValues.put(DataContract.Settings.COL_IS_SALE, saleStat);
+            contentValues.put(DataContract.Settings.COL_IS_INV, invStat);
+            contentValues.put(DataContract.Settings.COL_IS_GDS, gdsStat);
+            database.update(DataContract.Settings.TABLE_NAME,contentValues,selection,null);
+            database.close();
+            Log.d(TAG, " updated Settings table ......... ");
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+
+
+    }
+
+    public void updateStocks(int doc_no, double amount) {
+
+        SQLiteDatabase database = getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DataContract.Stocks.COL_TOTAL, amount);
+        String selection = DataContract.Stocks.COL_DOCUMENT_NUMBER + " = " + doc_no;
+        database.update(DataContract.Stocks.TABLE_NAME, contentValues, selection, null);
+
+    }
+
+/************************************update end********************************/
+
 
     //********selection query
 
@@ -449,9 +501,16 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
     public Cursor getSettings(SQLiteDatabase sqLiteDatabase) {
-        String[] projections = {DataContract.Settings.COL_COMPANY_CODE, DataContract.Settings.COL_COMPANY_NAME,
+        String[] projections = {
+                DataContract.Settings.COL_ID, DataContract.Settings.COL_ID,
+                DataContract.Settings.COL_COMPANY_CODE, DataContract.Settings.COL_COMPANY_NAME,
                 DataContract.Settings.COL_BRANCH_CODE, DataContract.Settings.COL_LOCATION_CODE,
-                DataContract.Settings.COL_PERIOD_CODE, DataContract.Settings.COL_DEVICE_ID,};
+                DataContract.Settings.COL_PERIOD_CODE, DataContract.Settings.COL_DEVICE_ID,
+                DataContract.Settings.COL_PERIOD_CODE, DataContract.Settings.COL_LOGO,
+                DataContract.Settings.COL_PERIOD_CODE, DataContract.Settings.COL_IS_SALE,
+                DataContract.Settings.COL_PERIOD_CODE, DataContract.Settings.COL_IS_GDS,
+                DataContract.Settings.COL_PERIOD_CODE, DataContract.Settings.COL_IS_INV,
+        };
         Cursor cursor = sqLiteDatabase.query(DataContract.Settings.TABLE_NAME, projections, null,
                 null, null, null, DataContract.Settings.COL_ID + " DESC ", "1 ");
 
@@ -543,15 +602,10 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
 
-    public void updateStocks(int doc_no, double amount) {
 
-        SQLiteDatabase database = getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DataContract.Stocks.COL_TOTAL, amount);
-        String selection = DataContract.Stocks.COL_DOCUMENT_NUMBER + " = " + doc_no;
-        database.update(DataContract.Stocks.TABLE_NAME, contentValues, selection, null);
 
-    }
+
+
 
 
     public Cursor getGoodsDetailsByDoc(SQLiteDatabase database, int doc_no) {

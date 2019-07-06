@@ -6,6 +6,12 @@ public class DataContract {
 
     public static final int SYNC_STATUS_OK=1;
     public static final int SYNC_STATUS_FAILED=0;
+    public static final int SALE_ON=1;
+    public static final int SALE_OFF=0;
+    public static final int INV_ON=1;
+    public static final int INV_OFF=0;
+    public static final int GDS_ON=1;
+    public static final int GDS_OFF=0;
 
 
 
@@ -19,6 +25,12 @@ public class DataContract {
         public static final String COL_BRANCH_CODE="branch_code";
         public static final String COL_LOCATION_CODE="location_code";
         public static final String COL_PERIOD_CODE="period_code";
+        public static final String COL_LOGO="logo";
+        public static final String COL_IS_SALE="is_sale";
+        public static final String COL_IS_INV="is_inv";
+        public static final String COL_IS_GDS="is_gds";
+
+
 
 
 
