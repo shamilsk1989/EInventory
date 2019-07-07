@@ -1,5 +1,6 @@
 package com.alhikmahpro.www.e_inventory.View;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import com.alhikmahpro.www.e_inventory.Adapter.SaleCartAdapter;
 import com.alhikmahpro.www.e_inventory.Data.Cart;
 import com.alhikmahpro.www.e_inventory.Data.CartModel;
+import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.R;
 
 import java.text.DecimalFormat;
@@ -36,7 +38,7 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
     @BindView(R.id.txtTotal)
     TextView txtTotal;
     double total;
-    String customerName,invoiceNo,salesmanId,customerCode,invoiceDate;
+    String customerName, invoiceNo, salesmanId, customerCode, invoiceDate, Action;
     private static final String TAG = "ViewCartActivity";
 
     @Override
@@ -47,14 +49,15 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setTitle("Cart ");
-        Intent intent=getIntent();
-        customerName=intent.getStringExtra("CUS_NAME");
-        customerCode=intent.getStringExtra("CUS_CODE");
-        salesmanId=intent.getStringExtra("SALESMAN_ID");
-        invoiceNo=intent.getStringExtra("DOC_NO");
-        invoiceDate=intent.getStringExtra("DOC_DATE");
-        Log.d(TAG, "onCreate: invoice no: "+invoiceNo);
-
+        Intent intent = getIntent();
+        Action = intent.getStringExtra("ACTION");
+        customerName = intent.getStringExtra("CUS_NAME");
+        customerCode = intent.getStringExtra("CUS_CODE");
+        salesmanId = intent.getStringExtra("SALESMAN_ID");
+        invoiceNo = intent.getStringExtra("DOC_NO");
+        invoiceDate = intent.getStringExtra("DOC_DATE");
+        Log.d(TAG, "onCreate: invoice no: " + invoiceNo);
+        dbHelper helper = new dbHelper(this);
         loadRecyclerView();
         calculate();
     }
@@ -63,14 +66,13 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
         layoutManager = new LinearLayoutManager(this);
         itemListRv.setLayoutManager(layoutManager);
         itemListRv.setHasFixedSize(true);
-        saleCartAdapter = new SaleCartAdapter(ViewCartActivity.this);
-
-        if(Cart.mCart.size()>0){
+        if (Cart.mCart.size() > 0) {
+            saleCartAdapter = new SaleCartAdapter(ViewCartActivity.this);
             itemListRv.setAdapter(saleCartAdapter);
             saleCartAdapter.setOnItemClickListener(ViewCartActivity.this);
             txtEmpty.setVisibility(View.GONE);
 
-        }else {
+        } else {
             txtTotal.setVisibility(View.GONE);
         }
 
@@ -80,15 +82,16 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
     @OnClick(R.id.btnNext)
     public void onViewClicked() {
 
-        Intent intent_payment = new Intent(ViewCartActivity.this, PaymentActivity.class);
-        intent_payment.putExtra("TYPE","SAL");
+        Intent intent_payment = new Intent(ViewCartActivity.this,PaymentActivity.class);
+        intent_payment.putExtra("ACTION", Action );
+        intent_payment.putExtra("TYPE", "SAL");
         intent_payment.putExtra("CUS_NAME", customerName);
         intent_payment.putExtra("CUS_CODE", customerCode);
         intent_payment.putExtra("SALESMAN_ID", salesmanId);
         intent_payment.putExtra("INV_NO", invoiceNo);
         intent_payment.putExtra("INV_DATE", invoiceDate);
         intent_payment.putExtra("TOTAL_ROW", Cart.mCart.size());
-        intent_payment.putExtra("TOTAL",total);
+        intent_payment.putExtra("TOTAL", total);
         startActivity(intent_payment);
     }
 
@@ -134,12 +137,12 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
 
     }
 
-    public String currencyFormatter(double val){
+    public String currencyFormatter(double val) {
 
-        NumberFormat format=NumberFormat.getCurrencyInstance();
-        String pattern=((DecimalFormat) format).toPattern();
-        String newPattern=pattern.replace("\u00A4","").trim();
-        NumberFormat newFormat=new DecimalFormat(newPattern);
+        NumberFormat format = NumberFormat.getCurrencyInstance();
+        String pattern = ((DecimalFormat) format).toPattern();
+        String newPattern = pattern.replace("\u00A4", "").trim();
+        NumberFormat newFormat = new DecimalFormat(newPattern);
         return String.valueOf(newFormat.format(val));
 
     }

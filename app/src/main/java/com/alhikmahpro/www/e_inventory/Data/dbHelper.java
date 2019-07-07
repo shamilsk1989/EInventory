@@ -571,9 +571,9 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
 
-    public boolean deleteGoodsDetailsById(int _id) {
+    public boolean deleteGoodsById(int _id) {
         SQLiteDatabase database = getReadableDatabase();
-        return database.delete(DataContract.GoodsReceiveDetails.TABLE_NAME, DataContract.GoodsReceiveDetails.COL_ID + "= ?", new String[]{String.valueOf(_id)}) > 0;
+        return database.delete(DataContract.GoodsReceive.TABLE_NAME, DataContract.GoodsReceive.COL_ID + "= ?", new String[]{String.valueOf(_id)}) > 0;
     }
 
     public void updateGoodsSync(int doc) {
@@ -835,6 +835,10 @@ public class dbHelper extends SQLiteOpenHelper {
 
     }
 
+    public boolean deleteInvoiceById(String invoice_no) {
+        SQLiteDatabase database = getReadableDatabase();
+        return database.delete(DataContract.Invoice.TABLE_NAME, DataContract.Invoice.COL_INVOICE_NUMBER + "= ?", new String[]{invoice_no}) > 0;
+    }
 
 
 

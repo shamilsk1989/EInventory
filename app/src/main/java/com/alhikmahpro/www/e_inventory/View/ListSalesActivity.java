@@ -60,8 +60,16 @@ public class ListSalesActivity extends AppCompatActivity {
         if(list.size()>0){
             list.clear();
         }
+        layoutManager = new LinearLayoutManager(this);
+        docListRv.setLayoutManager(layoutManager);
+        docListRv.setItemAnimator(new DefaultItemAnimator());
+        docListRv.setHasFixedSize(true);
         dbHelper helper = new dbHelper(ListSalesActivity.this);
         SQLiteDatabase database = helper.getReadableDatabase();
+
+
+        //select all invoice from invoice table
+
         Cursor cursor = helper.getInvoice(database);
         if (cursor.moveToFirst()) {
 
@@ -70,6 +78,7 @@ public class ListSalesActivity extends AppCompatActivity {
                 ItemModel model = new ItemModel();
                 model.setInvoiceNo(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_INVOICE_NUMBER)));
                 model.setDate(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_INVOICE_DATE)));
+                Log.d(TAG, "populateRecycler: Date "+cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_INVOICE_DATE)));
                 model.setStaffName(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_SALESMAN_ID)));
                 model.setCustomerCode(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_CUSTOMER_CODE)));
                 model.setCustomerName(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_CUSTOMER_NAME)));
@@ -80,48 +89,50 @@ public class ListSalesActivity extends AppCompatActivity {
                 model.setIs_sync(cursor.getInt(cursor.getColumnIndex(DataContract.Invoice.COL_IS_SYNC)));
                 list.add(model);
             } while (cursor.moveToNext());
+
+            adapter = new SalesListAdapter(this, list, new OnAdapterClickListener() {
+                @Override
+                public void OnItemClicked(int position) {
+                    goToNext(position);
+                }
+
+                @Override
+                public void OnDeleteClicked(int position) {
+
+                }
+            });
+
+            docListRv.setAdapter(adapter);
+            ViewCompat.setNestedScrollingEnabled(docListRv, false);
         } else {
             txtEmpty.setVisibility(View.VISIBLE);
         }
         cursor.close();
         database.close();
-
-
-        layoutManager = new LinearLayoutManager(this);
-        docListRv.setLayoutManager(layoutManager);
-        docListRv.setItemAnimator(new DefaultItemAnimator());
-        docListRv.setHasFixedSize(true);
-        adapter = new SalesListAdapter(this, list, new OnAdapterClickListener() {
-            @Override
-            public void OnItemClicked(int position) {
-
-                goToNext(position);
-
-            }
-
-            @Override
-            public void OnDeleteClicked(int position) {
-
-            }
-        });
-
-        docListRv.setAdapter(adapter);
-        ViewCompat.setNestedScrollingEnabled(docListRv, false);
     }
 
     private void goToNext(int position) {
+        Cart.mCart.clear();
         ItemModel itemModel=list.get(position);
         String invoiceNo=itemModel.getInvoiceNo();
+
         Log.d(TAG, "goToNext: "+itemModel.getCustomerName());
         dbHelper helper=new dbHelper(this);
 
         //get invoice details and add to the cart
         helper.getInvoiceDetailsById(invoiceNo);
-
         Log.d(TAG, "goToNext:cart size "+Cart.mCart.size());
+        Intent intent;
 
-        Intent intent = new Intent(ListSalesActivity.this,PrintViewActivity.class);
-        intent.putExtra("TYPE","edit");
+        // syc successfully then goto PrintViewActivity
+        if(itemModel.getIs_sync()==DataContract.SYNC_STATUS_OK){
+             intent=new Intent(ListSalesActivity.this,PrintViewActivity.class);
+        }else {
+            intent = new Intent(ListSalesActivity.this,ViewCartActivity.class);
+        }
+
+        intent.putExtra("ACTION","NEW");
+        intent.putExtra("TYPE","EDIT");
         intent.putExtra("CUS_NAME", itemModel.getCustomerName());
         intent.putExtra("CUS_CODE", itemModel.getCustomerCode());
         intent.putExtra("DISCOUNT", itemModel.getDiscount());
@@ -138,6 +149,7 @@ public class ListSalesActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         populateRecycler();
+
     }
 
     @Override

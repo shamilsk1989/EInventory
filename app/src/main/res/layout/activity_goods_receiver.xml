@@ -22,18 +22,18 @@
                 android:orientation="horizontal"
                 android:weightSum="4">
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Date : "
-                    android:textColor="@android:color/black" />
+                <!--<TextView-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:text="Date : "-->
+                    <!--android:textColor="@android:color/black" />-->
 
                 <TextView
                     android:id="@+id/txtDate"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_weight="2"
                     android:textColor="@android:color/black"
                     android:textSize="15sp" />
 
@@ -42,7 +42,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/txtDate"
                     android:layout_weight="1"
-                    android:text="Document No# "
+                    android:text="Doc No# "
                     android:textColor="@android:color/black"
                     android:textSize="15sp" />
 
@@ -106,14 +106,15 @@
                 android:layout_below="@+id/txtSupplierName"
                 android:layout_marginTop="10dp"
                 android:orientation="horizontal"
-                android:weightSum="3">
+                android:weightSum="4">
 
                 <TextView
 
                     android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="0.5"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="Invoice No#:"
+                    android:gravity="center"
                     android:textColor="@android:color/black" />
 
                 <TextView
@@ -128,10 +129,10 @@
                 <TextView
 
                     android:layout_width="0dp"
-                    android:layout_height="40dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
-                    android:layout_weight="0.5"
-                    android:text="Invoice Date"
+                    android:layout_weight=".5"
+                    android:text=" Date"
                     android:textColor="@android:color/black"
                     android:textSize="15sp" />
 
@@ -139,7 +140,7 @@
                     android:id="@+id/txtInvoiceDate"
                     android:layout_width="0dp"
                     android:layout_height="40dp"
-                    android:layout_weight="1"
+                    android:layout_weight="1.5"
                     android:background="@drawable/border_line"
                     android:textColor="@android:color/black"
                     android:textSize="15sp" />

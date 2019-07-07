@@ -230,6 +230,7 @@ public class GoodsItemListActivity extends AppCompatActivity {
 
         Log.d(TAG, "onViewClicked: " + "doc :" + docNo + "suppl :" + supplierName);
         Intent intent_payment = new Intent(GoodsItemListActivity.this, PaymentActivity.class);
+        intent_payment.putExtra("ACTION", "NEW");
         intent_payment.putExtra("TYPE", "GDS");
         intent_payment.putExtra("CUS_NAME", supplierName);
         intent_payment.putExtra("CUS_CODE", supplierCode);

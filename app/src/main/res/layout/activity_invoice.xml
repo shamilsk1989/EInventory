@@ -11,155 +11,103 @@
 
 
     <LinearLayout
-        android:id="@+id/content_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:orientation="horizontal"
-        android:weightSum="3">
+        android:padding="10dp"
+        android:id="@+id/content_layout"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="User Name" />
+
+        <EditText
+            android:id="@+id/editTextUser"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="15" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Supplier Code" />
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:gravity="center|left"
-                android:text="User"
-                android:textColor="@android:color/black"
-                android:textSize="18sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="20dp"
-                android:gravity="center|left"
-                android:text="Supplier Code"
-                android:textColor="@android:color/black"
-                android:textSize="18sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="20dp"
-                android:gravity="center|left"
-                android:text="Invoice No"
-                android:textColor="@android:color/black"
-                android:textSize="18sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="20dp"
-                android:gravity="center|left"
-                android:text="Invoice Date"
-                android:textColor="@android:color/black"
-                android:textSize="18sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="20dp"
-                android:gravity="center|left"
-                android:text="Order No"
-                android:textColor="@android:color/black"
-                android:textSize="18sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="15dp"
-            android:layout_weight="2"
-            android:orientation="vertical">
-
-
+            android:orientation="horizontal">
             <EditText
-                android:id="@+id/editTextUser"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:gravity="center|left"
-                android:inputType="text"
-                android:padding="5dp"
-                android:textColor="@android:color/black"
-                android:textSize="18sp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
+                android:id="@+id/editTextSupplierCode"
+                android:layout_weight="1"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="2"
-                >
-                <EditText
-
-                    android:id="@+id/editTextSupplierCode"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_weight="1.5"
-                    android:hint="Search"
-                    android:gravity="center|left"
-                    android:inputType="text"
-                    android:padding="10dp"
-                    android:textColor="@android:color/black"
-                    android:textSize="18sp" />
-
-                <ImageView
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight=".5"
-                    android:layout_marginTop="20dp"
-                    android:src="@drawable/ic_search_1"
-                    android:id="@+id/imgSearch"
-                    />
-
-
-            </LinearLayout>
-
-
-
-
-            <EditText
-
-                android:id="@+id/editTextInvoiceNo"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="20dp"
-                android:gravity="center|left"
-                android:inputType="text"
-                android:padding="5dp"
-                android:textColor="@android:color/black"
-                android:textSize="18sp" />
-
-            <TextView
-
-                android:id="@+id/txtInvoiceDate"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="20dp"
-                android:gravity="center|left"
-                android:inputType="text"
-                android:padding="5dp"
-                android:textColor="@android:color/black"
-                android:textSize="18sp" />
-
-
-            <EditText
-
-                android:id="@+id/editTextOrderNo"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="20dp"
-                android:gravity="center|left"
-                android:inputType="text"
-                android:padding="5dp"
-                android:textColor="@android:color/black"
-                android:textSize="18sp" />
-
+                android:singleLine="true"
+                android:paddingRight="60dp"
+                />
+            <ImageButton
+                android:id="@+id/imgSearch"
+                android:layout_marginLeft="-60dp"
+                style="?android:buttonBarButtonStyle"
+                android:paddingBottom="5dp"
+                android:src="@drawable/ic_search_1"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp" />
         </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Invoice Number" />
+
+        <EditText
+            android:id="@+id/editTextInvoiceNo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="15"
+            android:inputType="text" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Invoice Date" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <EditText
+                android:id="@+id/txtInvoiceDate"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:paddingRight="60dp"
+                />
+
+            <ImageButton
+                android:id="@+id/imgCalender"
+                style="?android:buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginLeft="-60dp"
+                android:paddingBottom="5dp"
+                android:src="@drawable/ic_calander" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Order Number" />
+
+        <EditText
+            android:id="@+id/editTextOrderNo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="15"
+            android:inputType="text" />
+
+
 
     </LinearLayout>
 
@@ -170,6 +118,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/content_layout"
         android:layout_marginTop="20dp"
+
         android:background="@android:color/holo_green_dark"
         android:text="check"
         android:textColor="@android:color/white" />

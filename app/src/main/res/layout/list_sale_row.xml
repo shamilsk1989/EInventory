@@ -33,28 +33,28 @@
             android:layout_width="0dp"
             android:layout_height="20dp"
             android:layout_weight="1"
-
             android:textColor="@android:color/black" />
-        <!--<ImageView-->
-            <!--android:id="@+id/rv_img_print"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="20dp"-->
-            <!--android:layout_weight=".25"-->
-            <!--android:src="@drawable/ic_printer"-->
-            <!--android:gravity="right" />-->
+
+        <ImageView
+            android:id="@+id/rv_img_sync_ok"
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:layout_weight=".5"
+            android:src="@drawable/ic_sync_ok"
+            android:gravity="right" />
 
         <!--<ImageView-->
-            <!--android:id="@+id/rv_img_download"-->
+            <!--android:id="@+id/rv_img_sync_failed"-->
             <!--android:layout_width="0dp"-->
             <!--android:layout_height="20dp"-->
             <!--android:layout_weight=".25"-->
-            <!--android:src="@drawable/ic_download"-->
+            <!--android:src="@drawable/ic_sync_error"-->
             <!--android:gravity="right" />-->
         <ImageView
             android:id="@+id/rv_img_edit"
             android:layout_width="0dp"
             android:layout_height="20dp"
-            android:layout_weight=".25"
+            android:layout_weight=".5"
             android:src="@drawable/ic_edit"
             android:gravity="right"
 

@@ -54,12 +54,6 @@ public class VolleyServiceGateway {
     public void postDataVolley(final String requestType, String url, JSONObject postObj){
 
         ShowProgressDialog();
-        if(!AppUtils.isNetworkAvailable(mContext)){
-            HideProgressDialog();
-            Toast.makeText(mContext, "No Internet ", Toast.LENGTH_SHORT).show();
-            return;
-
-        }
 
         String BASE_URL = SessionHandler.getInstance(mContext).getHost();
         BASE_URL=BASE_URL.trim();
@@ -109,12 +103,6 @@ public class VolleyServiceGateway {
 
     public void getDataVolley(final String requestType, String url){
         ShowProgressDialog();
-        if(!AppUtils.isNetworkAvailable(mContext)){
-            HideProgressDialog();
-            Toast.makeText(mContext, "No Internet ", Toast.LENGTH_SHORT).show();
-            return;
-
-        }
 
         String BASE_URL = SessionHandler.getInstance(mContext).getHost();
         BASE_URL=BASE_URL.trim();

@@ -72,7 +72,10 @@ public class InvoiceActivity extends AppCompatActivity implements ListSupplierFr
     Button btnCheck;
     @BindView(R.id.editTextOrderNo)
     EditText editTextOrderNo;
-
+    @BindView(R.id.imgSearch)
+    ImageView imgSearch;
+    @BindView(R.id.imgCalender)
+    ImageView imgCalender;
 
     String companyCode, companyName, deviceId, User, invoiceNo,
             supplierCode, invoiceDate, orderNo, branchCode, periodCode;
@@ -82,8 +85,7 @@ public class InvoiceActivity extends AppCompatActivity implements ListSupplierFr
     //ConnectivityManager connectivityManager;
     private static final String TAG = "InvoiceActivity";
     Calendar calendar;
-    @BindView(R.id.imgSearch)
-    ImageView imgSearch;
+
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
 
@@ -93,35 +95,15 @@ public class InvoiceActivity extends AppCompatActivity implements ListSupplierFr
         setContentView(R.layout.activity_invoice);
         ButterKnife.bind(this);
 
-        // btnCheck.setEnabled(false);
-//        connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-//        progressDialog = new ProgressDialog(this);
+
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setTitle("Check Supplier");
 
-        calendar = Calendar.getInstance();
-        final DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                calendar.set(Calendar.YEAR, year);
-                calendar.set(Calendar.MONTH, monthOfYear);
-                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                updateLabel();
+        txtInvoiceDate.setEnabled(false);
 
-            }
-        };
 
-        txtInvoiceDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "onClick: ");
-                new DatePickerDialog(InvoiceActivity.this, dateSetListener, calendar
-                        .get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-                        calendar.get(Calendar.DAY_OF_MONTH)).show();
-            }
-        });
 
         initView();
         initVolleyCallBack();
@@ -174,20 +156,6 @@ public class InvoiceActivity extends AppCompatActivity implements ListSupplierFr
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         String mDate = sdf.format(new Date());
         txtInvoiceDate.setText(mDate);
-//        dbHelper helper = new dbHelper(this);
-//        SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
-//        Cursor cursor = helper.getSettings(sqLiteDatabase);
-//        if (cursor.moveToFirst()) {
-//            companyCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_CODE));
-//            companyName = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME));
-//            deviceId = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID));
-//            branchCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_BRANCH_CODE));
-//            periodCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_PERIOD_CODE));
-//            BASE_URL = SessionHandler.getInstance(InvoiceActivity.this).getHost();
-//        }
-//        cursor.close();
-//        sqLiteDatabase.close();
-
     }
 
 
@@ -265,7 +233,7 @@ public class InvoiceActivity extends AppCompatActivity implements ListSupplierFr
     }
 
 
-    @OnClick({R.id.imgSearch, R.id.btnCheck})
+    @OnClick({R.id.imgSearch, R.id.btnCheck,R.id.imgCalender})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.imgSearch:
@@ -284,6 +252,25 @@ public class InvoiceActivity extends AppCompatActivity implements ListSupplierFr
                 }
 
                 break;
+            case R.id.imgCalender:
+
+                calendar=Calendar.getInstance();
+
+                final DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        calendar.set(Calendar.YEAR, year);
+                        calendar.set(Calendar.MONTH, monthOfYear);
+                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        updateLabel();
+
+                    }
+                };
+                new DatePickerDialog(InvoiceActivity.this, dateSetListener, calendar
+                        .get(Calendar.YEAR), calendar.get(Calendar.MONTH),
+                        calendar.get(Calendar.DAY_OF_MONTH)).show();
+                break;
+
         }
     }
 

@@ -2,12 +2,14 @@ package com.alhikmahpro.www.e_inventory.Adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.ItemModel;
 import com.alhikmahpro.www.e_inventory.Interface.OnAdapterClickListener;
 import com.alhikmahpro.www.e_inventory.R;
@@ -22,6 +24,7 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
     Context context;
     List<ItemModel>saleList;
     OnAdapterClickListener onAdapterClickListener;
+    private static final String TAG = "SalesListAdapter";
 
     public SalesListAdapter(Context context, List<ItemModel> saleList,OnAdapterClickListener onAdapterClickListener) {
         this.context = context;
@@ -42,6 +45,14 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
         ItemModel itemModel=saleList.get(position);
         holder.invoiceNo.setText(itemModel.getInvoiceNo());
         String date=itemModel.getDate();
+        Log.d(TAG, "onBindViewHolder:date "+date);
+        int sync=itemModel.getIs_sync();
+        if(sync==DataContract.SYNC_STATUS_OK){
+            holder.imgSyncOk.setImageResource(R.drawable.ic_sync_ok);
+        }
+        if(sync==DataContract.SYNC_STATUS_FAILED){
+            holder.imgSyncOk.setImageResource(R.drawable.ic_sync_error);
+        }
         holder.invoiceDate.setText(date.substring(0,10));
         holder.invoiceAmount.setText(currencyFormatter(itemModel.getNet()));
         holder.customerName.setText(itemModel.getCustomerName());
@@ -65,7 +76,7 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
         TextView invoiceNo;
         TextView invoiceAmount;
         TextView invoiceDate;
-        ImageView imgEdit;
+        ImageView imgEdit,imgSyncOk;
         TextView customerName;
 
 
@@ -76,6 +87,7 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
             invoiceAmount=itemView.findViewById(R.id.rv_amount);
             invoiceDate=itemView.findViewById(R.id.rv_date);
             imgEdit=itemView.findViewById(R.id.rv_img_edit);
+            imgSyncOk=itemView.findViewById(R.id.rv_img_sync_ok);
             customerName=itemView.findViewById(R.id.rv_customer);
 
         }

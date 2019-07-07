@@ -124,8 +124,8 @@ public class PrintViewActivity extends AppCompatActivity {
     TextView txtEmpty;
     @BindView(R.id.txtPayment)
     TextView txtPayment;
-    @BindView(R.id.btn_sync)
-    Button btnSync;
+//    @BindView(R.id.btn_sync)
+//    Button btnSync;
     @BindView(R.id.btn_pdf)
     Button btnPdf;
 
@@ -189,38 +189,38 @@ public class PrintViewActivity extends AppCompatActivity {
         invoiceDate = AppUtils.getDateAndTime();
         helper = new dbHelper(this);
         initView();
-        initVolleyCallBack();
+        //initVolleyCallBack();
     }
 
-    private void initVolleyCallBack() {
-        mVolleyListener=new volleyListener() {
-            @Override
-            public void notifySuccess(String requestType, JSONObject response) {
-                dialog.cancel();
-                Log.d(TAG, "notifySuccess: "+response);
-                String res ="";
-                try {
-                    res = response.getString("Status");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                if (res.equals("success")) {
-                    helper.updateInvoiceSync(invoiceNo);
-
-                }else {
-                    Toast.makeText(PrintViewActivity.this, "something went wrong pls try again later", Toast.LENGTH_SHORT).show();
-                }
-
-            }
-
-            @Override
-            public void notifyError(String requestType, VolleyError error) {
-                dialog.cancel();
-                Toast.makeText(PrintViewActivity.this, "server error", Toast.LENGTH_SHORT).show();
-
-            }
-        };
-    }
+//    private void initVolleyCallBack() {
+//        mVolleyListener=new volleyListener() {
+//            @Override
+//            public void notifySuccess(String requestType, JSONObject response) {
+//                dialog.cancel();
+//                Log.d(TAG, "notifySuccess: "+response);
+//                String res ="";
+//                try {
+//                    res = response.getString("Status");
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//                if (res.equals("success")) {
+//                    helper.updateInvoiceSync(invoiceNo);
+//
+//                }else {
+//                    Toast.makeText(PrintViewActivity.this, "something went wrong pls try again later", Toast.LENGTH_SHORT).show();
+//                }
+//
+//            }
+//
+//            @Override
+//            public void notifyError(String requestType, VolleyError error) {
+//                dialog.cancel();
+//                Toast.makeText(PrintViewActivity.this, "server error", Toast.LENGTH_SHORT).show();
+//
+//            }
+//        };
+//    }
 
     private void initView() {
 
@@ -238,6 +238,7 @@ public class PrintViewActivity extends AppCompatActivity {
 
         cursor.close();
         database.close();
+
 
         txtInvoice.setText(invoiceNo);
         txtDate.setText(invoiceDate);
@@ -671,85 +672,85 @@ public class PrintViewActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick(R.id.btn_sync)
-    public void onBtnSyncClicked() {
-        //create invoice json array
-
-        JSONArray invoiceArray = new JSONArray();
-        JSONObject invoiceObject = new JSONObject();
-        try {
-            invoiceObject.put(DataContract.Invoice.COL_INVOICE_NUMBER, invoiceNo);
-            invoiceObject.put(DataContract.Invoice.COL_INVOICE_DATE, mDate);
-            invoiceObject.put(DataContract.Invoice.COL_CUSTOMER_CODE, customerCode);
-            invoiceObject.put(DataContract.Invoice.COL_CUSTOMER_NAME, customerName);
-            invoiceObject.put(DataContract.Invoice.COL_SALESMAN_ID, salesmanId);
-            invoiceObject.put(DataContract.Invoice.COL_TOTAL_AMOUNT,base_total);
-            invoiceObject.put(DataContract.Invoice.COL_DISCOUNT_AMOUNT,discountAmount);
-            invoiceObject.put(DataContract.Invoice.COL_NET_AMOUNT, netAmount);
-            invoiceObject.put(DataContract.Invoice.COL_PAYMENT_TYPE, paymentMode);
-
-            invoiceArray.put(invoiceObject);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        //create invoiceDetails json array
-        JSONArray invoiceDetailsArray = new JSONArray();
-        int slNo=0;
-
-        for (CartModel cartModel : Cart.mCart) {
-            slNo++;
-
-            JSONObject detailsObject = new JSONObject();
-            try {
-                detailsObject.put("serial_no", slNo);
-                detailsObject.put(DataContract.InvoiceDetails.COL_INVOICE_NUMBER, invoiceNo);
-                detailsObject.put(DataContract.InvoiceDetails.COL_BAR_CODE, cartModel.getBarcode());
-                detailsObject.put(DataContract.InvoiceDetails.COL_PRODUCT_CODE, cartModel.getProductCode());
-                detailsObject.put(DataContract.InvoiceDetails.COL_PRODUCT_NAME, cartModel.getProductName());
-                detailsObject.put(DataContract.InvoiceDetails.COL_QUANTITY, cartModel.getQty());
-                detailsObject.put(DataContract.InvoiceDetails.COL_UNIT1, cartModel.getUnit1());
-                detailsObject.put(DataContract.InvoiceDetails.COL_UNIT2, cartModel.getUnit2());
-                detailsObject.put(DataContract.InvoiceDetails.COL_UNIT3, cartModel.getUnit3());
-                detailsObject.put(DataContract.InvoiceDetails.COL_UNIT, cartModel.getSelectedUnit());
-                detailsObject.put(DataContract.InvoiceDetails.COL_UN_QTY1, cartModel.getUnit1Qty());
-                detailsObject.put(DataContract.InvoiceDetails.COL_UN_QTY2, cartModel.getUnit2Qty());
-                detailsObject.put(DataContract.InvoiceDetails.COL_UN_QTY3, cartModel.getUnit3Qty());
-                detailsObject.put(DataContract.InvoiceDetails.COL_RATE, cartModel.getRate());
-                detailsObject.put(DataContract.InvoiceDetails.COL_DISCOUNT, cartModel.getDiscount());
-                detailsObject.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, cartModel.getNet());
-
-
-
-                detailsObject.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, cartModel.getNet());
-                detailsObject.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, cartModel.getNet());
-                detailsObject.put(DataContract.InvoiceDetails.COL_SALE_TYPE, cartModel.getSaleType());
-
-
-
-
-                invoiceDetailsArray.put(detailsObject);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        JSONObject result = new JSONObject();
-
-        try {
-            result.put("Invoice", invoiceArray);
-            result.put("Details", invoiceDetailsArray);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        //send to volley
-        View view = this.getCurrentFocus();
-        AppUtils.hideKeyboard(this, view);
-        dialog = AppUtils.showProgressDialog(this, "Loading....");
-        serviceGateway = new VolleyServiceGateway(mVolleyListener, this);
-        serviceGateway.postDataVolley("POSTCALL", "PriceChecker/sales_invoice.php", result);
-    }
+//    @OnClick(R.id.btn_sync)
+//    public void onBtnSyncClicked() {
+//        //create invoice json array
+//
+//        JSONArray invoiceArray = new JSONArray();
+//        JSONObject invoiceObject = new JSONObject();
+//        try {
+//            invoiceObject.put(DataContract.Invoice.COL_INVOICE_NUMBER, invoiceNo);
+//            invoiceObject.put(DataContract.Invoice.COL_INVOICE_DATE, mDate);
+//            invoiceObject.put(DataContract.Invoice.COL_CUSTOMER_CODE, customerCode);
+//            invoiceObject.put(DataContract.Invoice.COL_CUSTOMER_NAME, customerName);
+//            invoiceObject.put(DataContract.Invoice.COL_SALESMAN_ID, salesmanId);
+//            invoiceObject.put(DataContract.Invoice.COL_TOTAL_AMOUNT,base_total);
+//            invoiceObject.put(DataContract.Invoice.COL_DISCOUNT_AMOUNT,discountAmount);
+//            invoiceObject.put(DataContract.Invoice.COL_NET_AMOUNT, netAmount);
+//            invoiceObject.put(DataContract.Invoice.COL_PAYMENT_TYPE, paymentMode);
+//
+//            invoiceArray.put(invoiceObject);
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//
+//        //create invoiceDetails json array
+//        JSONArray invoiceDetailsArray = new JSONArray();
+//        int slNo=0;
+//
+//        for (CartModel cartModel : Cart.mCart) {
+//            slNo++;
+//
+//            JSONObject detailsObject = new JSONObject();
+//            try {
+//                detailsObject.put("serial_no", slNo);
+//                detailsObject.put(DataContract.InvoiceDetails.COL_INVOICE_NUMBER, invoiceNo);
+//                detailsObject.put(DataContract.InvoiceDetails.COL_BAR_CODE, cartModel.getBarcode());
+//                detailsObject.put(DataContract.InvoiceDetails.COL_PRODUCT_CODE, cartModel.getProductCode());
+//                detailsObject.put(DataContract.InvoiceDetails.COL_PRODUCT_NAME, cartModel.getProductName());
+//                detailsObject.put(DataContract.InvoiceDetails.COL_QUANTITY, cartModel.getQty());
+//                detailsObject.put(DataContract.InvoiceDetails.COL_UNIT1, cartModel.getUnit1());
+//                detailsObject.put(DataContract.InvoiceDetails.COL_UNIT2, cartModel.getUnit2());
+//                detailsObject.put(DataContract.InvoiceDetails.COL_UNIT3, cartModel.getUnit3());
+//                detailsObject.put(DataContract.InvoiceDetails.COL_UNIT, cartModel.getSelectedUnit());
+//                detailsObject.put(DataContract.InvoiceDetails.COL_UN_QTY1, cartModel.getUnit1Qty());
+//                detailsObject.put(DataContract.InvoiceDetails.COL_UN_QTY2, cartModel.getUnit2Qty());
+//                detailsObject.put(DataContract.InvoiceDetails.COL_UN_QTY3, cartModel.getUnit3Qty());
+//                detailsObject.put(DataContract.InvoiceDetails.COL_RATE, cartModel.getRate());
+//                detailsObject.put(DataContract.InvoiceDetails.COL_DISCOUNT, cartModel.getDiscount());
+//                detailsObject.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, cartModel.getNet());
+//
+//
+//
+//                detailsObject.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, cartModel.getNet());
+//                detailsObject.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, cartModel.getNet());
+//                detailsObject.put(DataContract.InvoiceDetails.COL_SALE_TYPE, cartModel.getSaleType());
+//
+//
+//
+//
+//                invoiceDetailsArray.put(detailsObject);
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        JSONObject result = new JSONObject();
+//
+//        try {
+//            result.put("Invoice", invoiceArray);
+//            result.put("Details", invoiceDetailsArray);
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//
+//        //send to volley
+//        View view = this.getCurrentFocus();
+//        AppUtils.hideKeyboard(this, view);
+//        dialog = AppUtils.showProgressDialog(this, "Loading....");
+//        serviceGateway = new VolleyServiceGateway(mVolleyListener, this);
+//        serviceGateway.postDataVolley("POSTCALL", "PriceChecker/sales_invoice.php", result);
+//    }
 
     @OnClick(R.id.btn_pdf)
     public void onBtnPdfClicked() {

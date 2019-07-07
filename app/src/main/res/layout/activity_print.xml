@@ -230,16 +230,16 @@
                     android:background="@color/colorPrimary"
                     android:textColor="@android:color/white"
                     />
-                <Button
-                    android:id="@+id/btn_sync"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="SYNC"
-                    android:layout_marginLeft="5dp"
-                    android:background="@color/colorPrimary"
-                    android:textColor="@android:color/white"
-                    />
+                <!--<Button-->
+                    <!--android:id="@+id/btn_sync"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:text="SYNC"-->
+                    <!--android:layout_marginLeft="5dp"-->
+                    <!--android:background="@color/colorPrimary"-->
+                    <!--android:textColor="@android:color/white"-->
+                    <!--/>-->
                 <Button
                     android:id="@+id/btn_pdf"
                     android:layout_width="0dp"

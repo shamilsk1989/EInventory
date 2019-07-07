@@ -758,6 +758,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         txtAddedQuantity.setText("");
 
         Intent intent = new Intent(SalesActivity.this, ViewCartActivity.class);
+        intent.putExtra("ACTION", "NEW");
         intent.putExtra("CUS_NAME", customerName);
         intent.putExtra("CUS_CODE", customerCode);
         intent.putExtra("SALESMAN_ID", salesmanId);

@@ -1,7 +1,6 @@
 package com.alhikmahpro.www.e_inventory.View;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,7 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -72,7 +70,7 @@ public class PaymentActivity extends AppCompatActivity {
     String paymentMode;
     private static final String TAG = "PaymentActivity";
 
-    String customerName, invoiceNo, total, invoiceDate, salesmanId, mDate, customerCode, type, orderNo;
+    String customerName, invoiceNo, total, invoiceDate, salesmanId, mDate, customerCode, type, orderNo,Action;
     int docNo;
     double disc, netAmount, base_total;
 
@@ -82,6 +80,8 @@ public class PaymentActivity extends AppCompatActivity {
     dbHelper helper;
     @BindView(R.id.textViewTotalRow)
     TextView textViewTotalRow;
+    @BindView(R.id.btn_delete)
+    Button btnDelete;
 
 
     @Override
@@ -93,10 +93,12 @@ public class PaymentActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setTitle("Payment");
         Intent intent = getIntent();
+        Action = intent.getStringExtra("ACTION");
         type = intent.getStringExtra("TYPE");
         customerName = intent.getStringExtra("CUS_NAME");
         customerCode = intent.getStringExtra("CUS_CODE");
         invoiceDate = intent.getStringExtra("INV_DATE");
+        Log.d(TAG, "onCreate: invoice date"+invoiceDate);
         invoiceNo = intent.getStringExtra("INV_NO");
         salesmanId = intent.getStringExtra("SALESMAN_ID");
         int count = intent.getIntExtra("TOTAL_ROW", 0);
@@ -158,26 +160,26 @@ public class PaymentActivity extends AppCompatActivity {
             @Override
             public void notifySuccess(String requestType, JSONObject response) {
                 String result = "";
-                int syncStatus=DataContract.SYNC_STATUS_FAILED;
+                int syncStatus = DataContract.SYNC_STATUS_FAILED;
                 try {
                     String res = response.getString("Status");
-                    if(res.equals("success")){
-                        syncStatus=DataContract.SYNC_STATUS_OK;
-                        result="Saved successfully";
-                    }else {
-                        syncStatus=DataContract.SYNC_STATUS_FAILED;
-                        result="Failed to save !";
+                    if (res.equals("success")) {
+                        syncStatus = DataContract.SYNC_STATUS_OK;
+                        result = "Saved successfully";
+                    } else {
+                        syncStatus = DataContract.SYNC_STATUS_FAILED;
+                        result = "Failed to save !";
                     }
 
                 } catch (JSONException e) {
-                    syncStatus=DataContract.SYNC_STATUS_FAILED;
+                    syncStatus = DataContract.SYNC_STATUS_FAILED;
                     result = "Sync failed";
                     e.printStackTrace();
                 } finally {
 
-                    if(type.equals("GDS")){
+                    if (type.equals("GDS")) {
                         saveGoods(syncStatus);
-                    }else {
+                    } else {
                         saveSales(syncStatus);
                     }
                     showAlert(result);
@@ -357,9 +359,6 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
 
-
-
-
     private void gotoNext() {
         Log.d(TAG, "gotoNext: " + type);
         if (type.equals("SAL")) {
@@ -404,26 +403,6 @@ public class PaymentActivity extends AppCompatActivity {
         return true;
     }
 
-    @OnClick(R.id.btn_pay)
-    public void onViewClicked() {
-        JSONObject resultObject = new JSONObject();
-        String url = "";
-        if (type.equals("GDS")) {
-            resultObject = generateGoodsJSON();
-            url = "PriceChecker/goods_receive.php";
-        } else if (type.equals("SAL")) {
-            resultObject = generateSalesJSON();
-            url = "PriceChecker/sales_invoice.php";
-        }
-        if (resultObject.length() > 0) {
-
-            //send to volley
-            View view = this.getCurrentFocus();
-            AppUtils.hideKeyboard(this, view);
-            serviceGateway = new VolleyServiceGateway(mVolleyListener, this);
-            serviceGateway.postDataVolley("POSTCALL", url, resultObject);
-        }
-    }
 
     public void saveSales(int sync) {
 
@@ -454,5 +433,82 @@ public class PaymentActivity extends AppCompatActivity {
         Log.d(TAG, "onRadioButtonClicked: " + paymentMode);
     }
 
+
+    @OnClick(R.id.btn_delete)
+    public void onBtnDeleteClicked() {
+
+        new android.app.AlertDialog.Builder(PaymentActivity.this)
+                .setTitle("Confirm")
+                .setMessage("Do you want to delete the cart ?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        if(Action.equals("EDIT")){
+                            if(type.equals("GDS")){
+                                helper.deleteInvoiceById(invoiceNo);
+                            }else if(type.equals("SAL")){
+                                helper.deleteGoodsById(docNo);
+
+                            }
+                        }
+
+                        Cart.mCart.clear();
+                        Cart.gCart.clear();
+                        Toast.makeText(PaymentActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
+                        finish();
+
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                }).create().show();
+
+
+
+
+    }
+
+    @OnClick(R.id.btn_pay)
+    public void onBtnPayClicked() {
+
+        JSONObject resultObject = new JSONObject();
+        String url = "";
+        if (type.equals("GDS")) {
+            resultObject = generateGoodsJSON();
+            url = "PriceChecker/goods_receive.php";
+        } else if (type.equals("SAL")) {
+            resultObject = generateSalesJSON();
+            url = "PriceChecker/sales_invoice.php";
+        }
+        if (resultObject.length() > 0) {
+
+            //send to volley
+            View view = this.getCurrentFocus();
+            AppUtils.hideKeyboard(this, view);
+
+            if(!AppUtils.isNetworkAvailable(this)){
+                Toast.makeText(this, "No Internet ", Toast.LENGTH_SHORT).show();
+                if (type.equals("GDS")) {
+                    // save goods receive sync failed
+                    saveGoods(DataContract.SYNC_STATUS_FAILED);
+
+                } else {
+                    // save invoice syn failed
+                    saveSales(DataContract.SYNC_STATUS_FAILED);
+                }
+                gotoNext();
+
+            }else {
+                serviceGateway = new VolleyServiceGateway(mVolleyListener, this);
+                serviceGateway.postDataVolley("POSTCALL", url, resultObject);
+            }
+
+        }
+    }
 
 }
