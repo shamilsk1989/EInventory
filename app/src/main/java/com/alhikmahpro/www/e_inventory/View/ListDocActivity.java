@@ -61,14 +61,9 @@ public class ListDocActivity extends AppCompatActivity {
         list = new ArrayList<>();
 
     }
-
-
-
-
-
-
     private void loadInventory() {
 
+        list.clear();
         dbHelper helper = new dbHelper(ListDocActivity.this);
         SQLiteDatabase database = helper.getReadableDatabase();
         Cursor cursor = helper.getStocks(database);
@@ -93,6 +88,7 @@ public class ListDocActivity extends AppCompatActivity {
     }
 
     private void loadGoods() {
+        list.clear();
         dbHelper helper = new dbHelper(ListDocActivity.this);
         SQLiteDatabase database = helper.getReadableDatabase();
         Cursor cursor = helper.getGoods(database);
@@ -149,7 +145,7 @@ public class ListDocActivity extends AppCompatActivity {
         }
         else if(type.equals("GDS")){
             Intent intent=new Intent(this,GoodsItemListActivity.class);
-            intent.putExtra("ACTION","Edite");
+            intent.putExtra("ACTION","Edit");
             intent.putExtra("DOC_NO",itemModel.getDocNo());
             intent.putExtra("ORD_NO",itemModel.getOrderNo());
             intent.putExtra("SUPP_CODE",itemModel.getSupplierCode());

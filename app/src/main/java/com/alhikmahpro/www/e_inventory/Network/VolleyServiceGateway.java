@@ -3,7 +3,10 @@ package com.alhikmahpro.www.e_inventory.Network;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.AppUtils;
@@ -11,6 +14,8 @@ import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
+import com.alhikmahpro.www.e_inventory.R;
+import com.alhikmahpro.www.e_inventory.View.PaymentActivity;
 import com.alhikmahpro.www.e_inventory.View.PriceCheckerActivity;
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
@@ -36,6 +41,8 @@ public class VolleyServiceGateway {
 
     volleyListener mListener=null;
     Context mContext;
+    AlertDialog alertDialog;
+    AlertDialog.Builder builder;
     private static final String TAG = "VolleyServiceGateway";
     //String companyCode,companyName,deviceId,branchCode,periodCode,locationCode,BASE_URL;
 
@@ -46,7 +53,9 @@ public class VolleyServiceGateway {
 
     public void postDataVolley(final String requestType, String url, JSONObject postObj){
 
+        ShowProgressDialog();
         if(!AppUtils.isNetworkAvailable(mContext)){
+            HideProgressDialog();
             Toast.makeText(mContext, "No Internet ", Toast.LENGTH_SHORT).show();
             return;
 
@@ -64,7 +73,7 @@ public class VolleyServiceGateway {
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
-
+                            HideProgressDialog();
                             Log.d(TAG, "onResponse in Volley Service: "+response);
                             if(mListener!=null){
                                 mListener.notifySuccess(requestType,response);
@@ -74,7 +83,7 @@ public class VolleyServiceGateway {
                     }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-
+                    HideProgressDialog();
                     HandlingVolleyError(error);
                     if(mListener!=null){
                         mListener.notifyError(requestType,error);
@@ -98,17 +107,14 @@ public class VolleyServiceGateway {
         }
     }
 
-
-
-
-
-
-
-
     public void getDataVolley(final String requestType, String url){
-//        final ProgressDialog progressDialog = new ProgressDialog(this);
-//        progressDialog.setMessage("Loading...");
-//        progressDialog.show();
+        ShowProgressDialog();
+        if(!AppUtils.isNetworkAvailable(mContext)){
+            HideProgressDialog();
+            Toast.makeText(mContext, "No Internet ", Toast.LENGTH_SHORT).show();
+            return;
+
+        }
 
         String BASE_URL = SessionHandler.getInstance(mContext).getHost();
         BASE_URL=BASE_URL.trim();
@@ -120,8 +126,7 @@ public class VolleyServiceGateway {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                       // progressDialog.dismiss();
-                        //closeKey();
+                       HideProgressDialog();
                         Log.d(TAG, "onResponse: Test"+response);
                         if(mListener!=null)
                             mListener.notifySuccess(requestType,response);
@@ -129,6 +134,7 @@ public class VolleyServiceGateway {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                HideProgressDialog();
                 HandlingVolleyError(error);
                 if(mListener!=null)
                     mListener.notifyError(requestType,error);
@@ -205,6 +211,20 @@ public class VolleyServiceGateway {
         }
     }
 
+    public void ShowProgressDialog() {
+        builder = new AlertDialog.Builder(mContext);
+        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View dialogView = inflater.inflate(R.layout.progress, null);
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+        alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    public void HideProgressDialog() {
+
+        alertDialog.dismiss();
+    }
 
 
 }

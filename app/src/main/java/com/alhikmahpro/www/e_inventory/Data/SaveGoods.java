@@ -3,10 +3,12 @@ package com.alhikmahpro.www.e_inventory.Data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
 
 public class SaveGoods extends AsyncTask<GoodsData,Void,String> {
     Context mContext;
+    private static final String TAG = "SaveGoods";
 
     public SaveGoods(Context mContext) {
         this.mContext = mContext;
@@ -19,6 +21,7 @@ public class SaveGoods extends AsyncTask<GoodsData,Void,String> {
 
     @Override
     protected String doInBackground(GoodsData... data) {
+        Log.d(TAG, "doInBackground: ");
         dbHelper dbHelper=new dbHelper(mContext);
         int docNo=data[0].docNo;
         String orderNo=data[0].orderNo;
@@ -38,11 +41,14 @@ public class SaveGoods extends AsyncTask<GoodsData,Void,String> {
         // check goods_receive table doc no already exist or not
         if(dbHelper.checkGoods(database,docNo)){
             database.close();
-           return "Already Exists";
+
+           dbHelper.updateGoods(docNo,orderNo,customerCode,customerName,invoiceNo,invoiceDate,salesmanId,base_total,disc,netAmount,paymentMode,mDate,syncStatus);
+           dbHelper.updateGoodsDetails1(docNo,syncStatus);
+           return "Updated";
         }else {
             database.close();
-            if(dbHelper.saveGoods(docNo,orderNo,customerCode,customerName,invoiceNo,invoiceDate,salesmanId,base_total,disc,netAmount,paymentMode,mDate,syncStatus))
-                dbHelper.saveGoodsDetails1(docNo,syncStatus);
+            dbHelper.saveGoods(docNo,orderNo,customerCode,customerName,invoiceNo,invoiceDate,salesmanId,base_total,disc,netAmount,paymentMode,mDate,syncStatus);
+            dbHelper.saveGoodsDetails1(docNo,syncStatus);
             return "Saved";
         }
     }

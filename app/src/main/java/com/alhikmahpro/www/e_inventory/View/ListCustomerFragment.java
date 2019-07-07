@@ -161,7 +161,7 @@ public class ListCustomerFragment extends DialogFragment implements SwipeRefresh
     }
 
     private void loadRecyclerView() {
-        Toast.makeText(getActivity(), "loading RecyclerView", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getActivity(), "loading RecyclerView", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "loadRecyclerView: ");
         mSwipeRefreshLayout.setRefreshing(true);
         supplierArrayList.clear();

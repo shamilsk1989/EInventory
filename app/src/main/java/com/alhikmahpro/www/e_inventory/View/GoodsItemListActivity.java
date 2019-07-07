@@ -72,7 +72,7 @@ public class GoodsItemListActivity extends AppCompatActivity {
     @BindView(R.id.btnSave)
     Button btnSave;
     int docNo;
-    String supplierName, supplierCode, invoiceNo, invoiceDate, user, orderNo,action;
+    String supplierName, supplierCode, invoiceNo, invoiceDate, user, orderNo, action;
     double totalAmount;
     ProgressDialog progressDialog;
     ConnectivityManager connectivityManager;
@@ -93,7 +93,8 @@ public class GoodsItemListActivity extends AppCompatActivity {
         progressDialog = new ProgressDialog(this);
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         Intent mIntent = getIntent();
-        action=mIntent.getStringExtra("ACTION");
+        action = mIntent.getStringExtra("ACTION");
+        Log.d(TAG, "onCreate: " + action);
         docNo = mIntent.getIntExtra("DOC_NO", 0);
         orderNo = mIntent.getStringExtra("ORD_NO");
         supplierCode = mIntent.getStringExtra("SUPP_CODE");
@@ -101,24 +102,52 @@ public class GoodsItemListActivity extends AppCompatActivity {
         invoiceNo = mIntent.getStringExtra("INV_NO");
         user = mIntent.getStringExtra("USER");
         invoiceDate = mIntent.getStringExtra("INV_DATE");
-//
-//        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-//        mDate = sdf.format(new Date());
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setTitle("Document  " + docNo);
         helper = new dbHelper(this);
-        initView();
-        //initVolleyCallBack();
 
+        if (action.equals("Edit")) {
+            // if edit then load goodsDetail from database by docNo.
+            SQLiteDatabase database = helper.getReadableDatabase();
+            Cursor cursor = helper.getGoodsDetailsByDoc(database, docNo);
+            if (cursor.moveToFirst()) {
+
+                ItemModel itemModel = new ItemModel();
+                itemModel.setDocNo(cursor.getInt(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_DOCUMENT_NUMBER)));
+                itemModel.setBarCode(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_BAR_CODE)));
+                itemModel.setProductCode(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_PRODUCT_CODE)));
+                itemModel.setProductName(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_PRODUCT_NAME)));
+                itemModel.setQty(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_QUANTITY)));
+                itemModel.setFreeQty(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_FREE_QUANTITY)));
+                itemModel.setSelectedPackage(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_UNIT)));
+                itemModel.setSelectedFreePackage(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_FREE_UNIT)));
+                itemModel.setRate(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_RATE)));
+                itemModel.setDiscount(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_DISCOUNT)));
+                itemModel.setCostPrice(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_COST_PRICE)));
+                itemModel.setSalePrice(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_SALES_PRICE)));
+                itemModel.setStock(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_STOCK)));
+                itemModel.setUnit1(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_UNIT1)));
+                itemModel.setUnit2(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_UNIT2)));
+                itemModel.setUnit3(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_UNIT3)));
+                itemModel.setUnit1Qty(cursor.getInt(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_UN_QTY1)));
+                itemModel.setUnit2Qty(cursor.getInt(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_UN_QTY2)));
+                itemModel.setUnit3Qty(cursor.getInt(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_UN_QTY3)));
+                itemModel.setNet(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_NET_VALUE)));
+
+                Cart.gCart.add(itemModel);
+            }
+            cursor.close();
+            database.close();
+
+        }
+        loadRecycler();
     }
 
 
+    private void loadRecycler() {
 
-    private void initView() {
-        if(action.equals("New")){
-            btnSave.setText("Next");
-        }
         if (Cart.gCart.size() > 0) {
             //if cart not empty hide empty textView
 
@@ -127,9 +156,9 @@ public class GoodsItemListActivity extends AppCompatActivity {
             txtTotalCount.setText(String.valueOf(Cart.gCart.size()));
             totalAmount = 0;
             for (ItemModel itemModel : Cart.gCart) {
-                Log.d(TAG, "initView: cart amount "+itemModel.getNet());
+                Log.d(TAG, "initView: cart amount " + itemModel.getNet());
                 totalAmount = totalAmount + itemModel.getNet();
-                Log.d(TAG, "initView: cart amount "+totalAmount);
+                Log.d(TAG, "initView: cart amount " + totalAmount);
 
             }
             txtTotal.setText(String.valueOf(totalAmount));
@@ -147,35 +176,35 @@ public class GoodsItemListActivity extends AppCompatActivity {
                 @Override
                 public void OnDeleteClicked(final int position) {
                     // check the action; if edit the delete not allowed
-                    if(action.equals("Edit")){
-                        Toast.makeText(GoodsItemListActivity.this, "Not available", Toast.LENGTH_SHORT).show();
-                    }else {
+//                    if (action.equals("Edit")) {
+//                        Toast.makeText(GoodsItemListActivity.this, "Not available", Toast.LENGTH_SHORT).show();
+//                    } else {
 
-                        // Remove item from cart
-                        new android.app.AlertDialog.Builder(GoodsItemListActivity.this)
-                                .setTitle("Confirm")
-                                .setMessage("Do you want to delete this item?")
-                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
+                    // Remove item from cart
+                    new android.app.AlertDialog.Builder(GoodsItemListActivity.this)
+                            .setTitle("Confirm")
+                            .setMessage("Do you want to delete this item?")
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
 
-                                        ItemModel itemModel = Cart.gCart.get(position);
-                                        double amount = itemModel.getNet();
-                                        Cart.gCart.remove(position);
-                                        adapter.notifyItemRemoved(position);
-                                        adapter.notifyItemRangeChanged(position, Cart.gCart.size());
-                                        calculateNet(amount);
+                                    ItemModel itemModel = Cart.gCart.get(position);
+                                    double amount = itemModel.getNet();
+                                    Cart.gCart.remove(position);
+                                    adapter.notifyItemRemoved(position);
+                                    adapter.notifyItemRangeChanged(position, Cart.gCart.size());
+                                    calculateNet(amount);
 
-                                    }
-                                })
-                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                    @Override
+                                }
+                            })
+                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                @Override
 
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.cancel();
-                                    }
-                                }).create().show();
-                    }
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                }
+                            }).create().show();
+                    //}
 
                 }
             });
@@ -186,21 +215,20 @@ public class GoodsItemListActivity extends AppCompatActivity {
         }
 
 
-
     }
 
     //Calculate total number of items and total amount of cart
-    private void calculateNet(double amount){
+    private void calculateNet(double amount) {
 
         txtTotalCount.setText(String.valueOf(Cart.gCart.size()));
-        totalAmount = totalAmount-amount;
+        totalAmount = totalAmount - amount;
         txtTotal.setText(String.valueOf(totalAmount));
     }
 
     @OnClick(R.id.btnSave)
     public void onViewClicked() {
 
-        Log.d(TAG, "onViewClicked: "+"doc :"+docNo+ "suppl :"+supplierName);
+        Log.d(TAG, "onViewClicked: " + "doc :" + docNo + "suppl :" + supplierName);
         Intent intent_payment = new Intent(GoodsItemListActivity.this, PaymentActivity.class);
         intent_payment.putExtra("TYPE", "GDS");
         intent_payment.putExtra("CUS_NAME", supplierName);
@@ -211,7 +239,7 @@ public class GoodsItemListActivity extends AppCompatActivity {
         intent_payment.putExtra("INV_NO", invoiceNo);
         intent_payment.putExtra("INV_DATE", invoiceDate);
         intent_payment.putExtra("TOTAL_ROW", Cart.gCart.size());
-        intent_payment.putExtra("TOTAL",totalAmount);
+        intent_payment.putExtra("TOTAL", totalAmount);
         startActivity(intent_payment);
     }
 

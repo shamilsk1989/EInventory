@@ -235,8 +235,8 @@ public class ListItemFragment extends DialogFragment implements SwipeRefreshLayo
     }
     private void loadRecyclerView() {
         Log.d(TAG, "loadRecyclerView: "+itemName);
-        Toast.makeText(getActivity(), "loading RecyclerView", Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "loadRecyclerView: ");
+        //Toast.makeText(getActivity(), "loading RecyclerView", Toast.LENGTH_SHORT).show();
+       /// Log.d(TAG, "loadRecyclerView: ");
         mSwipeRefreshLayout.setRefreshing(true);
         itemArrayList.clear();
         JSONObject postParam = new JSONObject();

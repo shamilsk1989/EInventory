@@ -102,14 +102,14 @@
         android:text="No Items" />
 
     <Button
+        android:id="@+id/btnSave"
         android:layout_width="match_parent"
         android:layout_height="@dimen/button_height"
-        android:background="@color/colorPrimary"
-        android:textColor="@android:color/white"
-        android:text="Sync"
-        android:id="@+id/btnSave"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="10dp" />
+        android:layout_marginBottom="10dp"
+        android:background="@color/colorPrimary"
+        android:text="NEXT"
+        android:textColor="@android:color/white" />
 
 
 

@@ -67,8 +67,6 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
 
     private static final int CAMERA_PERMISSION_CODE = 100;
     private static final String TAG = "CheckCustomerActivity";
-    @BindView(R.id.progressBar)
-    ProgressBar progressBar;
     private ConnectivityManager connectivityManager;
     String companyCode, companyName, deviceId, locationCode, branchCode, periodCode;
     String customerCode, customerName, lastInvoiceNo, lastReceiptNo, balanceAmount;
@@ -125,7 +123,6 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
         mVolleyListener = new volleyListener() {
             @Override
             public void notifySuccess(String requestType, JSONObject response) {
-                hideProgressBar();
                 if (response.length() > 0) {
                     try {
                         customerCode = response.getString("CustomerCode");
@@ -151,7 +148,6 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
 
             @Override
             public void notifyError(String requestType, VolleyError error) {
-                hideProgressBar();
                 showAlert("Network error");
 
             }
@@ -174,7 +170,6 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            showProgressBar();
             serviceGateway = new VolleyServiceGateway(mVolleyListener, this);
             serviceGateway.postDataVolley("POSTCALL", "PriceChecker/check_cust.php", postParam);
 
@@ -342,19 +337,12 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
     @Override
     protected void onResume() {
         super.onResume();
-        hideProgressBar();
-    }
-    private void showProgressBar() {
-        progressBar.setVisibility(View.VISIBLE);
+
     }
 
-    private void hideProgressBar() {
-        progressBar.setVisibility(View.INVISIBLE);
-    }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        hideProgressBar();
     }
 }

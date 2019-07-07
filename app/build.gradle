@@ -49,4 +49,7 @@ dependencies {
 
     //iText pdf creator
     implementation 'com.itextpdf:itextg:5.5.10'
+
+    // work manager
+    implementation "android.arch.work:work-runtime:1.0.0-alpha11"
 }

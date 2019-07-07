@@ -1,12 +1,16 @@
 package com.alhikmahpro.www.e_inventory.View;
 
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -71,12 +75,14 @@ public class PaymentActivity extends AppCompatActivity {
     String customerName, invoiceNo, total, invoiceDate, salesmanId, mDate, customerCode, type, orderNo;
     int docNo;
     double disc, netAmount, base_total;
+
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
     ProgressDialog progressDialog;
     dbHelper helper;
     @BindView(R.id.textViewTotalRow)
     TextView textViewTotalRow;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +99,7 @@ public class PaymentActivity extends AppCompatActivity {
         invoiceDate = intent.getStringExtra("INV_DATE");
         invoiceNo = intent.getStringExtra("INV_NO");
         salesmanId = intent.getStringExtra("SALESMAN_ID");
-        int count=intent.getIntExtra("TOTAL_ROW",0);
+        int count = intent.getIntExtra("TOTAL_ROW", 0);
         base_total = intent.getDoubleExtra("TOTAL", 0);
         netAmount = base_total;
 
@@ -151,57 +157,69 @@ public class PaymentActivity extends AppCompatActivity {
         mVolleyListener = new volleyListener() {
             @Override
             public void notifySuccess(String requestType, JSONObject response) {
+                String result = "";
+                int syncStatus=DataContract.SYNC_STATUS_FAILED;
                 try {
-                    Log.d(TAG, "notifySuccess: "+response);
                     String res = response.getString("Status");
-                    if (res.equals("success")) {
-                        if(type.equals("GDS")){
-
-                            // update goods receive
-                            helper.updateGoodsSync(docNo);
-                        }else {// update invoice details
-                            helper.updateInvoiceSync(invoiceNo);
-                        }
-
-                        Toast.makeText(PaymentActivity.this, "Sync successfully", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(PaymentActivity.this, "Sync failed", Toast.LENGTH_SHORT).show();
+                    if(res.equals("success")){
+                        syncStatus=DataContract.SYNC_STATUS_OK;
+                        result="Saved successfully";
+                    }else {
+                        syncStatus=DataContract.SYNC_STATUS_FAILED;
+                        result="Failed to save !";
                     }
+
                 } catch (JSONException e) {
-                    Toast.makeText(PaymentActivity.this, "Unexpected response", Toast.LENGTH_SHORT).show();
+                    syncStatus=DataContract.SYNC_STATUS_FAILED;
+                    result = "Sync failed";
                     e.printStackTrace();
+                } finally {
+
+                    if(type.equals("GDS")){
+                        saveGoods(syncStatus);
+                    }else {
+                        saveSales(syncStatus);
+                    }
+                    showAlert(result);
                 }
             }
 
             @Override
             public void notifyError(String requestType, VolleyError error) {
-                Log.d(TAG, "notifyError: "+error);
-                Toast.makeText(PaymentActivity.this, "Network error try again later!", Toast.LENGTH_SHORT).show();
+
+                if (type.equals("GDS")) {
+                    // save goods receive sync failed
+                    saveGoods(DataContract.SYNC_STATUS_FAILED);
+
+                } else {
+                    // save invoice syn failed
+                    saveSales(DataContract.SYNC_STATUS_FAILED);
+                }
+
+
+                Log.d(TAG, "notifyError: " + error);
+                showAlert("Network Error, update later");
             }
         };
 
     }
 
-    // save goods receive and goods receive details in to local db
-    private void saveGoods(int syncStatus) {
-        boolean res = helper.saveGoods(docNo, orderNo, customerCode,customerName, invoiceNo, invoiceDate, salesmanId, base_total, disc, netAmount, paymentMode, mDate, syncStatus);
-        if (res) {
-            if (helper.saveGoodsDetails1(docNo, syncStatus)) {
-                generateGoodsJSON();
+    private void showAlert(String Message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Sync Status..");
+        builder.setMessage(Message);
+        builder.setCancelable(false);
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                gotoNext();
+
             }
-        }
-    }
-    //save sales and sales details into local db
-    private void saveSales(int syncStatus) {
-        boolean res = helper.saveInvoice(invoiceNo, invoiceDate, salesmanId, customerCode, customerName, base_total, disc, netAmount, paymentMode, mDate, syncStatus);
-        if (res) {
-            if (helper.saveInvoiceDetails(invoiceNo, syncStatus)) {
-                generateSalesJSON();
-            }
-        }
+        }).create().show();
     }
 
-    private void generateSalesJSON() {
+    private JSONObject generateSalesJSON() {
 
         //create invoice json array
 
@@ -213,7 +231,7 @@ public class PaymentActivity extends AppCompatActivity {
             invoiceObject.put(DataContract.Invoice.COL_CUSTOMER_CODE, customerCode);
             invoiceObject.put(DataContract.Invoice.COL_CUSTOMER_NAME, customerName);
             invoiceObject.put(DataContract.Invoice.COL_SALESMAN_ID, salesmanId);
-            invoiceObject.put(DataContract.Invoice.COL_TOTAL_AMOUNT,base_total);
+            invoiceObject.put(DataContract.Invoice.COL_TOTAL_AMOUNT, base_total);
             invoiceObject.put(DataContract.Invoice.COL_DISCOUNT_AMOUNT, disc);
             invoiceObject.put(DataContract.Invoice.COL_NET_AMOUNT, netAmount);
             invoiceObject.put(DataContract.Invoice.COL_PAYMENT_TYPE, paymentMode);
@@ -225,7 +243,7 @@ public class PaymentActivity extends AppCompatActivity {
 
         //create invoiceDetails json array
         JSONArray invoiceDetailsArray = new JSONArray();
-        int slNo=0;
+        int slNo = 0;
 
         for (CartModel cartModel : Cart.mCart) {
             slNo++;
@@ -266,12 +284,11 @@ public class PaymentActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        String url = "PriceChecker/sales_invoice.php";
-        sendToVolley(result, url);
+        return result;
 
     }
 
-    private void generateGoodsJSON() {
+    private JSONObject generateGoodsJSON() {
 
         //Add goodsItems into json array
         JSONArray goodsArray = new JSONArray();
@@ -283,7 +300,7 @@ public class PaymentActivity extends AppCompatActivity {
             object.put(DataContract.GoodsReceive.COL_INVOICE_NUMBER, invoiceNo);
             object.put(DataContract.GoodsReceive.COL_INVOICE_DATE, invoiceDate);
             object.put(DataContract.GoodsReceive.COL_STAFF_NAME, salesmanId);
-            object.put(DataContract.GoodsReceive.COL_TOTAL,base_total);
+            object.put(DataContract.GoodsReceive.COL_TOTAL, base_total);
             object.put(DataContract.GoodsReceive.COL_DISCOUNT_AMOUNT, disc);
             object.put(DataContract.GoodsReceive.COL_NET_AMOUNT, netAmount);
             object.put(DataContract.GoodsReceive.COL_PAYMENT_TYPE, paymentMode);
@@ -335,25 +352,16 @@ public class PaymentActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        String url = "PriceChecker/goods_receive.php";
-        sendToVolley(result, url);
+
+        return result;
     }
 
 
-    private void sendToVolley(JSONObject object, String url) {
 
-        //send to volley
-        View view = this.getCurrentFocus();
-        AppUtils.hideKeyboard(this, view);
-        progressDialog = AppUtils.showProgressDialog(this, "Loading....");
-        serviceGateway = new VolleyServiceGateway(mVolleyListener, this);
-        serviceGateway.postDataVolley("POSTCALL", url, object);
-
-    }
 
 
     private void gotoNext() {
-        Log.d(TAG, "gotoNext: "+type);
+        Log.d(TAG, "gotoNext: " + type);
         if (type.equals("SAL")) {
             Intent intent_print = new Intent(PaymentActivity.this, PrintViewActivity.class);
             intent_print.putExtra("TYPE", "new");
@@ -398,25 +406,38 @@ public class PaymentActivity extends AppCompatActivity {
 
     @OnClick(R.id.btn_pay)
     public void onViewClicked() {
-        if (type.equals("GDS")){
-            // saveGoods(DataContract.SYNC_STATUS_FAILED);
-            GoodsData data=new GoodsData(docNo, orderNo, customerCode,customerName, invoiceNo, invoiceDate, salesmanId, base_total, disc, netAmount, paymentMode, mDate, DataContract.SYNC_STATUS_FAILED);
-            SaveGoods saveGoods=new SaveGoods(this);
-            saveGoods.execute(data);
+        JSONObject resultObject = new JSONObject();
+        String url = "";
+        if (type.equals("GDS")) {
+            resultObject = generateGoodsJSON();
+            url = "PriceChecker/goods_receive.php";
+        } else if (type.equals("SAL")) {
+            resultObject = generateSalesJSON();
+            url = "PriceChecker/sales_invoice.php";
         }
+        if (resultObject.length() > 0) {
 
-        else{
-            //saveSales(DataContract.SYNC_STATUS_FAILED);
-            SaleData saleData=new SaleData(invoiceNo,customerCode,customerName,invoiceDate,salesmanId,base_total,disc,netAmount,paymentMode,mDate,DataContract.SYNC_STATUS_FAILED);
-            SaveSales saveSales=new SaveSales(this);
-            saveSales.execute(saleData);
+            //send to volley
+            View view = this.getCurrentFocus();
+            AppUtils.hideKeyboard(this, view);
+            serviceGateway = new VolleyServiceGateway(mVolleyListener, this);
+            serviceGateway.postDataVolley("POSTCALL", url, resultObject);
         }
-
-        gotoNext();
-
     }
 
+    public void saveSales(int sync) {
 
+        SaleData saleData = new SaleData(invoiceNo, customerCode, customerName, invoiceDate, salesmanId, base_total, disc, netAmount, paymentMode, mDate, sync);
+        SaveSales saveSales = new SaveSales(this);
+        saveSales.execute(saleData);
+    }
+
+    public void saveGoods(int sync) {
+
+        GoodsData data = new GoodsData(docNo, orderNo, customerCode, customerName, invoiceNo, invoiceDate, salesmanId, base_total, disc, netAmount, paymentMode, mDate, sync);
+        SaveGoods saveGoods = new SaveGoods(this);
+        saveGoods.execute(data);
+    }
 
 
     public String currencyFormatter(double val) {
@@ -432,4 +453,6 @@ public class PaymentActivity extends AppCompatActivity {
         paymentMode = radioButton.getText().toString();
         Log.d(TAG, "onRadioButtonClicked: " + paymentMode);
     }
+
+
 }
