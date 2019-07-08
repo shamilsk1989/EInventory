@@ -287,7 +287,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         Log.d(TAG, "onRadioButtonClicked: " + radioId);
         radioButton = findViewById(radioId);
         saleType = radioButton.getText().toString();
-        Toast.makeText(this, "selected radio button" + radioButton.getText(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "selected radio button" + radioButton.getText(), Toast.LENGTH_SHORT).show();
         calculateNetValue();
     }
 
@@ -354,63 +354,6 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
         //add item into cart
 
-        //check the cart is empty or not
-//        boolean is_found = false;
-//        if (Cart.mCart.size() > 0) {
-//            //check item already added into the cart
-//            for (position = 0; position < Cart.mCart.size(); position++) {
-//                CartModel cartModel = Cart.mCart.get(position);
-//                if (cartModel.getProductCode() == productCode) {
-//                    old_qty = cartModel.getQty();
-//                    is_found = true;
-//                    break;
-//                }
-//            }
-//            //if item found in cart update item
-//            if (is_found) {
-//                CartModel cartModel = new CartModel();
-//                Cart.mCart.remove(position);
-//                cartModel.setBarcode(barCode);
-//                cartModel.setProductCode(productCode);
-//                cartModel.setProductName(productName);
-//                cartModel.setSaleType(saleType);
-//                cartModel.setQty(qty + old_qty);
-//                cartModel.setSelectedUnit(selectedUnit);
-//                cartModel.setUnit1(unit1);
-//                cartModel.setUnit2(unit2);
-//                cartModel.setUnit3(unit3);
-//                cartModel.setUnit1Qty(unit1Qty);
-//                cartModel.setUnit2Qty(unit2Qty);
-//                cartModel.setUnit3Qty(unit3Qty);
-//                cartModel.setRate(rate);
-//                cartModel.setDiscount(disc);
-//                cartModel.setNet(net);
-//                Cart.mCart.add(position, cartModel);
-//            }
-        // if not found add items in to cart
-//            else {
-//                CartModel cartModel = new CartModel();
-//                cartModel.setBarcode(barCode);
-//                cartModel.setProductCode(productCode);
-//                cartModel.setProductName(productName);
-//                cartModel.setSaleType(saleType);
-//                cartModel.setQty(qty);
-//                cartModel.setSelectedUnit(selectedUnit);
-//                cartModel.setUnit1(unit1);
-//                cartModel.setUnit2(unit2);
-//                cartModel.setUnit3(unit3);
-//                cartModel.setUnit1Qty(unit1Qty);
-//                cartModel.setUnit2Qty(unit2Qty);
-//                cartModel.setUnit3Qty(unit3Qty);
-//                cartModel.setRate(rate);
-//                cartModel.setDiscount(disc);
-//                cartModel.setNet(net);
-//                Cart.mCart.add(cartModel);
-//
-//            }
-        // }
-        //the cart is empty; add items in to the cart
-        //  else {
 
         CartModel cartModel = new CartModel();
         cartModel.setBarcode(barCode);
@@ -438,11 +381,6 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         clearView();
         editTextBarcode.setFocusableInTouchMode(true);
         editTextBarcode.requestFocus();
-        for (CartModel model : Cart.mCart) {
-            Log.d(TAG, "addToCart: " + model.getProductName());
-
-
-        }
 
 
     }

@@ -26,6 +26,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.Adapter.SupplierAdapter;
+import com.alhikmahpro.www.e_inventory.AppUtils;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
 import com.alhikmahpro.www.e_inventory.Data.SupplierModel;
@@ -237,13 +238,17 @@ public class ListSupplierFragment extends DialogFragment implements SwipeRefresh
 
     private void getVolleyData() {
 
-        Toast.makeText(getActivity(), "loading RecyclerView", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getActivity(), "loading RecyclerView", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "loadRecyclerView: ");
-        mSwipeRefreshLayout.setRefreshing(true);
-        supplierArrayList.clear();
+        if(!AppUtils.isNetworkAvailable(getContext())){
+            Toast.makeText(getContext(), "No Internet", Toast.LENGTH_SHORT).show();
+        }else{
+            mSwipeRefreshLayout.setRefreshing(true);
+            supplierArrayList.clear();
+            serviceGateway = new VolleyServiceGateway(mVolleyListener, getContext());
+            serviceGateway.getDataVolley("POSTCALL", "PriceChecker/supplier_list.php");
+        }
 
-        serviceGateway = new VolleyServiceGateway(mVolleyListener, getContext());
-        serviceGateway.getDataVolley("POSTCALL", "PriceChecker/supplier_list.php");
     }
 
 

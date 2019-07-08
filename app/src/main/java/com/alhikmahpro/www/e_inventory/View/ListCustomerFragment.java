@@ -204,7 +204,7 @@ public class ListCustomerFragment extends DialogFragment implements SwipeRefresh
                                 SupplierModel model = supplierArrayList.get(position);
                                 String code = model.getSupplierCode();
 
-                                Toast.makeText(getActivity(), "code is" + code, Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getActivity(), "code is" + code, Toast.LENGTH_SHORT).show();
                                 mListener.onComplete(code);
                                 Dialog dialog = getDialog();
                                 dialog.dismiss();

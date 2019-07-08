@@ -42,9 +42,9 @@
 
                 <EditText
                     android:id="@+id/txtCompanyName"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:ems="15" />
+                   />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -53,9 +53,9 @@
 
                 <EditText
                     android:id="@+id/txtCompanyCode"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:ems="15" />
+                    />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -64,9 +64,8 @@
 
                 <EditText
                     android:id="@+id/txtBranchCode"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:ems="15"
                     android:inputType="text" />
 
                 <TextView
@@ -76,9 +75,8 @@
 
                 <EditText
                     android:id="@+id/txtLocationCode"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:ems="15"
                     android:inputType="text" />
 
                 <TextView
@@ -88,9 +86,9 @@
 
                 <EditText
                     android:id="@+id/txtPeriodCode"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:ems="15"
+
                     android:inputType="text" />
 
             </LinearLayout>
@@ -166,9 +164,9 @@
 
                 <EditText
                     android:id="@+id/txtDeviceId"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:ems="15" />
+                    />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -177,9 +175,9 @@
 
                 <EditText
                     android:id="@+id/txtHost"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:ems="15" />
+                     />
 
             </LinearLayout>
 

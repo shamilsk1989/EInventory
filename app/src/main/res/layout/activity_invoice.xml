@@ -24,9 +24,10 @@
 
         <EditText
             android:id="@+id/editTextUser"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="15" />
+            android:textColor="@android:color/black"
+            />
 
         <TextView
             android:layout_width="wrap_content"
@@ -44,6 +45,7 @@
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:paddingRight="60dp"
+                android:textColor="@android:color/black"
                 />
             <ImageButton
                 android:id="@+id/imgSearch"
@@ -62,9 +64,9 @@
 
         <EditText
             android:id="@+id/editTextInvoiceNo"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="15"
+            android:textColor="@android:color/black"
             android:inputType="text" />
 
         <TextView
@@ -83,6 +85,7 @@
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:paddingRight="60dp"
+                android:textColor="@android:color/black"
                 />
 
             <ImageButton
@@ -102,9 +105,9 @@
 
         <EditText
             android:id="@+id/editTextOrderNo"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="15"
+            android:textColor="@android:color/black"
             android:inputType="text" />
 
 

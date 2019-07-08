@@ -24,6 +24,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.Adapter.SelectionAdapter;
+import com.alhikmahpro.www.e_inventory.AppUtils;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.SelectionModel;
 import com.alhikmahpro.www.e_inventory.Data.SupplierModel;
@@ -235,18 +236,20 @@ public class ListItemFragment extends DialogFragment implements SwipeRefreshLayo
     }
     private void loadRecyclerView() {
         Log.d(TAG, "loadRecyclerView: "+itemName);
-        //Toast.makeText(getActivity(), "loading RecyclerView", Toast.LENGTH_SHORT).show();
-       /// Log.d(TAG, "loadRecyclerView: ");
-        mSwipeRefreshLayout.setRefreshing(true);
-        itemArrayList.clear();
-        JSONObject postParam = new JSONObject();
-        try {
-            postParam.put("Code",itemName);
-        } catch (JSONException e) {
-            e.printStackTrace();
+        if(!AppUtils.isNetworkAvailable(getContext())){
+            Toast.makeText(getContext(), "No Internet", Toast.LENGTH_SHORT).show();
+        }else {
+            mSwipeRefreshLayout.setRefreshing(true);
+            itemArrayList.clear();
+            JSONObject postParam = new JSONObject();
+            try {
+                postParam.put("Code", itemName);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            serviceGateway = new VolleyServiceGateway(mVolleyListener, getContext());
+            serviceGateway.postDataVolley("POSTCALL", "PriceChecker/item_list.php", postParam);
         }
-        serviceGateway = new VolleyServiceGateway(mVolleyListener, getContext());
-        serviceGateway.postDataVolley("POSTCALL", "PriceChecker/item_list.php",postParam);
     }
 
     @Override

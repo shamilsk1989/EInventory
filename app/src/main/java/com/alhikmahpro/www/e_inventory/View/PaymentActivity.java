@@ -277,6 +277,7 @@ public class PaymentActivity extends AppCompatActivity {
             }
         }
 
+        Log.d(TAG, "generateSalesJSON: invoice details JSON"+invoiceDetailsArray);
         JSONObject result = new JSONObject();
 
         try {
@@ -376,7 +377,9 @@ public class PaymentActivity extends AppCompatActivity {
             startActivity(intent_print);
         } else {
             // finish all activity and go to home activity
-            Intent intent = new Intent(getApplicationContext(), InvoiceActivity.class);
+            Cart.gCart.clear();
+            Intent intent = new Intent(getApplicationContext(), ListDocActivity.class);
+            intent.putExtra("Type",type);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
         }
@@ -428,7 +431,12 @@ public class PaymentActivity extends AppCompatActivity {
 
     }
 
+
     public void onRadioButtonClicked(View view) {
+
+        int radioId = radioGroup.getCheckedRadioButtonId();
+        Log.d(TAG, "onRadioButtonClicked: " + radioId);
+        radioButton = findViewById(radioId);
         paymentMode = radioButton.getText().toString();
         Log.d(TAG, "onRadioButtonClicked: " + paymentMode);
     }
@@ -444,20 +452,26 @@ public class PaymentActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        if(Action.equals("EDIT")){
-                            if(type.equals("GDS")){
-                                helper.deleteInvoiceById(invoiceNo);
-                            }else if(type.equals("SAL")){
+                        if(type.equals("GDS")){
+                            if(Action.equals("EDIT")){
                                 helper.deleteGoodsById(docNo);
-
                             }
+                            // finish all activity and go to home activity
+                            Cart.gCart.clear();
+                            Intent intent = new Intent(getApplicationContext(), ListDocActivity.class);
+                            intent.putExtra("Type","GDS");
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
+
+                        }else if(type.equals("SAL")){
+                            if(Action.equals("EDIT")){
+                                helper.deleteInvoiceById(invoiceNo);
+                            }
+                            Cart.mCart.clear();
+                            Intent intent = new Intent(getApplicationContext(), ListSalesActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
                         }
-
-                        Cart.mCart.clear();
-                        Cart.gCart.clear();
-                        Toast.makeText(PaymentActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
-                        finish();
-
                     }
                 })
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -472,6 +486,7 @@ public class PaymentActivity extends AppCompatActivity {
 
 
     }
+
 
     @OnClick(R.id.btn_pay)
     public void onBtnPayClicked() {
@@ -510,5 +525,7 @@ public class PaymentActivity extends AppCompatActivity {
 
         }
     }
+
+
 
 }

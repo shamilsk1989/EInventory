@@ -106,35 +106,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         //hideMenu();
     }
 
-//    private void hideMenu() {
-//        Log.d("menu", "hideMenu: ");
-//        //hide sales menu
-//        //sale.setVisible(false);
-//        if (user.equals("User")) {
-//            admin.setVisible(false);
-//        }
-//
-//        if (!SessionHandler.getInstance(this).isSetInventory()) {
-//            Log.d("menu", "Inventory false");
-//            inventory.setVisible(false);
-//        }else {
-//            inventory.setVisible(true);
-//        }
-//        if (!SessionHandler.getInstance(this).isSetGoodsReceive()) {
-//            Log.d("menu", "goods false");
-//            goods.setVisible(false);
-//        }else{
-//            goods.setVisible(true);
-//        }
-//        if (!SessionHandler.getInstance(this).isSetSale()) {
-//            Log.d("menu", "sales false");
-//            sale.setVisible(false);
-//        }else {
-//            sale.setVisible(true);
-//        }
-//
-//    }
-
 
     private void initView() {
 
@@ -176,6 +147,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }else {
+            // if settings table have no data then hide menu
+            inventory.setVisible(false);
+            goods.setVisible(false);
+            sale.setVisible(false);
         }
         user = SessionHandler.getInstance(HomeActivity.this).getUser();
         navUser.setText(user);

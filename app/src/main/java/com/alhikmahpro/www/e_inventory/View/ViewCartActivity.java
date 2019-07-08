@@ -37,6 +37,8 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
     RecyclerView.LayoutManager layoutManager;
     @BindView(R.id.txtTotal)
     TextView txtTotal;
+    @BindView(R.id.txtTotalCount)
+    TextView txtTotalCount;
     double total;
     String customerName, invoiceNo, salesmanId, customerCode, invoiceDate, Action;
     private static final String TAG = "ViewCartActivity";
@@ -111,6 +113,7 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Cart.mCart.remove(position);
+                        saleCartAdapter.notifyDataSetChanged();
                         saleCartAdapter.notifyItemRemoved(position);
                         saleCartAdapter.notifyItemRangeChanged(position, Cart.mCart.size());
                         calculate();
@@ -134,6 +137,7 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
         }
 
         txtTotal.setText(currencyFormatter(total));
+        txtTotalCount.setText(String.valueOf(Cart.mCart.size()));
 
     }
 

@@ -112,7 +112,7 @@ public class ListDocActivity extends AppCompatActivity {
     }
 
 
-    private void populateRecycler() {
+    private void populateRecycler()   {
 
         layoutManager = new LinearLayoutManager(this);
         docListRv.setLayoutManager(layoutManager);
@@ -144,6 +144,8 @@ public class ListDocActivity extends AppCompatActivity {
             startActivity(intent);
         }
         else if(type.equals("GDS")){
+
+            Log.d(TAG, "editDoc:supp code "+itemModel.getSupplierCode());
             Intent intent=new Intent(this,GoodsItemListActivity.class);
             intent.putExtra("ACTION","Edit");
             intent.putExtra("DOC_NO",itemModel.getDocNo());
