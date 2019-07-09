@@ -563,8 +563,15 @@ public class dbHelper extends SQLiteOpenHelper {
                 DataContract.GoodsReceive.COL_INVOICE_DATE,
                 DataContract.GoodsReceive.COL_STAFF_NAME,
                 DataContract.GoodsReceive.COL_TOTAL,
-                DataContract.GoodsReceive.COL_DATE_TIME
-                , DataContract.GoodsReceive.COL_IS_SYNC};
+                DataContract.GoodsReceive.COL_DISCOUNT_AMOUNT,
+                DataContract.GoodsReceive.COL_NET_AMOUNT,
+                DataContract.GoodsReceive.COL_PAYMENT_TYPE,
+                DataContract.GoodsReceive.COL_DATE_TIME,
+                DataContract.GoodsReceive.COL_IS_SYNC
+
+
+
+        };
         String orderBy = DataContract.GoodsReceive.COL_ID + " DESC ";
         Cursor cursor = database.query(DataContract.GoodsReceive.TABLE_NAME, projection, null, null, null, null, orderBy);
         return cursor;

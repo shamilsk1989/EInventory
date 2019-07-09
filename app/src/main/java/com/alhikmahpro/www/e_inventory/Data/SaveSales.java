@@ -7,10 +7,16 @@ import android.widget.Toast;
 
 
 public class SaveSales extends AsyncTask<SaleData, Void, String> {
-    Context mContext;
 
-    public SaveSales(Context mContext) {
+    public static interface TaskListener {
+        public abstract void onFinished(String result);
+    }
+    Context mContext;
+    private TaskListener taskListener;
+
+    public SaveSales(Context mContext,TaskListener taskListener) {
         this.mContext = mContext;
+        this.taskListener=taskListener;
     }
 
     @Override
@@ -35,7 +41,7 @@ public class SaveSales extends AsyncTask<SaleData, Void, String> {
             dbHelper.updateInvoice(invoiceNo, invoiceDate, salesmanId, customerCode, customerName, base_total, disc, netAmount, paymentMode, mDate, syncStatus);
             dbHelper.updateInvoiceDetails(invoiceNo, syncStatus);
 
-            return "Updated";
+            return "Saved";
 
         } else {
             database.close();
@@ -50,6 +56,10 @@ public class SaveSales extends AsyncTask<SaleData, Void, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        Toast.makeText(mContext, result, Toast.LENGTH_SHORT).show();
+        if(this.taskListener != null) {
+
+            // And if it is we call the callback function on it.
+            this.taskListener.onFinished(result);
+        }
     }
 }

@@ -70,7 +70,7 @@ public class PaymentActivity extends AppCompatActivity {
     String paymentMode;
     private static final String TAG = "PaymentActivity";
 
-    String customerName, invoiceNo, total, invoiceDate, salesmanId, mDate, customerCode, type, orderNo,Action;
+    String customerName, invoiceNo, total, invoiceDate, salesmanId, mDate, customerCode, type, orderNo, Action;
     int docNo;
     double disc, netAmount, base_total;
 
@@ -98,7 +98,7 @@ public class PaymentActivity extends AppCompatActivity {
         customerName = intent.getStringExtra("CUS_NAME");
         customerCode = intent.getStringExtra("CUS_CODE");
         invoiceDate = intent.getStringExtra("INV_DATE");
-        Log.d(TAG, "onCreate: invoice date"+invoiceDate);
+        Log.d(TAG, "onCreate: invoice date" + invoiceDate);
         invoiceNo = intent.getStringExtra("INV_NO");
         salesmanId = intent.getStringExtra("SALESMAN_ID");
         int count = intent.getIntExtra("TOTAL_ROW", 0);
@@ -142,9 +142,9 @@ public class PaymentActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
 
-                if (editTextDiscount.getText().toString().isEmpty()) {
-                    editTextDiscount.setText("0");
-                }
+//                if (editTextDiscount.getText().toString().isEmpty()) {
+//                    editTextDiscount.setText("0");
+//                }
 
                 calculateNetValue();
 
@@ -156,6 +156,8 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void initVolleyCallBack() {
 
+        //server response
+
         mVolleyListener = new volleyListener() {
             @Override
             public void notifySuccess(String requestType, JSONObject response) {
@@ -165,30 +167,33 @@ public class PaymentActivity extends AppCompatActivity {
                     String res = response.getString("Status");
                     if (res.equals("success")) {
                         syncStatus = DataContract.SYNC_STATUS_OK;
-                        result = "Saved successfully";
+                        result = "Sync Successful";
                     } else {
                         syncStatus = DataContract.SYNC_STATUS_FAILED;
-                        result = "Failed to save !";
+                        result = "Sync Failed !";
                     }
 
                 } catch (JSONException e) {
                     syncStatus = DataContract.SYNC_STATUS_FAILED;
-                    result = "Sync failed";
+                    result = "Sync Error";
                     e.printStackTrace();
                 } finally {
 
+                    // save to local database
+                    Toast.makeText(PaymentActivity.this, result, Toast.LENGTH_SHORT).show();
                     if (type.equals("GDS")) {
                         saveGoods(syncStatus);
                     } else {
                         saveSales(syncStatus);
                     }
-                    showAlert(result);
+
                 }
             }
 
             @Override
             public void notifyError(String requestType, VolleyError error) {
-
+                Log.d(TAG, "notifyError: " + error);
+                Toast.makeText(PaymentActivity.this, "Connection Error !", Toast.LENGTH_SHORT).show();
                 if (type.equals("GDS")) {
                     // save goods receive sync failed
                     saveGoods(DataContract.SYNC_STATUS_FAILED);
@@ -199,8 +204,6 @@ public class PaymentActivity extends AppCompatActivity {
                 }
 
 
-                Log.d(TAG, "notifyError: " + error);
-                showAlert("Network Error, update later");
             }
         };
 
@@ -215,7 +218,7 @@ public class PaymentActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
-                gotoNext();
+                //gotoNext();
 
             }
         }).create().show();
@@ -277,7 +280,7 @@ public class PaymentActivity extends AppCompatActivity {
             }
         }
 
-        Log.d(TAG, "generateSalesJSON: invoice details JSON"+invoiceDetailsArray);
+        Log.d(TAG, "generateSalesJSON: invoice details JSON" + invoiceDetailsArray);
         JSONObject result = new JSONObject();
 
         try {
@@ -379,7 +382,7 @@ public class PaymentActivity extends AppCompatActivity {
             // finish all activity and go to home activity
             Cart.gCart.clear();
             Intent intent = new Intent(getApplicationContext(), ListDocActivity.class);
-            intent.putExtra("Type",type);
+            intent.putExtra("Type", type);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
         }
@@ -410,15 +413,40 @@ public class PaymentActivity extends AppCompatActivity {
     public void saveSales(int sync) {
 
         SaleData saleData = new SaleData(invoiceNo, customerCode, customerName, invoiceDate, salesmanId, base_total, disc, netAmount, paymentMode, mDate, sync);
-        SaveSales saveSales = new SaveSales(this);
+        SaveSales.TaskListener listener=new SaveSales.TaskListener() {
+            @Override
+            public void onFinished(String result) {
+                if (result.equals("Saved")) {
+                    Log.d(TAG, "onFinished: " + result);
+                    // Toast.makeText(PaymentActivity.this, "Saved", Toast.LENGTH_SHORT).show();
+                    gotoNext();
+                }
+            }
+        };
+        SaveSales saveSales = new SaveSales(this,listener);
         saveSales.execute(saleData);
+
+
     }
 
     public void saveGoods(int sync) {
-
         GoodsData data = new GoodsData(docNo, orderNo, customerCode, customerName, invoiceNo, invoiceDate, salesmanId, base_total, disc, netAmount, paymentMode, mDate, sync);
-        SaveGoods saveGoods = new SaveGoods(this);
+
+        SaveGoods.TaskListener listener = new SaveGoods.TaskListener() {
+            @Override
+            public void onFinished(String result) {
+                if (result.equals("Saved")) {
+                    Log.d(TAG, "onFinished: " + result);
+                   // Toast.makeText(PaymentActivity.this, "Saved", Toast.LENGTH_SHORT).show();
+                    gotoNext();
+                }
+
+            }
+        };
+
+        SaveGoods saveGoods = new SaveGoods(this, listener);
         saveGoods.execute(data);
+
     }
 
 
@@ -452,19 +480,19 @@ public class PaymentActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        if(type.equals("GDS")){
-                            if(Action.equals("EDIT")){
+                        if (type.equals("GDS")) {
+                            if (Action.equals("EDIT")) {
                                 helper.deleteGoodsById(docNo);
                             }
                             // finish all activity and go to home activity
                             Cart.gCart.clear();
                             Intent intent = new Intent(getApplicationContext(), ListDocActivity.class);
-                            intent.putExtra("Type","GDS");
+                            intent.putExtra("Type", "GDS");
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(intent);
 
-                        }else if(type.equals("SAL")){
-                            if(Action.equals("EDIT")){
+                        } else if (type.equals("SAL")) {
+                            if (Action.equals("EDIT")) {
                                 helper.deleteInvoiceById(invoiceNo);
                             }
                             Cart.mCart.clear();
@@ -481,8 +509,6 @@ public class PaymentActivity extends AppCompatActivity {
                         dialog.cancel();
                     }
                 }).create().show();
-
-
 
 
     }
@@ -506,8 +532,9 @@ public class PaymentActivity extends AppCompatActivity {
             View view = this.getCurrentFocus();
             AppUtils.hideKeyboard(this, view);
 
-            if(!AppUtils.isNetworkAvailable(this)){
+            if (!AppUtils.isNetworkAvailable(this)) {
                 Toast.makeText(this, "No Internet ", Toast.LENGTH_SHORT).show();
+                // no internet save to local db directly
                 if (type.equals("GDS")) {
                     // save goods receive sync failed
                     saveGoods(DataContract.SYNC_STATUS_FAILED);
@@ -516,16 +543,14 @@ public class PaymentActivity extends AppCompatActivity {
                     // save invoice syn failed
                     saveSales(DataContract.SYNC_STATUS_FAILED);
                 }
-                gotoNext();
-
-            }else {
+            } else {
+                // if internet available send to server
                 serviceGateway = new VolleyServiceGateway(mVolleyListener, this);
                 serviceGateway.postDataVolley("POSTCALL", url, resultObject);
             }
 
         }
     }
-
 
 
 }

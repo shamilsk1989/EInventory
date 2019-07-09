@@ -109,9 +109,9 @@ public class GoodsItemListActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Document  " + docNo);
         helper = new dbHelper(this);
 
+        // check action is edit or not if edit then load item db to gCart;
         if (action.equals("Edit")) {
             // if edit then load goodsDetail from database by docNo.
-
             if (Cart.gCart.size() > 0) {
                 Cart.gCart.clear();
             }
@@ -239,6 +239,7 @@ public class GoodsItemListActivity extends AppCompatActivity {
     public void onViewClicked() {
 
         Log.d(TAG, "onViewClicked: " + "doc :" + docNo + "suppl :" + supplierName);
+        Log.d(TAG, "onViewClicked:gCart "+Cart.gCart.size());
         Intent intent_payment = new Intent(GoodsItemListActivity.this, PaymentActivity.class);
         intent_payment.putExtra("ACTION", "NEW");
         intent_payment.putExtra("TYPE", "GDS");
@@ -255,13 +256,7 @@ public class GoodsItemListActivity extends AppCompatActivity {
     }
 
 
-    private void gotoNext() {
 
-
-        Intent i = new Intent(GoodsItemListActivity.this, HomeActivity.class);
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(i);
-    }
 
     @Override
     public boolean onSupportNavigateUp() {

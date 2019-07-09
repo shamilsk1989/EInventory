@@ -1,11 +1,70 @@
+////{
+////  "Goods": [
+////    {
+////      "document_number": 5,
+////      "staff_name": "android-13",
+////      "total": 630,
+////      "discount_amount": 0,
+////      "net_amount": 630,
+////      "payment_type": "Cash",
+////      "date_time": "08-07-2019"
+////    }
+////  ],
+////  "Details": [
+////    {
+////      "serial_no": 1,
+////      "doc_no": 5,
+////      "bar_code": "101",
+////      "product_code": "513691",
+////      "product_name": "3+1ST ACTIVITY BOOK ENGLISH",
+////      "quantity": 70,
+////      "free_quantity": 0,
+////      "rate": 9,
+////      "discount": 0,
+////      "net_value": 630,
+////      "um1": "EA",
+////      "um2": "DOZ",
+////      "um3": "",
+////      "selected_unit": "EA",
+////      "selected_free_unit": "EA",
+////      "um1_qty": 1,
+////      "um2_qty": 12,
+////      "um3_qty": 0
+////    },
+////    {
+////      "serial_no": 2,
+////      "doc_no": 5,
+////      "bar_code": "5136770",
+////      "product_code": "513677",
+////      "product_name": "3+1ST ACTIVITY BOOK IQ ",
+////      "quantity": 30,
+////      "free_quantity": 0,
+////      "rate": 0,
+////      "discount": 0,
+////      "net_value": 0,
+////      "um1": "EA",
+////      "um2": "",
+////      "um3": "",
+////      "selected_unit": "EA",
+////      "selected_free_unit": "EA",
+////      "um1_qty": 1,
+////      "um2_qty": 0,
+////      "um3_qty": 0
+////    }
+////  ]
+////}
 //{
 //  "Goods": [
 //    {
-//      "document_number": 5,
-//      "staff_name": "android-13",
-//      "total": 630,
-//      "discount_amount": 0,
-//      "net_amount": 630,
+//      "document_number": 6,
+//      "order_no": "",
+//      "supplier_code": "V0001",
+//      "invoice_no": "android-14\/1",
+//      "invoice_date": "08-07-2019",
+//      "staff_name": "android-14",
+//      "total": 720,
+//      "discount_amount": 20,
+//      "net_amount": 700,
 //      "payment_type": "Cash",
 //      "date_time": "08-07-2019"
 //    }
@@ -13,31 +72,11 @@
 //  "Details": [
 //    {
 //      "serial_no": 1,
-//      "doc_no": 5,
-//      "bar_code": "101",
-//      "product_code": "513691",
-//      "product_name": "3+1ST ACTIVITY BOOK ENGLISH",
-//      "quantity": 70,
-//      "free_quantity": 0,
-//      "rate": 9,
-//      "discount": 0,
-//      "net_value": 630,
-//      "um1": "EA",
-//      "um2": "DOZ",
-//      "um3": "",
-//      "selected_unit": "EA",
-//      "selected_free_unit": "EA",
-//      "um1_qty": 1,
-//      "um2_qty": 12,
-//      "um3_qty": 0
-//    },
-//    {
-//      "serial_no": 2,
-//      "doc_no": 5,
+//      "doc_no": 6,
 //      "bar_code": "5136770",
 //      "product_code": "513677",
 //      "product_name": "3+1ST ACTIVITY BOOK IQ ",
-//      "quantity": 30,
+//      "quantity": 60,
 //      "free_quantity": 0,
 //      "rate": 0,
 //      "discount": 0,
@@ -50,21 +89,42 @@
 //      "um1_qty": 1,
 //      "um2_qty": 0,
 //      "um3_qty": 0
+//    },
+//    {
+//      "serial_no": 2,
+//      "doc_no": 6,
+//      "bar_code": "101",
+//      "product_code": "513691",
+//      "product_name": "3+1ST ACTIVITY BOOK ENGLISH",
+//      "quantity": 80,
+//      "free_quantity": 0,
+//      "rate": 9,
+//      "discount": 0,
+//      "net_value": 720,
+//      "um1": "EA",
+//      "um2": "DOZ",
+//      "um3": "",
+//      "selected_unit": "EA",
+//      "selected_free_unit": "EA",
+//      "um1_qty": 1,
+//      "um2_qty": 12,
+//      "um3_qty": 0
 //    }
 //  ]
 //}
+
 {
   "Goods": [
     {
-      "document_number": 6,
+      "document_number": 4,
       "order_no": "",
       "supplier_code": "V0001",
-      "invoice_no": "android-14\/1",
+      "invoice_no": "and-5",
       "invoice_date": "08-07-2019",
-      "staff_name": "android-14",
-      "total": 720,
-      "discount_amount": 20,
-      "net_amount": 700,
+      "staff_name": "android-3",
+      "total": 54,
+      "discount_amount": 0,
+      "net_amount": 54,
       "payment_type": "Cash",
       "date_time": "08-07-2019"
     }
@@ -72,11 +132,31 @@
   "Details": [
     {
       "serial_no": 1,
-      "doc_no": 6,
-      "bar_code": "5136770",
-      "product_code": "513677",
-      "product_name": "3+1ST ACTIVITY BOOK IQ ",
-      "quantity": 60,
+      "doc_no": 4,
+      "bar_code": "101",
+      "product_code": "513691",
+      "product_name": "3+1ST ACTIVITY BOOK ENGLISH",
+      "quantity": 6,
+      "free_quantity": 0,
+      "rate": 9,
+      "discount": 0,
+      "net_value": 54,
+      "um1": "EA",
+      "um2": "DOZ",
+      "um3": "",
+      "selected_unit": "EA",
+      "selected_free_unit": "EA",
+      "um1_qty": 1,
+      "um2_qty": 12,
+      "um3_qty": 0
+    },
+    {
+      "serial_no": 2,
+      "doc_no": 4,
+      "bar_code": "5136530",
+      "product_code": "513653",
+      "product_name": "3+1ST ACTIVITY BOOK ENVIRONMENT ",
+      "quantity": 9,
       "free_quantity": 0,
       "rate": 0,
       "discount": 0,
@@ -88,26 +168,6 @@
       "selected_free_unit": "EA",
       "um1_qty": 1,
       "um2_qty": 0,
-      "um3_qty": 0
-    },
-    {
-      "serial_no": 2,
-      "doc_no": 6,
-      "bar_code": "101",
-      "product_code": "513691",
-      "product_name": "3+1ST ACTIVITY BOOK ENGLISH",
-      "quantity": 80,
-      "free_quantity": 0,
-      "rate": 9,
-      "discount": 0,
-      "net_value": 720,
-      "um1": "EA",
-      "um2": "DOZ",
-      "um3": "",
-      "selected_unit": "EA",
-      "selected_free_unit": "EA",
-      "um1_qty": 1,
-      "um2_qty": 12,
       "um3_qty": 0
     }
   ]

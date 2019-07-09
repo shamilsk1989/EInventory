@@ -7,12 +7,24 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class SaveGoods extends AsyncTask<GoodsData,Void,String> {
+    public SaveGoods() {
+    }
+
+    public static interface TaskListener {
+        public abstract void onFinished(String result);
+    }
     Context mContext;
     private static final String TAG = "SaveGoods";
-
-    public SaveGoods(Context mContext) {
+    private TaskListener taskListener;
+    public SaveGoods(Context mContext, TaskListener taskListener) {
         this.mContext = mContext;
-    }
+        this.taskListener = taskListener;
+}
+
+
+
+
+
 
     @Override
     protected void onPreExecute() {
@@ -44,7 +56,7 @@ public class SaveGoods extends AsyncTask<GoodsData,Void,String> {
 
            dbHelper.updateGoods(docNo,orderNo,customerCode,customerName,invoiceNo,invoiceDate,salesmanId,base_total,disc,netAmount,paymentMode,mDate,syncStatus);
            dbHelper.updateGoodsDetails1(docNo,syncStatus);
-           return "Updated";
+           return "Saved";
         }else {
             database.close();
             dbHelper.saveGoods(docNo,orderNo,customerCode,customerName,invoiceNo,invoiceDate,salesmanId,base_total,disc,netAmount,paymentMode,mDate,syncStatus);
@@ -56,7 +68,12 @@ public class SaveGoods extends AsyncTask<GoodsData,Void,String> {
 
     @Override
     protected void onPostExecute(String result) {
-        Toast.makeText(mContext, result, Toast.LENGTH_SHORT).show();
+        if(this.taskListener != null) {
+
+            // And if it is we call the callback function on it.
+            this.taskListener.onFinished(result);
+        }
+        //Toast.makeText(mContext, result, Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -98,9 +98,17 @@ public class ListDocActivity extends AppCompatActivity {
             do {
                 ItemModel model = new ItemModel();
                 model.setDocNo(cursor.getInt(cursor.getColumnIndex(DataContract.GoodsReceive.COL_DOCUMENT_NUMBER)));
+                model.setOrderNo(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_ORDER_NUMBER)));
+                model.setSupplierCode(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_SUPPLIER_CODE)));
+                model.setSupplierName(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_SUPPLIER_NAME)));
+                model.setInvoiceNo(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_INVOICE_NUMBER)));
+                model.setInvoiceDate(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_INVOICE_DATE)));
                 model.setStaffName(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_STAFF_NAME)));
                 model.setTotal(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceive.COL_TOTAL)));
+                model.setDiscount(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceive.COL_DISCOUNT_AMOUNT)));
+                model.setNet(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceive.COL_NET_AMOUNT)));
                 model.setDate(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_DATE_TIME)));
+                model.setPaymentType(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_PAYMENT_TYPE)));
                 model.setIs_sync(cursor.getInt(cursor.getColumnIndex(DataContract.Stocks.COL_IS_SYNC)));
                 list.add(model);
             } while (cursor.moveToNext());
