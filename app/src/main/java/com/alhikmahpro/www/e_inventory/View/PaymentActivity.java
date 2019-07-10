@@ -98,7 +98,7 @@ public class PaymentActivity extends AppCompatActivity {
         customerName = intent.getStringExtra("CUS_NAME");
         customerCode = intent.getStringExtra("CUS_CODE");
         invoiceDate = intent.getStringExtra("INV_DATE");
-        Log.d(TAG, "onCreate: invoice date" + invoiceDate);
+        Log.d(TAG, " payment activity onCreate: invoice date" + invoiceDate);
         invoiceNo = intent.getStringExtra("INV_NO");
         salesmanId = intent.getStringExtra("SALESMAN_ID");
         int count = intent.getIntExtra("TOTAL_ROW", 0);
@@ -124,8 +124,9 @@ public class PaymentActivity extends AppCompatActivity {
         int radioId = radioGroup.getCheckedRadioButtonId();
         radioButton = findViewById(radioId);
         paymentMode = radioButton.getText().toString();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-        mDate = sdf.format(new Date());
+        //SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        //mDate = sdf.format(new Date());
+        mDate=AppUtils.getDateAndTime();
         helper = new dbHelper(this);
 
         editTextDiscount.addTextChangedListener(new TextWatcher() {
@@ -209,20 +210,7 @@ public class PaymentActivity extends AppCompatActivity {
 
     }
 
-    private void showAlert(String Message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Sync Status..");
-        builder.setMessage(Message);
-        builder.setCancelable(false);
-        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-                //gotoNext();
 
-            }
-        }).create().show();
-    }
 
     private JSONObject generateSalesJSON() {
 
@@ -232,7 +220,7 @@ public class PaymentActivity extends AppCompatActivity {
         JSONObject invoiceObject = new JSONObject();
         try {
             invoiceObject.put(DataContract.Invoice.COL_INVOICE_NUMBER, invoiceNo);
-            invoiceObject.put(DataContract.Invoice.COL_INVOICE_DATE, mDate);
+            invoiceObject.put(DataContract.Invoice.COL_INVOICE_DATE,invoiceDate.substring(0,10));
             invoiceObject.put(DataContract.Invoice.COL_CUSTOMER_CODE, customerCode);
             invoiceObject.put(DataContract.Invoice.COL_CUSTOMER_NAME, customerName);
             invoiceObject.put(DataContract.Invoice.COL_SALESMAN_ID, salesmanId);
@@ -304,13 +292,13 @@ public class PaymentActivity extends AppCompatActivity {
             object.put(DataContract.GoodsReceive.COL_ORDER_NUMBER, orderNo);
             object.put(DataContract.GoodsReceive.COL_SUPPLIER_CODE, customerCode);
             object.put(DataContract.GoodsReceive.COL_INVOICE_NUMBER, invoiceNo);
-            object.put(DataContract.GoodsReceive.COL_INVOICE_DATE, invoiceDate);
+            object.put(DataContract.GoodsReceive.COL_INVOICE_DATE, invoiceDate.substring(0,10));
             object.put(DataContract.GoodsReceive.COL_STAFF_NAME, salesmanId);
             object.put(DataContract.GoodsReceive.COL_TOTAL, base_total);
             object.put(DataContract.GoodsReceive.COL_DISCOUNT_AMOUNT, disc);
             object.put(DataContract.GoodsReceive.COL_NET_AMOUNT, netAmount);
             object.put(DataContract.GoodsReceive.COL_PAYMENT_TYPE, paymentMode);
-            object.put(DataContract.GoodsReceive.COL_DATE_TIME, mDate);
+            object.put(DataContract.GoodsReceive.COL_DATE_TIME, mDate.substring(0,10));
             goodsArray.put(object);
         } catch (JSONException e) {
             e.printStackTrace();

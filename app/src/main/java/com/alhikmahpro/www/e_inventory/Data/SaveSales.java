@@ -3,6 +3,7 @@ package com.alhikmahpro.www.e_inventory.Data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
 
 
@@ -13,6 +14,7 @@ public class SaveSales extends AsyncTask<SaleData, Void, String> {
     }
     Context mContext;
     private TaskListener taskListener;
+    private static final String TAG = "SaveSales";
 
     public SaveSales(Context mContext,TaskListener taskListener) {
         this.mContext = mContext;
@@ -35,6 +37,7 @@ public class SaveSales extends AsyncTask<SaleData, Void, String> {
         double netAmount = data[0].netAmount;
         String paymentMode = data[0].paymentMode;
         String mDate = data[0].mDate;
+        Log.d(TAG, "doInBackground: "+invoiceDate);
         int syncStatus = data[0].syncStatus;
         if (dbHelper.checkInvoice(database, invoiceNo)) {
             database.close();

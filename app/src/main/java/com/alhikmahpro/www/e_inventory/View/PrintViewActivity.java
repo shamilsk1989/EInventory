@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -1034,9 +1035,11 @@ public class PrintViewActivity extends AppCompatActivity {
             insertCell(pTable, decimalFormat.format(netAmount), Element.ALIGN_RIGHT, 1, normal);
             paragraph.add(pTable);
             document.add(paragraph);
+            Toast.makeText(this, "Pdf Generated", Toast.LENGTH_SHORT).show();
 
 
             //previewPDF(fileName,dir);
+            document.close();
 
         } catch (DocumentException de) {
             Toast.makeText(this, "Error " + de.getMessage(), Toast.LENGTH_SHORT).show();
@@ -1045,8 +1048,6 @@ public class PrintViewActivity extends AppCompatActivity {
             de.printStackTrace();
         } catch (Exception ex) {
             ex.printStackTrace();
-        } finally {
-            document.close();
         }
     }
 
@@ -1083,6 +1084,15 @@ public class PrintViewActivity extends AppCompatActivity {
             Log.d(TAG, "previewPDF: no file ");
         }
 
+    }
+
+
+    static class createPdf extends AsyncTask<Void,Void,Void>{
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            return null;
+        }
     }
 
 

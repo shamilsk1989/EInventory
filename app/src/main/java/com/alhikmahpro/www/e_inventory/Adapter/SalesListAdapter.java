@@ -44,7 +44,7 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
 
         ItemModel itemModel=saleList.get(position);
         holder.invoiceNo.setText(itemModel.getInvoiceNo());
-        String date=itemModel.getDate();
+        String date=itemModel.getInvoiceDate();
         Log.d(TAG, "onBindViewHolder:date "+date);
         int sync=itemModel.getIs_sync();
         if(sync==DataContract.SYNC_STATUS_OK){
@@ -53,7 +53,7 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
         if(sync==DataContract.SYNC_STATUS_FAILED){
             holder.imgSyncOk.setImageResource(R.drawable.ic_sync_error);
         }
-        holder.invoiceDate.setText(date.substring(0,10));
+        holder.invoiceDate.setText(date);
         holder.invoiceAmount.setText(currencyFormatter(itemModel.getNet()));
         holder.customerName.setText(itemModel.getCustomerName());
         holder.imgEdit.setOnClickListener(new View.OnClickListener() {
@@ -91,9 +91,6 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
             customerName=itemView.findViewById(R.id.rv_customer);
 
         }
-
-
-
     }
 
     public String currencyFormatter(double val) {

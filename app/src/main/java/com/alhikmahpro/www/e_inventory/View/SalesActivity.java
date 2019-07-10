@@ -118,7 +118,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
     double price1 = 0, price2 = 0, price3 = 0, cost = 0, costPrice = 0, salePrice = 0, quantity, discount = 0, rate = 0;
     int unit1Qty, unit2Qty, unit3Qty, unitIndex;
-    String barCode, productCode, productName, saleType, selectedUnit, unit1, unit2, unit3, packing1, packing2, packing3, mDate, invoiceNo;
+    String barCode, productCode, productName, saleType, selectedUnit, unit1, unit2, unit3, packing1, packing2, packing3, invoiceDate, invoiceNo;
     ArrayList<String> list;
     boolean is_first;
 
@@ -609,12 +609,12 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         //mDate = sdf.format(new Date());
-        mDate = AppUtils.getDateAndTime();
+        invoiceDate = AppUtils.getDateAndTime();
         helper = new dbHelper(this);
         int last_no = helper.getLastInvoiceNo();
-        Log.d(TAG, "setDoc: " + last_no + mDate);
+        Log.d(TAG, "setDoc: " + last_no +"***" + invoiceDate);
         int mDoc = last_no + 1;
-        textViewDate.setText(mDate);
+        textViewDate.setText(invoiceDate);
         invoiceNo = "INV" + "-" + mDoc;
         textViewInvoice.setText(invoiceNo);
         textViewCustomer.setText(customerName);
@@ -701,7 +701,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         intent.putExtra("CUS_CODE", customerCode);
         intent.putExtra("SALESMAN_ID", salesmanId);
         intent.putExtra("DOC_NO", invoiceNo);
-        intent.putExtra("DOC_DATE", mDate);
+        intent.putExtra("DOC_DATE", invoiceDate);
         startActivity(intent);
 
 

@@ -620,7 +620,7 @@ public class dbHelper extends SQLiteOpenHelper {
             contentValues.put(DataContract.Invoice.COL_IS_SYNC, status);
             database.insert(DataContract.Invoice.TABLE_NAME, null, contentValues);
             database.close();
-            Log.d(TAG, "one row inserted in goods table ......... ");
+            Log.d(TAG, "one row inserted in sales table ......... ");
             return true;
         } catch (Exception e) {
             return false;

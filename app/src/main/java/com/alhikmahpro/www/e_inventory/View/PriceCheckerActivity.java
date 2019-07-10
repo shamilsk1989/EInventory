@@ -1,17 +1,12 @@
 package com.alhikmahpro.www.e_inventory.View;
 
 import android.Manifest;
-
 import android.app.ProgressDialog;
 import android.content.Context;
-
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -26,6 +21,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -33,24 +29,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.AppUtils;
-import com.alhikmahpro.www.e_inventory.Data.DataContract;
-import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
 import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
 import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
-import com.alhikmahpro.www.e_inventory.Network.VolleySingleton;
-import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.R;
-import com.android.volley.AuthFailureError;
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.NetworkError;
-import com.android.volley.NoConnectionError;
-import com.android.volley.ParseError;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.ServerError;
-import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.CaptureActivity;
@@ -59,8 +41,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -92,14 +72,15 @@ public class PriceCheckerActivity extends AppCompatActivity {
     private static final int CAMERA_PERMISSION_CODE = 100;
 
     String companyCode, companyName, deviceId, branchCode, locationCode, periodCode;
-    @BindView(R.id.header_layout)
-    LinearLayout headerLayout;
-    @BindView(R.id.txtviewPrice1)
-    TextView txtviewPrice1;
-    @BindView(R.id.txtviewPrice2)
-    TextView txtviewPrice2;
-    @BindView(R.id.txtviewPrice3)
-    TextView txtviewPrice3;
+
+    @BindView(R.id.txtViewPrice1)
+    TextView txtViewPrice1;
+    @BindView(R.id.txtViewPrice2)
+    TextView txtViewPrice2;
+    @BindView(R.id.txtViewPrice3)
+    TextView txtViewPrice3;
+    @BindView(R.id.btnClear)
+    Button btnClear;
     private String BASE_URL = "";
     private ConnectivityManager connectivityManager;
     ProgressDialog progressDialog;
@@ -150,11 +131,10 @@ public class PriceCheckerActivity extends AppCompatActivity {
             public void notifySuccess(String requestType, JSONObject response) {
                 progressDialog.cancel();
                 Log.d(TAG, "Response: " + response);
-                if(response.length()>0){
+                if (response.length() > 0) {
                     clearView();
                     setValues(response);
-                }
-                else{
+                } else {
                     clearView();
                     showAlert("Not Found..");
                     String val = txtBarcode.getText().toString();
@@ -181,12 +161,20 @@ public class PriceCheckerActivity extends AppCompatActivity {
         txtPrice2.setEnabled(false);
         txtPrice3.setEnabled(false);
         txtStock.setEnabled(false);
+        txtPrice2.setVisibility(View.GONE);
+        txtPrice3.setVisibility(View.GONE);
+
+        txtViewPrice2.setVisibility(View.GONE);
+        txtViewPrice3.setVisibility(View.GONE);
+
+        txtBarcode.setFocusableInTouchMode(true);
+        txtBarcode.requestFocus();
     }
 
 
     private void clearView() {
 
-        //txtBarcode.setText("");
+
         txtCode.setText("");
         txtName.setText("");
         txtPrice1.setText("");
@@ -235,23 +223,23 @@ public class PriceCheckerActivity extends AppCompatActivity {
 
     }
 
-    void getDataFromVolley(){
+    void getDataFromVolley() {
         View view = this.getCurrentFocus();
-        AppUtils.hideKeyboard(this,view);
+        AppUtils.hideKeyboard(this, view);
         String code = txtBarcode.getText().toString();
         code = code.replace("\n", "").replace("\r", "");
 
         if (validate(code)) {
-            JSONObject postParam=new JSONObject();
+            JSONObject postParam = new JSONObject();
             try {
-                postParam.put("Code",code);
+                postParam.put("Code", code);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
-            progressDialog=AppUtils.showProgressDialog(this,"Loading....");
+            progressDialog = AppUtils.showProgressDialog(this, "Loading....");
             serviceGateway = new VolleyServiceGateway(mVolleyListener, this);
-            serviceGateway.postDataVolley("POSTCALL", "PriceChecker/check_price.php",postParam);
+            serviceGateway.postDataVolley("POSTCALL", "PriceChecker/check_price.php", postParam);
 
         }
     }
@@ -279,23 +267,23 @@ public class PriceCheckerActivity extends AppCompatActivity {
             DecimalFormat format = new DecimalFormat("#,###,##0.00");
 
             if (unitQty2 > 0) {
-                txtviewPrice2.setVisibility(View.VISIBLE);
+                txtViewPrice2.setVisibility(View.VISIBLE);
                 txtPrice2.setVisibility(View.VISIBLE);
             } else {
-                txtviewPrice2.setVisibility(View.GONE);
+                txtViewPrice2.setVisibility(View.GONE);
                 txtPrice2.setVisibility(View.GONE);
             }
 
             if (unitQty3 > 0) {
-                txtviewPrice3.setVisibility(View.VISIBLE);
+                txtViewPrice3.setVisibility(View.VISIBLE);
                 txtPrice3.setVisibility(View.VISIBLE);
             } else {
-                txtviewPrice3.setVisibility(View.GONE);
+                txtViewPrice3.setVisibility(View.GONE);
                 txtPrice3.setVisibility(View.GONE);
             }
-            txtviewPrice1.setText("Price - " + packing1);
-            txtviewPrice2.setText("Price - " + packing2);
-            txtviewPrice3.setText("Price - " + packing3);
+            txtViewPrice1.setText("Price - " + packing1);
+            txtViewPrice2.setText("Price - " + packing2);
+            txtViewPrice3.setText("Price - " + packing3);
 
 
             txtPrice1.setText(format.format(price1));
@@ -325,7 +313,6 @@ public class PriceCheckerActivity extends AppCompatActivity {
             }
         }).create().show();
     }
-
 
 
     private void scanBarcode() {
@@ -404,4 +391,13 @@ public class PriceCheckerActivity extends AppCompatActivity {
     }
 
 
+    @OnClick(R.id.btnClear)
+    public void onViewClicked() {
+        clearView();
+        txtBarcode.setText("");
+        txtBarcode.setFocusableInTouchMode(true);
+        txtBarcode.requestFocus();
+
+
+    }
 }

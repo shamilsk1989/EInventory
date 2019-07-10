@@ -58,7 +58,7 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
         salesmanId = intent.getStringExtra("SALESMAN_ID");
         invoiceNo = intent.getStringExtra("DOC_NO");
         invoiceDate = intent.getStringExtra("DOC_DATE");
-        Log.d(TAG, "onCreate: invoice no: " + invoiceNo);
+        Log.d(TAG, "view cart onCreate: invoice no: and Date" + invoiceNo+"/"+invoiceDate);
         dbHelper helper = new dbHelper(this);
         loadRecyclerView();
         calculate();

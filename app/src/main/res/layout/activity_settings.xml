@@ -38,6 +38,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
                     android:text="Company Name" />
 
                 <EditText
@@ -49,17 +51,22 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
                     android:text="Company Code" />
 
                 <EditText
                     android:id="@+id/txtCompanyCode"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+
                     />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
                     android:text="Branch Code" />
 
                 <EditText
@@ -71,6 +78,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
                     android:text="Location Code" />
 
                 <EditText
@@ -82,6 +91,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
                     android:text="Period Code" />
 
                 <EditText
@@ -113,7 +124,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Logo"
-                    android:textSize="15dp"
+
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
                     android:textStyle="bold"
                     />
 
@@ -160,6 +173,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
                     android:text="Employee Name" />
 
                 <EditText
@@ -171,6 +186,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
                     android:text="Server URL" />
 
                 <EditText
@@ -202,6 +219,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
                     android:text="Inventory" />
 
                 <Switch
@@ -213,6 +232,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
                     android:text="Goods" />
 
                 <Switch
@@ -224,6 +245,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
                     android:text="Sale" />
 
                 <Switch
