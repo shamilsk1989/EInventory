@@ -125,7 +125,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
             if(is_inv==DataContract.INV_ON)
                 inventory.setVisible(true);
-
             else
                 inventory.setVisible(false);
 
@@ -138,6 +137,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 sale.setVisible(true);
             else
                 sale.setVisible(false);
+
+
+            if(SessionHandler.getInstance(this).getUser().equals("User")){
+                admin.setVisible(false);
+
+            }
 
             Log.d(TAG, "Logo" + img.toString());
 
@@ -425,5 +430,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
         Log.d(TAG, "onResume: ");
         initView();
+
     }
 }

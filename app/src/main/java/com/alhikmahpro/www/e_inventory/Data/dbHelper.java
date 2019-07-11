@@ -749,8 +749,8 @@ public class dbHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    public Cursor getInvoice(SQLiteDatabase database) {
-        Log.d(TAG, "getInvoice: ");
+    public Cursor  getInvoice(SQLiteDatabase database) {
+        Log.d(TAG, "get all Invoice: ");
         String[] projection = {
                 DataContract.Invoice.COL_INVOICE_NUMBER,
                 DataContract.Invoice.COL_INVOICE_DATE,
@@ -765,6 +765,26 @@ public class dbHelper extends SQLiteOpenHelper {
         };
         String orderBy = DataContract.Invoice.COL_ID + " DESC ";
         Cursor cursor = database.query(DataContract.Invoice.TABLE_NAME, projection, null, null, null, null, orderBy);
+        return cursor;
+    }
+
+    public Cursor getInvoiceById(SQLiteDatabase database,String invoiceId){
+        Log.d(TAG, "getInvoice by id: ");
+        String[] projection = {
+                DataContract.Invoice.COL_INVOICE_NUMBER,
+                DataContract.Invoice.COL_INVOICE_DATE,
+                DataContract.Invoice.COL_SALESMAN_ID,
+                DataContract.Invoice.COL_CUSTOMER_CODE,
+                DataContract.Invoice.COL_CUSTOMER_NAME,
+                DataContract.Invoice.COL_TOTAL_AMOUNT,
+                DataContract.Invoice.COL_DISCOUNT_AMOUNT,
+                DataContract.Invoice.COL_NET_AMOUNT,
+                DataContract.Invoice.COL_PAYMENT_TYPE,
+                DataContract.Invoice.COL_IS_SYNC,
+        };
+        String selection = DataContract.Invoice.COL_INVOICE_NUMBER + " LIKE ?";
+        String[] selection_ars = {invoiceId};
+        Cursor cursor = database.query(DataContract.Invoice.TABLE_NAME, projection, selection, selection_ars, null, null, null);
         return cursor;
     }
 
@@ -784,10 +804,10 @@ public class dbHelper extends SQLiteOpenHelper {
                 DataContract.InvoiceDetails.COL_NET_AMOUNT,
 
         };
-        String selection = DataContract.Invoice.COL_INVOICE_NUMBER + " LIKE ?";
+        String selection = DataContract.InvoiceDetails.COL_INVOICE_NUMBER + " LIKE ?";
         String[] selection_ars = {invoiceId};
         Cursor cursor = database.query(DataContract.InvoiceDetails.TABLE_NAME, projection, selection, selection_ars, null, null, null);
-        Log.d(TAG, "Refund details cursor size" + cursor.getCount());
+        //Log.d(TAG, "Refund details cursor size" + cursor.getCount());
         if (cursor.moveToFirst()) {
             do {
 
