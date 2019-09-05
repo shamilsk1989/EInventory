@@ -60,7 +60,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private static final int STORAGE_PERMISSION_CODE = 100;
     private String scanData = "", user;
     Menu navMenu;
-    MenuItem admin, inventory, goods, sale;
+    MenuItem admin, inventory, goods, sale, receipt;
     ImageView imgLogo;
 
     @Override
@@ -77,7 +77,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         View headerView = navigationView.getHeaderView(0);
         navShopName = (TextView) headerView.findViewById(R.id.textShop);
         navUser = (TextView) headerView.findViewById(R.id.textUser);
-        imgLogo= (ImageView) headerView.findViewById(R.id.logo_img);
+        imgLogo = (ImageView) headerView.findViewById(R.id.logo_img);
         navigationView.setNavigationItemSelectedListener(this);
 
         fragmentManager = getSupportFragmentManager();
@@ -88,6 +88,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         inventory = navMenu.findItem(R.id.nav_inventory);
         goods = navMenu.findItem(R.id.nav_goods_receive);
         sale = navMenu.findItem(R.id.nav_sale);
+        receipt = navMenu.findItem(R.id.nav_receipt);
 
 
         if (findViewById(R.id.fragment_container) != null) {
@@ -115,31 +116,37 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         if (cursor.moveToFirst()) {
             navShopName.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME)));
 
-            int is_inv=cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_INV));
-            int is_gds=cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_GDS));
-            int is_sale=cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_SALE));
+            int is_inv = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_INV));
+            int is_gds = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_GDS));
+            int is_sale = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_SALE));
+            int is_rec = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_REC));
             byte[] img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO));
-            Log.d(TAG, "inventory: "+is_inv);
-            Log.d(TAG, "goods: "+is_gds);
-            Log.d(TAG, "sales: "+is_sale);
+            Log.d(TAG, "inventory: " + is_inv);
+            Log.d(TAG, "goods: " + is_gds);
+            Log.d(TAG, "sales: " + is_sale);
+            Log.d(TAG, "receipt: " + is_rec);
 
-            if(is_inv==DataContract.INV_ON)
+            if (is_inv == DataContract.INV_ON)
                 inventory.setVisible(true);
             else
                 inventory.setVisible(false);
 
-            if(is_gds==DataContract.GDS_ON)
+            if (is_gds == DataContract.GDS_ON)
                 goods.setVisible(true);
             else
                 goods.setVisible(false);
 
-            if(is_sale==DataContract.SALE_ON)
+            if (is_sale == DataContract.SALE_ON)
                 sale.setVisible(true);
             else
                 sale.setVisible(false);
+            if (is_rec == DataContract.REC_ON)
+                receipt.setVisible(true);
+            else
+                receipt.setVisible(false);
 
 
-            if(SessionHandler.getInstance(this).getUser().equals("User")){
+            if (SessionHandler.getInstance(this).getUser().equals("User")) {
                 admin.setVisible(false);
 
             }
@@ -152,11 +159,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }else {
+        } else {
             // if settings table have no data then hide menu
             inventory.setVisible(false);
             goods.setVisible(false);
             sale.setVisible(false);
+            receipt.setVisible(false);
         }
         user = SessionHandler.getInstance(HomeActivity.this).getUser();
         navUser.setText(user);
@@ -240,6 +248,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(intent_gds);
                 //startActivity(new Intent(HomeActivity.this, InvoiceActivity.class));
                 break;
+            case R.id.nav_receipt:
+                Intent intent_rec = new Intent(this, ListReceiptActivity.class);
+                //intent_rec.putExtra("Type", "REC");
+                startActivity(intent_rec);
+                break;
+
             case R.id.nav_logout:
                 logout();
                 break;

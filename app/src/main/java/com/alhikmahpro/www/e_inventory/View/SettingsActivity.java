@@ -72,6 +72,8 @@ public class SettingsActivity extends AppCompatActivity {
     @BindView(R.id.switch_goods)
     Switch switchGoods;
 
+    @BindView(R.id.switch_receipt)
+    Switch switchReceipt;
     @BindView(R.id.imgLogo)
     CircleImageView imgLogo;
     @BindView(R.id.btnSave)
@@ -84,7 +86,7 @@ public class SettingsActivity extends AppCompatActivity {
     Switch switchSale;
 
     dbHelper helper;
-    int is_sale=0,is_gds=0,is_inv=0;
+    int is_sale=0,is_gds=0,is_inv=0,is_rec=0;
     public static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1;
     private int GALLERY = 1, CAMERA = 2;
     Bitmap thumbnail;
@@ -115,6 +117,7 @@ public class SettingsActivity extends AppCompatActivity {
             is_inv=cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_INV));
             is_gds=cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_GDS));
             is_sale=cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_SALE));
+            is_rec=cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_REC));
             byte[] img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO));
 
             //get url from shared prefernce
@@ -138,6 +141,10 @@ public class SettingsActivity extends AppCompatActivity {
             if(is_inv==DataContract.INV_ON){
                 switchInventory.setChecked(true);
             }
+            if(is_rec==DataContract.REC_ON){
+                switchReceipt.setChecked(true);
+            }
+
 
 
 
@@ -190,6 +197,19 @@ public class SettingsActivity extends AppCompatActivity {
                     is_sale=DataContract.SALE_OFF;
                 }
                 Log.d(TAG, "Sale onCheckedChanged: "+is_sale);
+
+            }
+        });
+
+        switchReceipt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(switchReceipt.isChecked()){
+                    is_rec=DataContract.REC_ON;
+                }else{
+                    is_rec=DataContract.REC_OFF;
+                }
+                Log.d(TAG, "Receipt onCheckedChanged: "+is_rec);
 
             }
         });
@@ -268,9 +288,9 @@ public class SettingsActivity extends AppCompatActivity {
             SessionHandler.getInstance(this).setHost(url);
             // check settings table if data is there; update else save setting details to DB
             if(_id>0){
-                helper.updateSettings(_id,c_code,c_name,b_code,l_code,p_code,device,img_data,is_sale,is_inv,is_gds);
+                helper.updateSettings(_id,c_code,c_name,b_code,l_code,p_code,device,img_data,is_sale,is_inv,is_gds,is_rec);
             }else{
-                helper.saveSettings(c_code, c_name, b_code, l_code, p_code, device,img_data,is_sale,is_inv,is_gds);
+                helper.saveSettings(c_code, c_name, b_code, l_code, p_code, device,img_data,is_sale,is_inv,is_gds,is_rec);
             }
             Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
             finish();

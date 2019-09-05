@@ -61,6 +61,7 @@ public class DocAdapter extends RecyclerView.Adapter<DocAdapter.ViewHolder> {
                 adapterClickListener.OnItemClicked(position);
             }
         });
+
     }
 
     @Override

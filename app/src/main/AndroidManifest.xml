@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -17,7 +18,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".View.SplashActivity"
+        <activity android:name=".View.ListReceiptActivity"></activity>
+        <activity android:name=".View.ReceiptActivity" />
+        <activity
+            android:name=".View.SplashActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -48,14 +52,13 @@
         <activity android:name=".View.SalesActivity" />
         <activity android:name=".View.CheckCustomerActivity" />
         <activity android:name=".View.ViewCartActivity" />
-
         <activity android:name=".View.PaymentActivity" />
         <activity android:name=".View.PrintViewActivity" />
         <activity android:name=".View.PrinterSettingsActivity" />
         <activity android:name=".View.PaperSettingsActivity" />
         <activity android:name=".View.AddPrinterActivity" />
         <activity android:name=".View.DeviceListActivity" />
-        <activity android:name=".View.ListSalesActivity"></activity>
+        <activity android:name=".View.ListSalesActivity" />
     </application>
 
 </manifest>

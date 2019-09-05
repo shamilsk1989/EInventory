@@ -211,51 +211,88 @@
             android:layout_below="@+id/cardView3"
             android:id="@+id/cardView4">
 
-            <LinearLayout
+
+
+
+
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:padding="10dp">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="Inventory"
                     android:textColor="@android:color/black"
-                    android:textSize="18sp"
-                    android:text="Inventory" />
+                    android:layout_alignParentLeft="true"
+                    android:textSize="18sp" />
 
                 <Switch
                     android:id="@+id/switch_inventory"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
                     android:checked="false" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="Goods"
                     android:textColor="@android:color/black"
-                    android:textSize="18sp"
-                    android:text="Goods" />
+                    android:layout_below="@+id/switch_inventory"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginTop="10dp"
+                    android:textSize="18sp" />
 
                 <Switch
                     android:id="@+id/switch_goods"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_below="@+id/switch_inventory"
+                    android:layout_alignParentRight="true"
                     android:layout_marginTop="10dp"
                     android:checked="false" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="Sale"
                     android:textColor="@android:color/black"
-                    android:textSize="18sp"
-                    android:text="Sale" />
+                    android:layout_below="@+id/switch_goods"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginTop="10dp"
+                    android:textSize="18sp" />
 
                 <Switch
                     android:id="@+id/switch_sale"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_below="@+id/switch_goods"
+                    android:layout_alignParentRight="true"
                     android:layout_marginTop="10dp"
                     android:checked="false" />
-            </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/black"
+                    android:layout_below="@id/switch_sale"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginTop="10dp"
+                    android:textSize="18sp"
+                    android:text="Receipt" />
+
+                <Switch
+                    android:id="@+id/switch_receipt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/switch_sale"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginTop="10dp"
+                    android:checked="false" />
+            </RelativeLayout>
 
         </android.support.v7.widget.CardView>
 

@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.alhikmahpro.www.e_inventory.Adapter.DocAdapter;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.ItemModel;
+import com.alhikmahpro.www.e_inventory.Data.ReceiptModel;
 import com.alhikmahpro.www.e_inventory.Data.RuntimeData;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.Interface.FragmentActionListener;
@@ -109,7 +110,7 @@ public class ListDocActivity extends AppCompatActivity {
                 model.setNet(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceive.COL_NET_AMOUNT)));
                 model.setDate(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_DATE_TIME)));
                 model.setPaymentType(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_PAYMENT_TYPE)));
-                model.setIs_sync(cursor.getInt(cursor.getColumnIndex(DataContract.Stocks.COL_IS_SYNC)));
+                model.setIs_sync(cursor.getInt(cursor.getColumnIndex(DataContract.GoodsReceive.COL_IS_SYNC)));
                 list.add(model);
             } while (cursor.moveToNext());
         } else {
@@ -118,6 +119,7 @@ public class ListDocActivity extends AppCompatActivity {
         cursor.close();
         database.close();
     }
+
 
 
     private void populateRecycler()   {
@@ -134,6 +136,7 @@ public class ListDocActivity extends AppCompatActivity {
 
             @Override
             public void OnDeleteClicked(int position) {
+                //use as share button click event
             }
         });
 
@@ -179,8 +182,14 @@ public class ListDocActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Goods Receive");
             loadGoods();
         }
+//        else if(type.equals("REC")){
+//            getSupportActionBar().setTitle("Receipt");
+//
+//        }
         populateRecycler();
     }
+
+
 
 
 //    private void editDoc(int no,String user) {
@@ -228,6 +237,11 @@ public class ListDocActivity extends AppCompatActivity {
             Intent intent = new Intent(ListDocActivity.this, CheckCustomerActivity.class);
             startActivity(intent);
         }
+//        else if (type.equals("REC")) {
+//            Intent intent = new Intent(ListDocActivity.this, ReceiptActivity.class);
+//            startActivity(intent);
+//        }
+
 
 
     }

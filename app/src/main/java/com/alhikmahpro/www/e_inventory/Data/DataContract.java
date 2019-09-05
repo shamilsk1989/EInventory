@@ -12,7 +12,8 @@ public class DataContract {
     public static final int INV_OFF=0;
     public static final int GDS_ON=1;
     public static final int GDS_OFF=0;
-
+    public static final int REC_ON=1;
+    public static final int REC_OFF=0;
 
 
     public static class Settings{
@@ -29,7 +30,7 @@ public class DataContract {
         public static final String COL_IS_SALE="is_sale";
         public static final String COL_IS_INV="is_inv";
         public static final String COL_IS_GDS="is_gds";
-
+        public static final String COL_IS_REC="is_rec";
 
 
 
@@ -170,6 +171,20 @@ public class DataContract {
         public static final String COL_PAPER_SIZE="paper_size";
     }
 
+    public static class Receipts{
+        public static final String TABLE_NAME="receipts";
+        public static final String COL_ID="_id";
+        public static final String COL_RECEIPT_NUMBER="receipts_number";
+        public static final String COL_RECEIPT_DATE="receipts_date";
+        public static final String COL_SALESMAN_ID="salesman_id";
+        public static final String COL_CUSTOMER_CODE="customer_code";
+        public static final String COL_CUSTOMER_NAME="customer_name";
+        public static final String COL_RECEIVED_AMOUNT="received_amount";
+        public static final String COL_PAYMENT_TYPE="payment_type";
+        public static final String COL_CHEQUE_DATE="cheque_date";
+        public static final String COL_CHEQUE_NUMBER="cheque_number";
+        public static final String COL_IS_SYNC="is_sync";
+    }
 
 
 

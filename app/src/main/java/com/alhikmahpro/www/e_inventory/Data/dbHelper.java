@@ -26,6 +26,7 @@ public class dbHelper extends SQLiteOpenHelper {
             DataContract.Settings.COL_IS_SALE + " INTEGER DEFAULT 0, " +
             DataContract.Settings.COL_IS_GDS + " INTEGER DEFAULT 0, " +
             DataContract.Settings.COL_IS_INV + " INTEGER DEFAULT 0, " +
+            DataContract.Settings.COL_IS_REC + " INTEGER DEFAULT 0, " +
             DataContract.Settings.COL_DEVICE_ID + " INTEGER DEFAULT 0 " + ");";
 
     private final String SQL_CREATE_LOGIN_TABLE = "CREATE TABLE IF NOT EXISTS " + DataContract.Login.TABLE_NAME + " (" +
@@ -143,6 +144,20 @@ public class dbHelper extends SQLiteOpenHelper {
             DataContract.PaperSettings.COL_PAPER_SIZE + " TEXT " + ");";
 
 
+    private final String SQL_CREATE_RECEIPT_TABLE = "CREATE TABLE IF NOT EXISTS " + DataContract.Receipts.TABLE_NAME + " (" +
+            DataContract.Receipts.COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+            DataContract.Receipts.COL_RECEIPT_NUMBER + " TEXT ," +
+            DataContract.Receipts.COL_RECEIPT_DATE + " TEXT ," +
+            DataContract.Receipts.COL_SALESMAN_ID + " TEXT ," +
+            DataContract.Receipts.COL_CUSTOMER_CODE + " TEXT ," +
+            DataContract.Receipts.COL_CUSTOMER_NAME + " TEXT ," +
+            DataContract.Receipts.COL_RECEIVED_AMOUNT + " REAL ," +
+            DataContract.Receipts.COL_PAYMENT_TYPE + " TEXT ," +
+            DataContract.Receipts.COL_CHEQUE_DATE + " TEXT ," +
+            DataContract.Receipts.COL_CHEQUE_NUMBER + " TEXT ," +
+            DataContract.Receipts.COL_IS_SYNC + " INTEGER DEFAULT 0 " + ");";
+
+
     public dbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         Log.d(TAG, "Database created......: ");
@@ -159,6 +174,7 @@ public class dbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_INVOICE_TABLE);
         db.execSQL(SQL_CREATE_INVOICE_DETAILS_TABLE);
         db.execSQL(SQL_CREATE_PAPER_SETTINGS_TABLE);
+        db.execSQL(SQL_CREATE_RECEIPT_TABLE);
         Log.d(TAG, "Table created......: ");
 
     }
@@ -174,13 +190,14 @@ public class dbHelper extends SQLiteOpenHelper {
         db.execSQL(" DROP TABLE IF EXISTS " + DataContract.Invoice.TABLE_NAME);
         db.execSQL(" DROP TABLE IF EXISTS " + DataContract.InvoiceDetails.TABLE_NAME);
         db.execSQL(" DROP TABLE IF EXISTS " + DataContract.PaperSettings.TABLE_NAME);
+        db.execSQL(" DROP TABLE IF EXISTS " + DataContract.Receipts.TABLE_NAME);
         onCreate(db);
 
     }
 
     //*****************************settings table********************
     public boolean saveSettings(String CCode, String CCName, String BCode, String LCode, String PCode, String deviceId,
-                                byte[] logo, int saleStat, int invStat, int gdsStat) {
+                                byte[] logo, int saleStat, int invStat, int gdsStat, int recStat) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -196,6 +213,7 @@ public class dbHelper extends SQLiteOpenHelper {
             contentValues.put(DataContract.Settings.COL_IS_SALE, saleStat);
             contentValues.put(DataContract.Settings.COL_IS_INV, invStat);
             contentValues.put(DataContract.Settings.COL_IS_GDS, gdsStat);
+            contentValues.put(DataContract.Settings.COL_IS_REC, recStat);
             database.insert(DataContract.Settings.TABLE_NAME, null, contentValues);
             database.close();
             Log.d(TAG, "one row inserted in Settings table ......... ");
@@ -208,7 +226,7 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
     public boolean updateSettings(int _id, String CCode, String CCName, String BCode, String LCode, String PCode, String deviceId,
-                                  byte[] logo, int saleStat, int invStat, int gdsStat) {
+                                  byte[] logo, int saleStat, int invStat, int gdsStat, int recStat) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -225,6 +243,7 @@ public class dbHelper extends SQLiteOpenHelper {
             contentValues.put(DataContract.Settings.COL_IS_SALE, saleStat);
             contentValues.put(DataContract.Settings.COL_IS_INV, invStat);
             contentValues.put(DataContract.Settings.COL_IS_GDS, gdsStat);
+            contentValues.put(DataContract.Settings.COL_IS_REC, recStat);
             database.update(DataContract.Settings.TABLE_NAME, contentValues, selection, null);
             database.close();
             Log.d(TAG, " updated Settings table ......... ");
@@ -233,16 +252,20 @@ public class dbHelper extends SQLiteOpenHelper {
             return false;
         }
     }
+
     public Cursor getSettings(SQLiteDatabase sqLiteDatabase) {
         String[] projections = {
                 DataContract.Settings.COL_ID, DataContract.Settings.COL_ID,
                 DataContract.Settings.COL_COMPANY_CODE, DataContract.Settings.COL_COMPANY_NAME,
                 DataContract.Settings.COL_BRANCH_CODE, DataContract.Settings.COL_LOCATION_CODE,
-                DataContract.Settings.COL_PERIOD_CODE, DataContract.Settings.COL_DEVICE_ID,
-                DataContract.Settings.COL_PERIOD_CODE, DataContract.Settings.COL_LOGO,
-                DataContract.Settings.COL_PERIOD_CODE, DataContract.Settings.COL_IS_SALE,
-                DataContract.Settings.COL_PERIOD_CODE, DataContract.Settings.COL_IS_GDS,
-                DataContract.Settings.COL_PERIOD_CODE, DataContract.Settings.COL_IS_INV,
+                DataContract.Settings.COL_DEVICE_ID, DataContract.Settings.COL_DEVICE_ID,
+                DataContract.Settings.COL_LOGO, DataContract.Settings.COL_LOGO,
+                DataContract.Settings.COL_PERIOD_CODE, DataContract.Settings.COL_PERIOD_CODE,
+                DataContract.Settings.COL_IS_SALE, DataContract.Settings.COL_IS_SALE,
+                DataContract.Settings.COL_IS_GDS, DataContract.Settings.COL_IS_GDS,
+                DataContract.Settings.COL_IS_INV, DataContract.Settings.COL_IS_INV,
+                DataContract.Settings.COL_IS_REC, DataContract.Settings.COL_IS_REC,
+
         };
         Cursor cursor = sqLiteDatabase.query(DataContract.Settings.TABLE_NAME, projections, null,
                 null, null, null, DataContract.Settings.COL_ID + " DESC ", "1 ");
@@ -326,6 +349,7 @@ public class dbHelper extends SQLiteOpenHelper {
         database.close();
 
     }
+
     public Cursor getStocks(SQLiteDatabase database) {
         Log.d(TAG, "getStocks: ");
         String[] projection = {DataContract.Stocks.COL_STAFF_NAME, DataContract.Stocks.COL_TOTAL, DataContract.Stocks.COL_DOCUMENT_NUMBER
@@ -509,7 +533,6 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
 
-
     public int getGoodsLastDocNo() {
         SQLiteDatabase database = getReadableDatabase();
         String[] projection = {DataContract.GoodsReceive.COL_DOCUMENT_NUMBER};
@@ -552,7 +575,6 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
 
-
     public Cursor getGoods(SQLiteDatabase database) {
         Log.d(TAG, "getGoods: ");
         String[] projection = {DataContract.GoodsReceive.COL_DOCUMENT_NUMBER,
@@ -568,7 +590,6 @@ public class dbHelper extends SQLiteOpenHelper {
                 DataContract.GoodsReceive.COL_PAYMENT_TYPE,
                 DataContract.GoodsReceive.COL_DATE_TIME,
                 DataContract.GoodsReceive.COL_IS_SYNC
-
 
 
         };
@@ -682,7 +703,7 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
     public boolean updateInvoice(String invoiceNo, String invoiceDate, String salesmanId, String customerCode, String customerName,
-                               double total, double discount, double net, String paymentMode, String date, int status) {
+                                 double total, double discount, double net, String paymentMode, String date, int status) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -749,7 +770,7 @@ public class dbHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    public Cursor  getInvoice(SQLiteDatabase database) {
+    public Cursor getInvoice(SQLiteDatabase database) {
         Log.d(TAG, "get all Invoice: ");
         String[] projection = {
                 DataContract.Invoice.COL_INVOICE_NUMBER,
@@ -768,7 +789,7 @@ public class dbHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
-    public Cursor getInvoiceById(SQLiteDatabase database,String invoiceId){
+    public Cursor getInvoiceById(SQLiteDatabase database, String invoiceId) {
         Log.d(TAG, "getInvoice by id: ");
         String[] projection = {
                 DataContract.Invoice.COL_INVOICE_NUMBER,
@@ -868,11 +889,104 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
 
-
-
     /************************ end invoice*******************************************************/
 
+    /************************ Receipt **********************************************************/
+    public boolean saveReceipts(String receiptNo, String receiptDate, String salesmanId, String customerCode, String customerName,
+                                double amount, String paymentMode, String chqDate, String chqNumber, int status) {
 
+        SQLiteDatabase database = getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        try {
+            contentValues.put(DataContract.Receipts.COL_RECEIPT_NUMBER, receiptNo);
+            contentValues.put(DataContract.Receipts.COL_RECEIPT_DATE, receiptDate);
+            contentValues.put(DataContract.Receipts.COL_SALESMAN_ID, salesmanId);
+            contentValues.put(DataContract.Receipts.COL_CUSTOMER_CODE, customerCode);
+            contentValues.put(DataContract.Receipts.COL_CUSTOMER_NAME, customerName);
+            contentValues.put(DataContract.Receipts.COL_RECEIVED_AMOUNT, amount);
+            contentValues.put(DataContract.Receipts.COL_PAYMENT_TYPE, paymentMode);
+            contentValues.put(DataContract.Receipts.COL_CHEQUE_DATE, chqDate);
+            contentValues.put(DataContract.Receipts.COL_CHEQUE_NUMBER, chqNumber);
+            contentValues.put(DataContract.Receipts.COL_IS_SYNC, status);
+            database.insert(DataContract.Receipts.TABLE_NAME, null, contentValues);
+            database.close();
+            Log.d(TAG, "one row inserted in sales table ......... ");
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+
+
+    }
+
+    public boolean updateReceipt(String receiptNo, String receiptDate, String salesmanId, String customerCode, String customerName,
+                                 double amount, String paymentMode, String chqDate, String chqNumber, int status) {
+
+        SQLiteDatabase database = getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        try {
+            contentValues.put(DataContract.Receipts.COL_RECEIPT_NUMBER, receiptNo);
+            contentValues.put(DataContract.Receipts.COL_RECEIPT_DATE, receiptDate);
+            contentValues.put(DataContract.Receipts.COL_SALESMAN_ID, salesmanId);
+            contentValues.put(DataContract.Receipts.COL_CUSTOMER_CODE, customerCode);
+            contentValues.put(DataContract.Receipts.COL_CUSTOMER_NAME, customerName);
+            contentValues.put(DataContract.Receipts.COL_RECEIVED_AMOUNT, amount);
+            contentValues.put(DataContract.Receipts.COL_PAYMENT_TYPE, paymentMode);
+            contentValues.put(DataContract.Receipts.COL_CHEQUE_DATE, chqDate);
+            contentValues.put(DataContract.Receipts.COL_CHEQUE_NUMBER, chqNumber);
+            contentValues.put(DataContract.Receipts.COL_IS_SYNC, status);
+
+            database.update(DataContract.Receipts.TABLE_NAME, contentValues, DataContract.Receipts.COL_RECEIPT_NUMBER + "=?", new String[]{receiptNo});
+            database.close();
+            Log.d(TAG, "one row updated in invoice table ......... ");
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+
+
+    }
+
+    public int getLastReceiptNo() {
+        SQLiteDatabase database = getReadableDatabase();
+        String[] projection = {DataContract.Receipts.COL_ID};
+        Cursor cursor = database.query(DataContract.Receipts.TABLE_NAME, projection, null, null, null, null, DataContract.Receipts.COL_ID + " DESC ", "1");
+
+
+        //Cursor cursor=database.query(DataContract.Invoice.TABLE_NAME,projections,null,null,null,null,DataContract.Invoice.COL_INVOICE_ID +" DESC ","1");
+        int id = 0;
+        if (cursor.moveToFirst()) {
+            id = cursor.getInt(cursor.getColumnIndex(DataContract.Receipts.COL_ID));
+
+        }
+        cursor.close();
+        database.close();
+        return id;
+
+    }
+
+
+    public Cursor getAllReceipts(SQLiteDatabase database) {
+        Log.d(TAG, "get all receipts: ");
+        String[] projection = {
+                DataContract.Receipts.COL_RECEIPT_NUMBER,
+                DataContract.Receipts.COL_RECEIPT_DATE,
+                DataContract.Receipts.COL_SALESMAN_ID,
+                DataContract.Receipts.COL_CUSTOMER_CODE,
+                DataContract.Receipts.COL_CUSTOMER_NAME,
+                DataContract.Receipts.COL_RECEIVED_AMOUNT,
+                DataContract.Receipts.COL_PAYMENT_TYPE,
+                DataContract.Receipts.COL_CHEQUE_DATE,
+                DataContract.Receipts.COL_CHEQUE_NUMBER,
+                DataContract.Receipts.COL_IS_SYNC
+        };
+        String orderBy = DataContract.Receipts.COL_ID + " DESC ";
+        Cursor cursor = database.query(DataContract.Receipts.TABLE_NAME, projection, null, null, null, null, orderBy);
+        return cursor;
+    }
+
+
+    /************************ end receipts*******************************************************/
     /************************************paper settings ********************************/
     public boolean savePaperSettings(String Name, String Address, String Phone, String Footer, String Size) {
 
@@ -902,6 +1016,7 @@ public class dbHelper extends SQLiteOpenHelper {
                 DataContract.PaperSettings.COL_ID + " DESC ", "1");
         return cursor;
     }
+
     /************************************end paper settings********************************/
 
     public boolean getLogin(String password) {
@@ -931,10 +1046,6 @@ public class dbHelper extends SQLiteOpenHelper {
 
         }
     }
-
-
-
-
 
 
 }

@@ -21,6 +21,7 @@
     <string name="nav_sale">Sales</string>
     <string name="action_download">Pdf</string>
     <string name="action_sync">Sync</string>
+    <string name="nav_receipt">Receipts</string>
 
 
     <!--Spinner -->

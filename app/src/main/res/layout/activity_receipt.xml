@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".View.CheckCustomerActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="16dp">
+
+        <LinearLayout
+
+            android:id="@+id/title_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <TextView
+                android:id="@+id/txt_date"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/border_line" />
+
+            <TextView
+                android:id="@+id/txt_salesman"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/border_line" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/header_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/title_layout"
+            android:layout_marginTop="10dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <EditText
+                android:id="@+id/editTextBarcode"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1.5"
+                android:background="@drawable/editext_border"
+                android:hint="Search Customer"
+                android:nextFocusLeft="@id/txtBarcode"
+                android:nextFocusUp="@id/txtBarcode"
+                android:padding="8dp"
+                android:singleLine="true" />
+
+            <ImageView
+                android:id="@+id/imgBarcode"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight=".5"
+                android:src="@drawable/ic_barcode" />
+
+            <ImageView
+                android:id="@+id/imgSearch"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight=".5"
+                android:src="@drawable/ic_search" />
+
+            <ImageView
+                android:id="@+id/imgSubmit"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight=".5"
+                android:src="@drawable/ic_submitt_24dp" />
+        </LinearLayout>
+
+
+        <TextView
+            android:id="@+id/textViewCustomerName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/header_layout"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/border_line"
+            android:textColor="@android:color/black"
+            android:textSize="18sp" />
+
+
+        <LinearLayout
+            android:id="@+id/content_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textViewCustomerName"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:gravity="center|left"
+                    android:text="Balance Amount"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
+                    android:gravity="center|left"
+                    android:text="Amount "
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
+
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+
+                <EditText
+                    android:id="@+id/editTextBalance"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/border_line"
+                    android:gravity="center|left"
+                    android:inputType="none"
+                    android:padding="5dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
+
+
+                <EditText
+
+                    android:id="@+id/editTextAmount"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/border_line"
+                    android:gravity="center|left"
+                    android:inputType="none"
+                    android:padding="5dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <RadioGroup
+            android:id="@+id/radioGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/content_layout"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <RadioButton
+                android:id="@+id/radioSale"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:checked="true"
+                android:text="Cash"
+
+                />
+
+            <RadioButton
+                android:id="@+id/radioReturn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Cheque" />
+
+        </RadioGroup>
+
+        <LinearLayout
+            android:id="@+id/cheque_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/radioGroup"
+            android:layout_marginTop="10dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <EditText
+                android:id="@+id/editTextChequeNumber"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:background="@drawable/editext_border"
+                android:hint="Cheque Number"
+                android:nextFocusLeft="@id/txtBarcode"
+                android:nextFocusUp="@id/txtBarcode"
+                android:padding="8dp"
+                android:singleLine="true" />
+
+            <EditText
+                android:id="@+id/editTextChequeDate"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_marginLeft="5dp"
+                android:background="@drawable/editext_border"
+                android:hint="Cheque Date"
+                android:padding="8dp"
+                android:focusable="false"
+                android:layout_weight="1"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/txt_remark"
+            android:layout_marginTop="8dp"
+            android:text="Remark"
+            android:layout_below="@+id/cheque_layout"
+            android:textColor="@android:color/black"
+            />
+
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:id="@+id/editTextRemark"
+            android:layout_below="@+id/txt_remark"
+            android:background="@drawable/border_line"
+
+
+            />
+
+
+        <Button
+            android:id="@+id/btnNext"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_height"
+            android:layout_below="@+id/editTextRemark"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="30dp"
+            android:background="@android:color/holo_green_dark"
+            android:text="continue >>"
+            android:textColor="@android:color/white" />
+
+    </RelativeLayout>
+
+
+</android.support.design.widget.CoordinatorLayout>
