@@ -41,8 +41,8 @@ public class CreatePdf extends AsyncTask<String,Void,String> {
     AlertDialog.Builder builder;
     private static final String TAG = "CreatePdf";
 
-    String customerName, invoiceDate, salesmanId, customerCode, paymentMode, Type;
-    String companyName, companyAddress, companyPhone, footer;
+    String customerName="", invoiceDate, salesmanId, customerCode, paymentMode, Type;
+    String companyName, companyAddress="", companyPhone="", footer="";
     double netAmount, discountAmount, base_total;
     public CreatePdf(Context mContext, String invoiceNo) {
         this.mContext = mContext;
@@ -255,7 +255,6 @@ public class CreatePdf extends AsyncTask<String,Void,String> {
             insertCell(pTable, decimalFormat.format(netAmount), Element.ALIGN_RIGHT, 1, normal);
             paragraph.add(pTable);
             document.add(paragraph);
-
             document.close();
             return true;
 

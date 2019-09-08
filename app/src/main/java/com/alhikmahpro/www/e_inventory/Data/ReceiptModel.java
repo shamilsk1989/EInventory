@@ -9,7 +9,7 @@ public class ReceiptModel {
     private String customerName;
     private String customerCode;
     private String balanceAmount;
-    private double receivedAmount;
+    private String receivedAmount;
     private String paymentType;
     private String chequeDate;
     private String chequeNumber;
@@ -72,11 +72,11 @@ public class ReceiptModel {
         this.balanceAmount = balanceAmount;
     }
 
-    public double getReceivedAmount() {
+    public String getReceivedAmount() {
         return receivedAmount;
     }
 
-    public void setReceivedAmount(double receivedAmount) {
+    public void setReceivedAmount(String receivedAmount) {
         this.receivedAmount = receivedAmount;
     }
 

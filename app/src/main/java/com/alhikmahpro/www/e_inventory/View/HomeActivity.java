@@ -224,7 +224,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 //
                 //  Intent intent_sale = new Intent(this, ListDocActivity.class);
                 Intent intent_sale = new Intent(this, ListSalesActivity.class);
-                intent_sale.putExtra("Type", "SAL");
                 startActivity(intent_sale);
                 break;
 
@@ -250,7 +249,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.nav_receipt:
                 Intent intent_rec = new Intent(this, ListReceiptActivity.class);
-                //intent_rec.putExtra("Type", "REC");
                 startActivity(intent_rec);
                 break;
 

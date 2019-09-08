@@ -44,6 +44,7 @@ public class ListSalesActivity extends AppCompatActivity {
     RecyclerView.LayoutManager layoutManager;
     SalesListAdapter adapter;
     private static final String TAG = "ListSalesActivity";
+    String type;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +53,9 @@ public class ListSalesActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Sales");
+//        Intent intent = getIntent();
+//        type= intent.getStringExtra("Type");
+        getSupportActionBar().setTitle("SALES");
         populateRecycler();
     }
 
@@ -131,8 +134,8 @@ public class ListSalesActivity extends AppCompatActivity {
             intent = new Intent(ListSalesActivity.this,ViewCartActivity.class);
         }
 
-        intent.putExtra("ACTION","NEW");
-        intent.putExtra("TYPE","EDIT");
+        intent.putExtra("ACTION","EDIT");
+        intent.putExtra("TYPE","SAL");
         intent.putExtra("CUS_NAME", itemModel.getCustomerName());
         intent.putExtra("CUS_CODE", itemModel.getCustomerCode());
         intent.putExtra("DISCOUNT", itemModel.getDiscount());

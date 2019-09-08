@@ -151,7 +151,8 @@ public class dbHelper extends SQLiteOpenHelper {
             DataContract.Receipts.COL_SALESMAN_ID + " TEXT ," +
             DataContract.Receipts.COL_CUSTOMER_CODE + " TEXT ," +
             DataContract.Receipts.COL_CUSTOMER_NAME + " TEXT ," +
-            DataContract.Receipts.COL_RECEIVED_AMOUNT + " REAL ," +
+            DataContract.Receipts.COL_BALANCE_AMOUNT + " TEXT ," +
+            DataContract.Receipts.COL_RECEIVED_AMOUNT + " TEXT ," +
             DataContract.Receipts.COL_PAYMENT_TYPE + " TEXT ," +
             DataContract.Receipts.COL_CHEQUE_DATE + " TEXT ," +
             DataContract.Receipts.COL_CHEQUE_NUMBER + " TEXT ," +
@@ -893,7 +894,7 @@ public class dbHelper extends SQLiteOpenHelper {
 
     /************************ Receipt **********************************************************/
     public boolean saveReceipts(String receiptNo, String receiptDate, String salesmanId, String customerCode, String customerName,
-                                double amount, String paymentMode, String chqDate, String chqNumber, int status) {
+                                String balanceAmount,String receivedAmount, String paymentMode, String chqDate, String chqNumber, int status) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -903,7 +904,8 @@ public class dbHelper extends SQLiteOpenHelper {
             contentValues.put(DataContract.Receipts.COL_SALESMAN_ID, salesmanId);
             contentValues.put(DataContract.Receipts.COL_CUSTOMER_CODE, customerCode);
             contentValues.put(DataContract.Receipts.COL_CUSTOMER_NAME, customerName);
-            contentValues.put(DataContract.Receipts.COL_RECEIVED_AMOUNT, amount);
+            contentValues.put(DataContract.Receipts.COL_BALANCE_AMOUNT, balanceAmount);
+            contentValues.put(DataContract.Receipts.COL_RECEIVED_AMOUNT, receivedAmount);
             contentValues.put(DataContract.Receipts.COL_PAYMENT_TYPE, paymentMode);
             contentValues.put(DataContract.Receipts.COL_CHEQUE_DATE, chqDate);
             contentValues.put(DataContract.Receipts.COL_CHEQUE_NUMBER, chqNumber);
@@ -920,7 +922,7 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
     public boolean updateReceipt(String receiptNo, String receiptDate, String salesmanId, String customerCode, String customerName,
-                                 double amount, String paymentMode, String chqDate, String chqNumber, int status) {
+                                 String balanceAmount,String receivedAmount, String paymentMode, String chqDate, String chqNumber, int status) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -930,7 +932,8 @@ public class dbHelper extends SQLiteOpenHelper {
             contentValues.put(DataContract.Receipts.COL_SALESMAN_ID, salesmanId);
             contentValues.put(DataContract.Receipts.COL_CUSTOMER_CODE, customerCode);
             contentValues.put(DataContract.Receipts.COL_CUSTOMER_NAME, customerName);
-            contentValues.put(DataContract.Receipts.COL_RECEIVED_AMOUNT, amount);
+            contentValues.put(DataContract.Receipts.COL_BALANCE_AMOUNT, balanceAmount);
+            contentValues.put(DataContract.Receipts.COL_RECEIVED_AMOUNT, receivedAmount);
             contentValues.put(DataContract.Receipts.COL_PAYMENT_TYPE, paymentMode);
             contentValues.put(DataContract.Receipts.COL_CHEQUE_DATE, chqDate);
             contentValues.put(DataContract.Receipts.COL_CHEQUE_NUMBER, chqNumber);
@@ -938,7 +941,7 @@ public class dbHelper extends SQLiteOpenHelper {
 
             database.update(DataContract.Receipts.TABLE_NAME, contentValues, DataContract.Receipts.COL_RECEIPT_NUMBER + "=?", new String[]{receiptNo});
             database.close();
-            Log.d(TAG, "one row updated in invoice table ......... ");
+            Log.d(TAG, "one row updated in receipt table ......... ");
             return true;
         } catch (Exception e) {
             return false;
@@ -975,6 +978,7 @@ public class dbHelper extends SQLiteOpenHelper {
                 DataContract.Receipts.COL_CUSTOMER_CODE,
                 DataContract.Receipts.COL_CUSTOMER_NAME,
                 DataContract.Receipts.COL_RECEIVED_AMOUNT,
+                DataContract.Receipts.COL_BALANCE_AMOUNT,
                 DataContract.Receipts.COL_PAYMENT_TYPE,
                 DataContract.Receipts.COL_CHEQUE_DATE,
                 DataContract.Receipts.COL_CHEQUE_NUMBER,

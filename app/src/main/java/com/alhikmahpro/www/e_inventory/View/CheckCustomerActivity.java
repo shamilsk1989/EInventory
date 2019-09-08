@@ -39,6 +39,9 @@ import com.journeyapps.barcodescanner.CaptureActivity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -61,8 +64,11 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
     EditText editTextLastInvoice;
     @BindView(R.id.editTextLastReceipt)
     EditText editTextLastReceipt;
-    @BindView(R.id.btnNext)
-    Button btnNext;
+    @BindView(R.id.btnReceipt)
+    Button btnReceipts;
+    @BindView(R.id.btnInvoice)
+    Button btnInvoice;
+
 
 
     private static final int CAMERA_PERMISSION_CODE = 100;
@@ -131,11 +137,12 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
                         lastReceiptNo = response.getString("LastReceipt");
                         balanceAmount = response.getString("CurrentBalance");
 
-
+                        double balAmount=ParseDouble(balanceAmount);
                         textViewCustomerName.setText(customerName);
                         editTextLastInvoice.setText(lastInvoiceNo);
                         editTextLastReceipt.setText(lastReceiptNo);
-                        editTextBalance.setText(balanceAmount);
+                        editTextBalance.setText(currencyFormatter(balAmount));
+                        Log.d(TAG, "notifySuccess: "+currencyFormatter(balAmount));
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -279,8 +286,8 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
 
     }
 
-    @OnClick(R.id.btnNext)
-    public void onBtnNextClicked() {
+    @OnClick(R.id.btnInvoice)
+    public void onBtnInvoiceClicked() {
         if (TextUtils.isEmpty(textViewCustomerName.getText().toString())) {
             textViewCustomerName.setError("Invalid customer");
         } else {
@@ -293,6 +300,25 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
 
 
     }
+    @OnClick(R.id.btnReceipt)
+    public void onBtnReceiptClicked() {
+        if (TextUtils.isEmpty(textViewCustomerName.getText().toString())) {
+            textViewCustomerName.setError("Invalid customer");
+        } else {
+            clearView();
+            Intent intent_rec = new Intent(CheckCustomerActivity.this, ReceiptActivity.class);
+            intent_rec.putExtra("TYPE", "NEW");
+            intent_rec.putExtra("PAYMENT_TYPE", "Cash");
+            intent_rec.putExtra("CUS_NAME", customerName);
+            intent_rec.putExtra("CUS_CODE", customerCode);
+            intent_rec.putExtra("BALANCE_AMOUNT", balanceAmount);
+            startActivity(intent_rec);
+        }
+
+
+    }
+
+
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -344,5 +370,23 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+    }
+
+    public String currencyFormatter(double val) {
+        NumberFormat format = NumberFormat.getCurrencyInstance();
+        String pattern = ((DecimalFormat) format).toPattern();
+        String newPattern = pattern.replace("\u00A4", "").trim();
+        NumberFormat newFormat = new DecimalFormat(newPattern);
+        return String.valueOf(newFormat.format(val));
+
+    }
+    double ParseDouble(String strNumber) {
+        if (strNumber != null && strNumber.length() > 0) {
+            try {
+                return Double.parseDouble(strNumber);
+            } catch (Exception e) {
+                return -1;   // or some value to mark this field is wrong. or make a function validates field first ...
+            }
+        } else return 0;
     }
 }

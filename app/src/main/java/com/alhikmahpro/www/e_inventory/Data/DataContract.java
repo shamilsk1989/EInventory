@@ -179,6 +179,7 @@ public class DataContract {
         public static final String COL_SALESMAN_ID="salesman_id";
         public static final String COL_CUSTOMER_CODE="customer_code";
         public static final String COL_CUSTOMER_NAME="customer_name";
+        public static final String COL_BALANCE_AMOUNT="balance_amount";
         public static final String COL_RECEIVED_AMOUNT="received_amount";
         public static final String COL_PAYMENT_TYPE="payment_type";
         public static final String COL_CHEQUE_DATE="cheque_date";
