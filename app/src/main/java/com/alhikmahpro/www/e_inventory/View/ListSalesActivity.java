@@ -1,10 +1,18 @@
 package com.alhikmahpro.www.e_inventory.View;
 
+import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -19,14 +27,18 @@ import com.alhikmahpro.www.e_inventory.Adapter.DocAdapter;
 import com.alhikmahpro.www.e_inventory.Adapter.SalesListAdapter;
 import com.alhikmahpro.www.e_inventory.Data.Cart;
 import com.alhikmahpro.www.e_inventory.Data.CartModel;
+import com.alhikmahpro.www.e_inventory.Data.CreatePdf;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.ItemModel;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.Interface.OnAdapterClickListener;
+import com.alhikmahpro.www.e_inventory.Interface.OnListAdapterClickListener;
 import com.alhikmahpro.www.e_inventory.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,6 +57,8 @@ public class ListSalesActivity extends AppCompatActivity {
     SalesListAdapter adapter;
     private static final String TAG = "ListSalesActivity";
     String type;
+    private static final int PERMISSION_CODE = 100;
+    String invoiceNo="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,10 +107,35 @@ public class ListSalesActivity extends AppCompatActivity {
                 list.add(model);
             } while (cursor.moveToNext());
 
-            adapter = new SalesListAdapter(this, list, new OnAdapterClickListener() {
+
+            adapter=new SalesListAdapter(this, list, new OnListAdapterClickListener() {
                 @Override
-                public void OnItemClicked(int position) {
+                public void OnEditClicked(int position) {
                     goToNext(position);
+                }
+
+                @Override
+                public void OnSyncClicked(int position) {
+
+                }
+
+                @Override
+                public void OnShareClicked(int position) {
+                    Log.d(TAG, "OnShareClicked: ");
+                    ItemModel itemModel=list.get(position);
+                    invoiceNo=itemModel.getInvoiceNo();
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+                        if (requestStoragePermission()) {
+                            createPdfWrapper();
+                        }
+                    } else {
+                        createPdfWrapper();
+                    }
+
+
+
                 }
 
                 @Override
@@ -114,10 +153,18 @@ public class ListSalesActivity extends AppCompatActivity {
         database.close();
     }
 
+    private void createPdfWrapper() {
+        Log.d(TAG, "createPdfWrapper: ");
+
+        CreatePdf createPdf=new CreatePdf(this,invoiceNo);
+        createPdf.execute();
+
+    }
+
     private void goToNext(int position) {
         Cart.mCart.clear();
         ItemModel itemModel=list.get(position);
-        String invoiceNo=itemModel.getInvoiceNo();
+        invoiceNo=itemModel.getInvoiceNo();
 
         Log.d(TAG, "goToNext: "+itemModel.getCustomerName());
         dbHelper helper=new dbHelper(this);
@@ -147,6 +194,24 @@ public class ListSalesActivity extends AppCompatActivity {
         intent.putExtra("PAY_MOD", itemModel.getPaymentType());
         startActivity(intent);
     }
+    private boolean requestStoragePermission() {
+
+        int writePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int readPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        List<String> listPermissions = new ArrayList<>();
+        if (writePermission != PackageManager.PERMISSION_GRANTED) {
+            listPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if (readPermission != PackageManager.PERMISSION_GRANTED) {
+            listPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
+        if (!listPermissions.isEmpty()) {
+            ActivityCompat.requestPermissions(this, listPermissions.toArray(new String[listPermissions.size()]), PERMISSION_CODE);
+            return false;
+        }
+        return true;
+
+    }
 
     @Override
     protected void onResume() {
@@ -164,6 +229,57 @@ public class ListSalesActivity extends AppCompatActivity {
     @OnClick(R.id.fab)
     public void onViewClicked() {
         Intent intent=new Intent(ListSalesActivity.this,CheckCustomerActivity.class);
+        intent.putExtra("Type","SAL");
         startActivity(intent);
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_CODE:
+                Map<String, Integer> perms = new HashMap<>();
+                perms.put(Manifest.permission.READ_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
+                perms.put(Manifest.permission.WRITE_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
+
+                if (grantResults.length > 0) {
+                    for (int i = 0; i < permissions.length; i++)
+                        perms.put(permissions[i], grantResults[i]);
+
+                    //check all permissions
+                    if (perms.get(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                            perms.get(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+
+                        Log.d(TAG, "permission granted ");
+                        createPdfWrapper();
+                    } else {
+                        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ||
+
+                                ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+
+                            new AlertDialog.Builder(ListSalesActivity.this)
+                                    .setTitle("Permission needed")
+                                    .setMessage("To continue please allow the permission ")
+                                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            requestStoragePermission();
+                                        }
+                                    })
+                                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                        @Override
+
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.cancel();
+                                        }
+                                    }).create().show();
+
+                        } else {
+                            Toast.makeText(this, "permission denied", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+
+        }
+
+
     }
 }

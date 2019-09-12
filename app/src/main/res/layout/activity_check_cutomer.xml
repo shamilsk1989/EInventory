@@ -167,26 +167,16 @@
 
             <Button
                 android:id="@+id/btnInvoice"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="@dimen/button_height"
                 android:layout_below="@+id/content_layout"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="30dp"
                 android:background="@android:color/holo_green_dark"
-                android:text="Invoice"
+                android:text="Next>>"
                 android:layout_alignParentLeft="true"
                 android:textColor="@android:color/white" />
-            <Button
-                android:id="@+id/btnReceipt"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/button_height"
-                android:layout_below="@+id/content_layout"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="30dp"
-                android:background="@android:color/holo_green_dark"
-                android:text="Receipt"
-                android:layout_alignParentRight="true"
-                android:textColor="@android:color/white" />
+
 
         </RelativeLayout>
 

@@ -8,8 +8,8 @@ public class ReceiptModel {
     private String salesmanId;
     private String customerName;
     private String customerCode;
-    private String balanceAmount;
-    private String receivedAmount;
+    private double balanceAmount;
+    private double receivedAmount;
     private String paymentType;
     private String chequeDate;
     private String chequeNumber;
@@ -64,19 +64,19 @@ public class ReceiptModel {
         this.customerCode = customerCode;
     }
 
-    public String getBalanceAmount() {
+    public double getBalanceAmount() {
         return balanceAmount;
     }
 
-    public void setBalanceAmount(String balanceAmount) {
+    public void setBalanceAmount(double balanceAmount) {
         this.balanceAmount = balanceAmount;
     }
 
-    public String getReceivedAmount() {
+    public double getReceivedAmount() {
         return receivedAmount;
     }
 
-    public void setReceivedAmount(String receivedAmount) {
+    public void setReceivedAmount(double receivedAmount) {
         this.receivedAmount = receivedAmount;
     }
 

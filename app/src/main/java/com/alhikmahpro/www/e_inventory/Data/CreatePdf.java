@@ -1,10 +1,13 @@
 package com.alhikmahpro.www.e_inventory.Data;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,6 +15,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.R;
+import com.alhikmahpro.www.e_inventory.View.ListReceiptActivity;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -35,15 +39,16 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class CreatePdf extends AsyncTask<String,Void,String> {
-    Context mContext;
-    String invoiceNo;
-    AlertDialog alertDialog;
-    AlertDialog.Builder builder;
+    private Context mContext;
+    private String invoiceNo;
+    private AlertDialog alertDialog;
+    private AlertDialog.Builder builder;
     private static final String TAG = "CreatePdf";
 
-    String customerName="", invoiceDate, salesmanId, customerCode, paymentMode, Type;
-    String companyName, companyAddress="", companyPhone="", footer="";
-    double netAmount, discountAmount, base_total;
+    private String customerName="", invoiceDate, salesmanId, customerCode, paymentMode, Type;
+    private String companyName, companyAddress="", companyPhone="", footer="";
+    private double netAmount, discountAmount, base_total;
+    private String fileName;
     public CreatePdf(Context mContext, String invoiceNo) {
         this.mContext = mContext;
         this.invoiceNo = invoiceNo;
@@ -115,7 +120,7 @@ public class CreatePdf extends AsyncTask<String,Void,String> {
                 dir.mkdir();
             }
 
-            String fileName = invoiceNo + "-" + invoiceDate+".pdf";
+            fileName = invoiceNo + "-" + invoiceDate+".pdf";
             pdfFile = new File(dir, fileName);
 
             //PdfWriter.getInstance(document,new FileOutputStream(mFilePath));
@@ -283,7 +288,7 @@ public class CreatePdf extends AsyncTask<String,Void,String> {
 
     }
 
-    public void ShowProgressDialog() {
+    private void ShowProgressDialog() {
         builder = new AlertDialog.Builder(mContext);
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View dialogView = inflater.inflate(R.layout.progress, null);
@@ -293,11 +298,30 @@ public class CreatePdf extends AsyncTask<String,Void,String> {
         alertDialog.show();
     }
 
-    public void HideProgressDialog() {
+    private void HideProgressDialog() {
 
         alertDialog.dismiss();
     }
 
+    private void openGeneratedPDF() {
+
+//        File outputFile = new File(Environment.getExternalStoragePublicDirectory
+//                (Environment.DIRECTORY_DOWNLOADS), "sample.pdf");
+        File outputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Receipts/"+fileName);
+        // Uri uri = Uri.fromFile(outputFile);
+        Uri uri = FileProvider.getUriForFile(mContext, mContext.getPackageName() + ".provider", outputFile);
+
+        Intent share = new Intent();
+        share.setAction(Intent.ACTION_SEND);
+        share.setType("application/pdf");
+        share.putExtra(Intent.EXTRA_STREAM, uri);
+        mContext.startActivity(Intent.createChooser(share, "Share to :"));
+
+
+        //ListReceiptActivity.startActivity(share);
+
+
+    }
 
 
 }

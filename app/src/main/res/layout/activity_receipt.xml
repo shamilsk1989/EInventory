@@ -259,38 +259,41 @@
             android:layout_below="@+id/editTextRemark"
             android:layout_marginTop="10dp"
             android:background="@android:color/holo_green_dark"
-            android:text="print"
+            android:text="Save And Print"
             android:textColor="@android:color/white" />
 
-        <LinearLayout
+        <Button
+            android:id="@+id/btnNew"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/btnPrint"
-            android:layout_weight="2"
+            android:layout_height="40dp"
+            android:text="new"
+            android:layout_below="@+id/btnPrint"
+            android:background="@android:color/holo_green_dark"
+            android:textColor="@android:color/white"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="20dp"
-            android:orientation="horizontal">
-            <Button
-                android:id="@+id/btnNew"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="new"
-                android:background="@android:color/holo_green_dark"
-                android:textColor="@android:color/white"
-                />
+            />
 
-            <Button
-                android:id="@+id/btnPdf"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="PDF"
-                android:layout_marginLeft="5dp"
-                android:background="@android:color/holo_green_dark"
-                android:textColor="@android:color/white"
-                />
-        </LinearLayout>
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_below="@id/btnPrint"-->
+            <!--android:layout_weight="2"-->
+            <!--android:layout_marginTop="10dp"-->
+            <!--android:layout_marginBottom="20dp"-->
+            <!--android:orientation="horizontal">-->
+            <!--<Button-->
+                <!--android:id="@+id/btnNew"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_weight="1"-->
+                <!--android:text="new"-->
+                <!--android:background="@android:color/holo_green_dark"-->
+                <!--android:textColor="@android:color/white"-->
+                <!--/>-->
+
+          <!---->
+        <!--</LinearLayout>-->
 
     </RelativeLayout>
 

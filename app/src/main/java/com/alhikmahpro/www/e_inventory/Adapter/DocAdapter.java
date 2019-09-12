@@ -73,7 +73,7 @@ public class DocAdapter extends RecyclerView.Adapter<DocAdapter.ViewHolder> {
 
         @BindView(R.id.rv_docNo)
         TextView rvDocNo;
-        @BindView(R.id.rv_staffName)
+        @BindView(R.id.rv_customerName)
         TextView rvStaffName;
         @BindView(R.id.rv_img_edit)
         ImageView rvImgEdit;

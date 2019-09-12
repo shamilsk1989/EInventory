@@ -151,8 +151,8 @@ public class dbHelper extends SQLiteOpenHelper {
             DataContract.Receipts.COL_SALESMAN_ID + " TEXT ," +
             DataContract.Receipts.COL_CUSTOMER_CODE + " TEXT ," +
             DataContract.Receipts.COL_CUSTOMER_NAME + " TEXT ," +
-            DataContract.Receipts.COL_BALANCE_AMOUNT + " TEXT ," +
-            DataContract.Receipts.COL_RECEIVED_AMOUNT + " TEXT ," +
+            DataContract.Receipts.COL_BALANCE_AMOUNT + " REAL ," +
+            DataContract.Receipts.COL_RECEIVED_AMOUNT + " REAL ," +
             DataContract.Receipts.COL_PAYMENT_TYPE + " TEXT ," +
             DataContract.Receipts.COL_CHEQUE_DATE + " TEXT ," +
             DataContract.Receipts.COL_CHEQUE_NUMBER + " TEXT ," +
@@ -697,10 +697,16 @@ public class dbHelper extends SQLiteOpenHelper {
                         DataContract.Invoice.COL_INVOICE_NUMBER + "= ? ",
                 new String[]{String.valueOf(invoice_no)});
 
-        if (cursor.getCount() > 0)
+        if (cursor.getCount() > 0){
+            cursor.close();
             return true;
-        else
+        }
+
+        else{
+           cursor.close();
             return false;
+        }
+
     }
 
     public boolean updateInvoice(String invoiceNo, String invoiceDate, String salesmanId, String customerCode, String customerName,
@@ -894,7 +900,7 @@ public class dbHelper extends SQLiteOpenHelper {
 
     /************************ Receipt **********************************************************/
     public boolean saveReceipts(String receiptNo, String receiptDate, String salesmanId, String customerCode, String customerName,
-                                String balanceAmount,String receivedAmount, String paymentMode, String chqDate, String chqNumber, int status) {
+                                double balanceAmount,double receivedAmount, String paymentMode, String chqDate, String chqNumber, int status) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -912,7 +918,7 @@ public class dbHelper extends SQLiteOpenHelper {
             contentValues.put(DataContract.Receipts.COL_IS_SYNC, status);
             database.insert(DataContract.Receipts.TABLE_NAME, null, contentValues);
             database.close();
-            Log.d(TAG, "one row inserted in sales table ......... ");
+            Log.d(TAG, "one row inserted in receipt table ......... ");
             return true;
         } catch (Exception e) {
             return false;
@@ -922,7 +928,7 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
     public boolean updateReceipt(String receiptNo, String receiptDate, String salesmanId, String customerCode, String customerName,
-                                 String balanceAmount,String receivedAmount, String paymentMode, String chqDate, String chqNumber, int status) {
+                                 double balanceAmount,double receivedAmount, String paymentMode, String chqDate, String chqNumber, int status) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();

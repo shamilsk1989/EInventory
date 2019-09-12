@@ -11,10 +11,8 @@ import android.widget.TextView;
 
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.ItemModel;
-import com.alhikmahpro.www.e_inventory.Interface.OnAdapterClickListener;
+import com.alhikmahpro.www.e_inventory.Interface.OnListAdapterClickListener;
 import com.alhikmahpro.www.e_inventory.R;
-
-import org.w3c.dom.Text;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -23,10 +21,10 @@ import java.util.List;
 public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.SaleViewHolder> {
     Context context;
     List<ItemModel>saleList;
-    OnAdapterClickListener onAdapterClickListener;
+    OnListAdapterClickListener onAdapterClickListener;
     private static final String TAG = "SalesListAdapter";
 
-    public SalesListAdapter(Context context, List<ItemModel> saleList,OnAdapterClickListener onAdapterClickListener) {
+    public SalesListAdapter(Context context, List<ItemModel> saleList,OnListAdapterClickListener onAdapterClickListener) {
         this.context = context;
         this.saleList = saleList;
         this.onAdapterClickListener = onAdapterClickListener;
@@ -48,10 +46,14 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
         Log.d(TAG, "onBindViewHolder:date "+date);
         int sync=itemModel.getIs_sync();
         if(sync==DataContract.SYNC_STATUS_OK){
-            holder.imgSyncOk.setImageResource(R.drawable.ic_sync_ok);
+            holder.imgSync.setImageResource(R.drawable.ic_sync_ok);
+            holder.imgEdit.setEnabled(false);
+            holder.imgEdit.setImageResource(R.drawable.ic_edit_disabled);
         }
         if(sync==DataContract.SYNC_STATUS_FAILED){
-            holder.imgSyncOk.setImageResource(R.drawable.ic_sync_error);
+            holder.imgSync.setImageResource(R.drawable.ic_sync_error);
+            holder.imgEdit.setEnabled(true);
+            holder.imgEdit.setImageResource(R.drawable.ic_edit);
         }
         holder.invoiceDate.setText(date);
         holder.invoiceAmount.setText(currencyFormatter(itemModel.getNet()));
@@ -59,7 +61,16 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
         holder.imgEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onAdapterClickListener.OnItemClicked(position);
+                Log.d(TAG, "onClick: edit");
+                onAdapterClickListener.OnEditClicked(position);
+            }
+        });
+        holder.imgShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: ");
+                onAdapterClickListener.OnShareClicked(position);
+
             }
         });
 
@@ -76,7 +87,7 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
         TextView invoiceNo;
         TextView invoiceAmount;
         TextView invoiceDate;
-        ImageView imgEdit,imgSyncOk;
+        ImageView imgEdit,imgSync,imgShare;
         TextView customerName;
 
 
@@ -87,7 +98,8 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
             invoiceAmount=itemView.findViewById(R.id.rv_amount);
             invoiceDate=itemView.findViewById(R.id.rv_date);
             imgEdit=itemView.findViewById(R.id.rv_img_edit);
-            imgSyncOk=itemView.findViewById(R.id.rv_img_sync_ok);
+            imgSync=itemView.findViewById(R.id.rv_img_sync);
+            imgShare=itemView.findViewById(R.id.rv_img_share);
             customerName=itemView.findViewById(R.id.rv_customer);
 
         }

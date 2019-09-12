@@ -13,8 +13,11 @@ import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.ItemModel;
 import com.alhikmahpro.www.e_inventory.Data.ReceiptModel;
 import com.alhikmahpro.www.e_inventory.Interface.OnAdapterClickListener;
+import com.alhikmahpro.www.e_inventory.Interface.OnListAdapterClickListener;
 import com.alhikmahpro.www.e_inventory.R;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,12 +26,12 @@ import butterknife.ButterKnife;
 
 public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ViewHolder> {
 
-    OnAdapterClickListener adapterClickListener;
+    OnListAdapterClickListener adapterClickListener;
     List<ReceiptModel> mList = new ArrayList<>();
     Context context;
 
 
-    public ReceiptAdapter(Context context,List<ReceiptModel> mList, OnAdapterClickListener adapterClickListener) {
+    public ReceiptAdapter(Context context,List<ReceiptModel> mList, OnListAdapterClickListener adapterClickListener) {
         this.context=context;
         this.adapterClickListener = adapterClickListener;
         this.mList = mList;
@@ -38,7 +41,7 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ViewHold
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
 
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_receipt_row, viewGroup, false);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_sale_row, viewGroup, false);
         ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
 
@@ -50,30 +53,33 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ViewHold
         ReceiptModel itemsModel = mList.get(position);
 
         viewHolder.rvDocNo.setText(String.valueOf(itemsModel.getReceiptNo()));
-        viewHolder.rvStaffName.setText(itemsModel.getSalesmanId());
-
+        viewHolder.rvCustomerName.setText(itemsModel.getCustomerName());
         viewHolder.rvDate.setText(itemsModel.getReceiptDate());
-
-        if(itemsModel.getIs_sync()== DataContract.SYNC_STATUS_FAILED){
-            viewHolder.rvImgEdit.setVisibility(View.VISIBLE);
-            viewHolder.rvImgSync.setVisibility(View.GONE);
-
+        double amount=itemsModel.getReceivedAmount();
+        viewHolder.rvAmount.setText(currencyFormatter(amount));
+        int sync=itemsModel.getIs_sync();
+        if(sync==DataContract.SYNC_STATUS_OK){
+            viewHolder.rvImgSync.setImageResource(R.drawable.ic_sync_ok);
+            viewHolder.rvImgEdit.setEnabled(false);
+            viewHolder.rvImgEdit.setImageResource(R.drawable.ic_edit_disabled);
         }
-        else if(itemsModel.getIs_sync()==DataContract.SYNC_STATUS_OK){
-            viewHolder.rvImgEdit.setVisibility(View.GONE);
-            viewHolder.rvImgSync.setVisibility(View.VISIBLE);
+        if(sync==DataContract.SYNC_STATUS_FAILED){
+            viewHolder.rvImgSync.setImageResource(R.drawable.ic_sync_error);
+            viewHolder.rvImgEdit.setEnabled(true);
+            viewHolder.rvImgEdit.setImageResource(R.drawable.ic_edit);
         }
+
         viewHolder.rvImgEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapterClickListener.OnItemClicked(position);
+                adapterClickListener.OnEditClicked(position);
             }
         });
 
         viewHolder.rvImgShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                adapterClickListener.OnDeleteClicked(position);
+                adapterClickListener.OnShareClicked(position);
             }
         });
 
@@ -86,10 +92,12 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ViewHold
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.rv_docNo)
+        @BindView(R.id.rv_invoiceNo)
         TextView rvDocNo;
-        @BindView(R.id.rv_staffName)
-        TextView rvStaffName;
+        @BindView(R.id.rv_amount)
+        TextView rvAmount;
+        @BindView(R.id.rv_customer)
+        TextView rvCustomerName;
         @BindView(R.id.rv_img_edit)
         ImageView rvImgEdit;
         @BindView(R.id.rv_img_share)
@@ -103,5 +111,15 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ViewHold
             super(view);
             ButterKnife.bind(this, view);
         }
+    }
+
+
+    public String currencyFormatter(double val) {
+        NumberFormat format = NumberFormat.getCurrencyInstance();
+        String pattern = ((DecimalFormat) format).toPattern();
+        String newPattern = pattern.replace("\u00A4", "").trim();
+        NumberFormat newFormat = new DecimalFormat(newPattern);
+        return String.valueOf(newFormat.format(val));
+
     }
 }

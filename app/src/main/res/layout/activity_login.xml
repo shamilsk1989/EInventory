@@ -30,6 +30,7 @@
         android:layout_marginTop="@dimen/margin_medium"
         android:background="@drawable/editext_border"
         android:hint="Password"
+        android:inputType="textPassword"
         
         android:maxLines="1"
         android:maxLength="100"

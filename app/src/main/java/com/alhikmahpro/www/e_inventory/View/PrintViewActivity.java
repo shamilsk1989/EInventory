@@ -160,7 +160,7 @@ public class PrintViewActivity extends AppCompatActivity {
     PrintViewAdapter adapter;
     private static final String TAG = "PrintViewActivity";
     String customerName, invoiceNo, total, invoiceDate, salesmanId, customerCode, paymentMode, Type;
-    String companyName, companyAddress, companyPhone, footer;
+    String companyName="", companyAddress="", companyPhone="", footer="";
     double netAmount, discountAmount, base_total;
     private static final int PERMISSION_CODE = 100;
     private static final int STORAGE_PERMISSION_CODE = 101;
@@ -248,7 +248,6 @@ public class PrintViewActivity extends AppCompatActivity {
         try {
             closePrinter();
             FindBluetoothDevice();
-            openBluetoothPrinter();
             printData();
 
         } catch (Exception ex) {
@@ -318,7 +317,11 @@ public class PrintViewActivity extends AppCompatActivity {
                     if (pairedDev.getAddress().equals(spDeviceAddress)) {
                         bluetoothDevice = pairedDev;
                         Log.d(TAG, "Printer Found " + pairedDev.getName());
+                        openBluetoothPrinter();
                         break;
+                    }
+                    else{
+                        Toast.makeText(this, "Printer not found", Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -338,9 +341,7 @@ public class PrintViewActivity extends AppCompatActivity {
             bluetoothSocket.connect();
             outputStream = bluetoothSocket.getOutputStream();
             inputStream = bluetoothSocket.getInputStream();
-
             Log.d(TAG, "printer connected:");
-
             beginListenData();
 
         } catch (Exception ex) {
@@ -649,12 +650,7 @@ public class PrintViewActivity extends AppCompatActivity {
     public void onBtnPdfClicked() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-//                Log.d(TAG, "Permission already granted: ");
-//                createPdfWrapper();
-//            } else {
-//                requestStoragePermission();
-//            }
+
             if (requestStoragePermission()) {
                 createPdfWrapper();
             }
@@ -680,30 +676,7 @@ public class PrintViewActivity extends AppCompatActivity {
             return false;
         }
         return true;
-//        if (ActivityCompat.shouldShowRequestPermissionRationale(PrintViewActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-//
-//            new AlertDialog.Builder(PrintViewActivity.this)
-//                    .setTitle("Permission needed")
-//                    .setMessage("To continue please allow the permission ")
-//                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            ActivityCompat.requestPermissions(PrintViewActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
-//
-//                        }
-//                    })
-//                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//                        @Override
-//
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            dialog.cancel();
-//                        }
-//                    }).create().show();
-//
-//
-//        } else {
-//            ActivityCompat.requestPermissions(PrintViewActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
-//        }
+
     }
 
     @Override
@@ -762,205 +735,7 @@ public class PrintViewActivity extends AppCompatActivity {
 
     }
 
-//    private void createPdfWrapper() {
-//
-//        final DecimalFormat decimalFormat = new DecimalFormat("0.00");
-//
-//        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-//        String mDate = sdf.format(new Date());
-//        Document document = new Document();
-//        try {
-//
-//            //create directory
-//            String directoryPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Invoice";
-//            dir = new File(directoryPath);
-//            if (!dir.exists()) {
-//                dir.mkdir();
-//            }
-//
-//            String fileName = invoiceNo + "-" + invoiceDate+".pdf";
-//            pdfFile = new File(dir, fileName);
-//
-//            //PdfWriter.getInstance(document,new FileOutputStream(mFilePath));
-//            FileOutputStream stream = new FileOutputStream(pdfFile);
-//            //PdfWriter pdfWriter=PdfWriter.getInstance(document,stream);
-//            PdfWriter.getInstance(document, stream);
-//            //open document
-//
-//            document.open();
-//            //document settings
-//
-//            document.setPageSize(PageSize.A4);
-//            document.addCreationDate();
-//            BaseColor mColorAccent = new BaseColor(0, 153, 204, 255);
-//            float mHeadingFontSize = 13.0f;
-//            float mValueFontSize = 15.0f;
-//            float mItemFontSize = 10.0f;
-//            Paragraph paragraph = new Paragraph("");
-//
-//            //adding title image
-////            Image image=Image.getInstance("src/resource/logo.png");
-////            image.scaleAbsolute(540f,75f);
-//
-//
-//            //font
-//            BaseFont urName = BaseFont.createFont("assets/fonts/brandon_medium.otf", "UTF-8", BaseFont.EMBEDDED);
-//
-//            Font heading = new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD, new BaseColor(0, 0, 0));
-//            Font normal = new Font(Font.FontFamily.TIMES_ROMAN, 12);
-//
-//            // LINE SEPARATOR
-//            LineSeparator lineSeparator = new LineSeparator();
-//            lineSeparator.setLineColor(new BaseColor(0, 0, 0, 68));
-//
-//            // Title Order Details...
-//            // Adding Title....
-//
-//            Font mOrderDetailsTitleFont = new Font(urName, 25.0f, Font.NORMAL, BaseColor.BLACK);
-//            Chunk mOrderDetailsTitleChunk = new Chunk(companyName, mOrderDetailsTitleFont);
-//            Paragraph mOrderDetailsTitleParagraph = new Paragraph(mOrderDetailsTitleChunk);
-//            mOrderDetailsTitleParagraph.setAlignment(Element.ALIGN_CENTER);
-//            document.add(mOrderDetailsTitleParagraph);
-//
-//            Font mOrderDetailsTitle2Font = new Font(urName, 22.0f, Font.NORMAL, BaseColor.BLACK);
-//            Chunk mOrderDetailsTitle2Chunk = new Chunk(companyAddress, mOrderDetailsTitle2Font);
-//            Paragraph mOrderDetailsTitle2Paragraph = new Paragraph(mOrderDetailsTitle2Chunk);
-//            mOrderDetailsTitle2Paragraph.setAlignment(Element.ALIGN_CENTER);
-//            document.add(mOrderDetailsTitle2Paragraph);
-//
-//            Font mOrderDetailsTitle3Font = new Font(urName, 20.0f, Font.NORMAL, BaseColor.BLACK);
-//            Chunk mOrderDetailsTitle3Chunk = new Chunk(companyPhone, mOrderDetailsTitle3Font);
-//            Paragraph mOrderDetailsTitle3Paragraph = new Paragraph(mOrderDetailsTitle3Chunk);
-//            mOrderDetailsTitle3Paragraph.setAlignment(Element.ALIGN_CENTER);
-//            document.add(mOrderDetailsTitle3Paragraph);
-//
-//
-//            // Fields of Order Details...
-//            // Adding Chunks for Title and value
-//
-//            Font mOrderIdFont = new Font(urName, mHeadingFontSize, Font.NORMAL, mColorAccent);
-//            Chunk mOrderIdChunk = new Chunk("Invoice No:", mOrderIdFont);
-//            Paragraph mOrderIdParagraph = new Paragraph(mOrderIdChunk);
-//            document.add(mOrderIdParagraph);
-//
-//            Font mOrderIdValueFont = new Font(urName, mValueFontSize, Font.NORMAL, BaseColor.BLACK);
-//            Chunk mOrderIdValueChunk = new Chunk("#" + invoiceNo, mOrderIdValueFont);
-//            Paragraph mOrderIdValueParagraph = new Paragraph(mOrderIdValueChunk);
-//            document.add(mOrderIdValueParagraph);
-//
-//            // Adding Line Breakable Space....
-//            document.add(new Paragraph(""));
-//            // Adding Horizontal Line...
-//            //  document.add(new Chunk(lineSeparator));
-//            // Adding Line Breakable Space....
-//            document.add(new Paragraph(""));
-//
-//            // Fields of Order Details...
-//            Font mOrderDateFont = new Font(urName, mHeadingFontSize, Font.NORMAL, mColorAccent);
-//            Chunk mOrderDateChunk = new Chunk("Order Date:", mOrderDateFont);
-//            Paragraph mOrderDateParagraph = new Paragraph(mOrderDateChunk);
-//            document.add(mOrderDateParagraph);
-//
-//            Font mOrderDateValueFont = new Font(urName, mValueFontSize, Font.NORMAL, BaseColor.BLACK);
-//            Chunk mOrderDateValueChunk = new Chunk(invoiceDate, mOrderDateValueFont);
-//            Paragraph mOrderDateValueParagraph = new Paragraph(mOrderDateValueChunk);
-//            document.add(mOrderDateValueParagraph);
-//
-//            document.add(new Paragraph(""));
-//            //document.add(new Chunk(lineSeparator));
-//            document.add(new Paragraph(""));
-//
-//            // Fields of Order Details...
-//            Font mOrderAcNameFont = new Font(urName, mHeadingFontSize, Font.NORMAL, mColorAccent);
-//            Chunk mOrderAcNameChunk = new Chunk("Customer Name:", mOrderAcNameFont);
-//            Paragraph mOrderAcNameParagraph = new Paragraph(mOrderAcNameChunk);
-//            document.add(mOrderAcNameParagraph);
-//
-//            Font mOrderAcNameValueFont = new Font(urName, mValueFontSize, Font.NORMAL, BaseColor.BLACK);
-//            Chunk mOrderAcNameValueChunk = new Chunk(customerName, mOrderAcNameValueFont);
-//            Paragraph mOrderAcNameValueParagraph = new Paragraph(mOrderAcNameValueChunk);
-//            document.add(mOrderAcNameValueParagraph);
-//
-//            document.add(new Paragraph(""));
-//            //document.add(new Chunk(lineSeparator));
-//            document.add(new Paragraph(""));
-//
-//            // Fields of Order Details...
-//            Font mOrderSalesmanFont = new Font(urName, mHeadingFontSize, Font.NORMAL, mColorAccent);
-//            Chunk mOrderSalesmanChunk = new Chunk("Salesman:", mOrderSalesmanFont);
-//            Paragraph mOrderSalesmanParagraph = new Paragraph(mOrderSalesmanChunk);
-//            document.add(mOrderSalesmanParagraph);
-//
-//            Font mOrderSalesmanValueFont = new Font(urName, mValueFontSize, Font.NORMAL, BaseColor.BLACK);
-//            Chunk mOrderSalesmanValueChunk = new Chunk(salesmanId, mOrderSalesmanValueFont);
-//            Paragraph mOrderSalesmanValueParagraph = new Paragraph(mOrderSalesmanValueChunk);
-//            document.add(mOrderSalesmanValueParagraph);
-//
-//            document.add(new Paragraph(""));
-//            document.add(new Chunk(lineSeparator));
-//            document.add(new Paragraph(""));
-//
-//            //float[]columnWidth={}
-//            PdfPTable pTable = new PdfPTable(3);
-//            pTable.setWidthPercentage(100);
-//            //insert heading
-//
-//            insertCell(pTable, " Item Name", Element.ALIGN_RIGHT, 1, heading);
-//            insertCell(pTable, " Quantity", Element.ALIGN_LEFT, 1, heading);
-//            insertCell(pTable, " Total", Element.ALIGN_LEFT, 1, heading);
-//            pTable.setHeaderRows(1);
-//
-//            for (CartModel mm : Cart.mCart)
-//            {
-//
-//                String item = mm.getProductName();
-//                String qty = String.valueOf(mm.getQty());
-//                String price = String.valueOf(decimalFormat.format(mm.getRate()));
-//                String sub_total = String.valueOf(decimalFormat.format(mm.getNet()));
-//                String item_format = price + " X " + mm.getQty();
-//
-//                insertCell(pTable, item, Element.ALIGN_RIGHT, 1, normal);
-//                insertCell(pTable, item_format, Element.ALIGN_LEFT, 1, normal);
-//                insertCell(pTable, price, Element.ALIGN_LEFT, 1, normal);
-//
-//            }
-//            insertCell(pTable, "", Element.ALIGN_LEFT, 3, heading);
-//            insertCell(pTable, "Total ", Element.ALIGN_RIGHT, 2, normal);
-//            insertCell(pTable, decimalFormat.format(base_total), Element.ALIGN_RIGHT, 1, normal);
-//            insertCell(pTable, "Discount ", Element.ALIGN_RIGHT, 2, normal);
-//            insertCell(pTable, decimalFormat.format(discountAmount), Element.ALIGN_RIGHT, 1, normal);
-//            insertCell(pTable, "Net :", Element.ALIGN_RIGHT, 2, normal);
-//            insertCell(pTable, decimalFormat.format(netAmount), Element.ALIGN_RIGHT, 1, normal);
-//            paragraph.add(pTable);
-//            document.add(paragraph);
-//            Toast.makeText(this, "Pdf Generated", Toast.LENGTH_SHORT).show();
-//
-//
-//            //previewPDF(fileName,dir);
-//            document.close();
-//
-//        } catch (DocumentException de) {
-//            Toast.makeText(this, "Error " + de.getMessage(), Toast.LENGTH_SHORT).show();
-//            Log.d(TAG, "createPdfWrapper: " + de.getMessage());
-//            //Log.d(TAG, "createPdfWrapper: "+ex.;
-//            de.printStackTrace();
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
-//    }
-//
-//
-//    private void insertCell(PdfPTable pTable, String text, int align, int colspan, Font font) {
-//
-//        PdfPCell cell = new PdfPCell(new Phrase(text.trim(), font));
-//        cell.setHorizontalAlignment(align);
-//        cell.setColspan(colspan);
-//        if (text.trim().equalsIgnoreCase("")) {
-//            cell.setMinimumHeight(10f);
-//        }
-//        pTable.addCell(cell);
-//
-//    }
+
 
 
 

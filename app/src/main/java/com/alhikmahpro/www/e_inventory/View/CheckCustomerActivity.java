@@ -64,8 +64,8 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
     EditText editTextLastInvoice;
     @BindView(R.id.editTextLastReceipt)
     EditText editTextLastReceipt;
-    @BindView(R.id.btnReceipt)
-    Button btnReceipts;
+//    @BindView(R.id.btnReceipt)
+//    Button btnReceipts;
     @BindView(R.id.btnInvoice)
     Button btnInvoice;
 
@@ -75,7 +75,9 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
     private static final String TAG = "CheckCustomerActivity";
     private ConnectivityManager connectivityManager;
     String companyCode, companyName, deviceId, locationCode, branchCode, periodCode;
-    String customerCode, customerName, lastInvoiceNo, lastReceiptNo, balanceAmount;
+    String customerCode, customerName, lastInvoiceNo, lastReceiptNo;
+    double balanceAmount;
+    String type;
 
     String BASE_URL = "";
 
@@ -91,6 +93,8 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setTitle("Check Customer");
+        Intent intent=getIntent();
+        type=intent.getStringExtra("Type");
 
         //disable edit text
 
@@ -135,14 +139,13 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
                         customerName = response.getString("CustomerName");
                         lastInvoiceNo = response.getString("LastInvoice");
                         lastReceiptNo = response.getString("LastReceipt");
-                        balanceAmount = response.getString("CurrentBalance");
+                        balanceAmount =ParseDouble(response.getString("CurrentBalance"));
 
-                        double balAmount=ParseDouble(balanceAmount);
                         textViewCustomerName.setText(customerName);
                         editTextLastInvoice.setText(lastInvoiceNo);
                         editTextLastReceipt.setText(lastReceiptNo);
-                        editTextBalance.setText(currencyFormatter(balAmount));
-                        Log.d(TAG, "notifySuccess: "+currencyFormatter(balAmount));
+                        editTextBalance.setText(currencyFormatter(balanceAmount));
+                        Log.d(TAG, "notifySuccess: "+currencyFormatter(balanceAmount));
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -288,6 +291,33 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
 
     @OnClick(R.id.btnInvoice)
     public void onBtnInvoiceClicked() {
+        if(type!=null && type.equals("REC")){
+            loadReceiptActivity();
+        }
+        else if(type!=null & type.equals("SAL")){
+            loadSalesActivity();
+        }
+
+    }
+//    @OnClick(R.id.btnReceipt)
+//    public void onBtnReceiptClicked() {
+//        if (TextUtils.isEmpty(textViewCustomerName.getText().toString())) {
+//            textViewCustomerName.setError("Invalid customer");
+//        } else {
+//            clearView();
+//            Intent intent_rec = new Intent(CheckCustomerActivity.this, ReceiptActivity.class);
+//            intent_rec.putExtra("TYPE", "NEW");
+//            intent_rec.putExtra("PAYMENT_TYPE", "Cash");
+//            intent_rec.putExtra("CUS_NAME", customerName);
+//            intent_rec.putExtra("CUS_CODE", customerCode);
+//            intent_rec.putExtra("BALANCE_AMOUNT", balanceAmount);
+//            startActivity(intent_rec);
+//        }
+//
+//
+//    }
+
+    private void loadSalesActivity(){
         if (TextUtils.isEmpty(textViewCustomerName.getText().toString())) {
             textViewCustomerName.setError("Invalid customer");
         } else {
@@ -298,10 +328,9 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
             startActivity(intent_sale);
         }
 
-
     }
-    @OnClick(R.id.btnReceipt)
-    public void onBtnReceiptClicked() {
+    private void loadReceiptActivity(){
+
         if (TextUtils.isEmpty(textViewCustomerName.getText().toString())) {
             textViewCustomerName.setError("Invalid customer");
         } else {
@@ -314,7 +343,6 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
             intent_rec.putExtra("BALANCE_AMOUNT", balanceAmount);
             startActivity(intent_rec);
         }
-
 
     }
 

@@ -131,7 +131,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Sales");
+        getSupportActionBar().setTitle("New Sales");
         list = new ArrayList<>();
         initView();
         initVolleyCallBack();
