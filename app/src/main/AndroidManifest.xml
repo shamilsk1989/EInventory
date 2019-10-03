@@ -18,7 +18,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".View.ListReceiptActivity"></activity>
+        <activity android:name=".View.ClearDataActivity"></activity>
+        <activity android:name=".View.ListReceiptActivity" />
         <activity android:name=".View.ReceiptActivity" />
         <activity
             android:name=".View.SplashActivity"
@@ -60,18 +61,14 @@
         <activity android:name=".View.DeviceListActivity" />
         <activity android:name=".View.ListSalesActivity" />
 
-
-
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.provider"
             android:exported="false"
             android:grantUriPermissions="true">
-
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_path"/>
-
+                android:resource="@xml/provider_path" />
         </provider>
     </application>
 

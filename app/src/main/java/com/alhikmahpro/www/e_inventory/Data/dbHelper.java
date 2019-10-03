@@ -11,7 +11,7 @@ import android.util.Log;
 
 public class dbHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "m-inv";
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     private static final String TAG = "dbHelper";
 
     private final String SQL_CREATE_SETTINGS_TABLE = "CREATE TABLE IF NOT EXISTS " + DataContract.Settings.TABLE_NAME + " (" +
@@ -141,6 +141,7 @@ public class dbHelper extends SQLiteOpenHelper {
             DataContract.PaperSettings.COL_COMPANY_ADDRESS + " TEXT," +
             DataContract.PaperSettings.COL_COMPANY_PHONE + " TEXT," +
             DataContract.PaperSettings.COL_FOOTER + " TEXT," +
+            DataContract.Settings.COL_LOGO + " BLOB, " +
             DataContract.PaperSettings.COL_PAPER_SIZE + " TEXT " + ");";
 
 
@@ -156,6 +157,7 @@ public class dbHelper extends SQLiteOpenHelper {
             DataContract.Receipts.COL_PAYMENT_TYPE + " TEXT ," +
             DataContract.Receipts.COL_CHEQUE_DATE + " TEXT ," +
             DataContract.Receipts.COL_CHEQUE_NUMBER + " TEXT ," +
+            DataContract.Receipts.COL_REMARK + " TEXT ," +
             DataContract.Receipts.COL_IS_SYNC + " INTEGER DEFAULT 0 " + ");";
 
 
@@ -815,6 +817,31 @@ public class dbHelper extends SQLiteOpenHelper {
         Cursor cursor = database.query(DataContract.Invoice.TABLE_NAME, projection, selection, selection_ars, null, null, null);
         return cursor;
     }
+    public Cursor getAllUnSyncInvoice(SQLiteDatabase database) {
+
+        Log.d(TAG, "get Un sync Invoice : ");
+        String[] projection = {
+                DataContract.Invoice.COL_INVOICE_NUMBER,
+                DataContract.Invoice.COL_INVOICE_DATE,
+                DataContract.Invoice.COL_SALESMAN_ID,
+                DataContract.Invoice.COL_CUSTOMER_CODE,
+                DataContract.Invoice.COL_CUSTOMER_NAME,
+                DataContract.Invoice.COL_TOTAL_AMOUNT,
+                DataContract.Invoice.COL_DISCOUNT_AMOUNT,
+                DataContract.Invoice.COL_NET_AMOUNT,
+                DataContract.Invoice.COL_PAYMENT_TYPE,
+                DataContract.Invoice.COL_IS_SYNC,
+        };
+        String selection = DataContract.Invoice.COL_IS_SYNC + " LIKE ?";
+        String[] selection_ars = {String.valueOf(DataContract.SYNC_STATUS_FAILED)};
+        //Cursor cursor = database.rawQuery("select"+ DataContract.Invoice.COL_INVOICE_NUMBER+ "from " + DataContract.Invoice.TABLE_NAME + " where " + DataContract.Invoice.COL_IS_SYNC + "="+DataContract.SYNC_STATUS_FAILED , null);
+        Cursor cursor= database.query(DataContract.Invoice.TABLE_NAME, projection, selection, selection_ars, null, null, null);
+        return cursor;
+    }
+
+
+
+
 
     public void getInvoiceDetailsById(String invoiceId) {
         Log.d(TAG, "getInvoice: ");
@@ -858,12 +885,14 @@ public class dbHelper extends SQLiteOpenHelper {
         database.close();
     }
 
-    public void updateInvoiceSync(String doc) {
+
+
+    public void updateAllInvoiceSync() {
         try {
             SQLiteDatabase database = getWritableDatabase();
             ContentValues values = new ContentValues();
             values.put(DataContract.Invoice.COL_IS_SYNC, DataContract.SYNC_STATUS_OK);
-            database.update(DataContract.Invoice.TABLE_NAME, values, DataContract.Invoice.COL_INVOICE_NUMBER + "=?", new String[]{String.valueOf(doc)});
+            database.update(DataContract.Invoice.TABLE_NAME, values, DataContract.Invoice.COL_IS_SYNC + "=?", new String[]{String.valueOf(DataContract.SYNC_STATUS_FAILED)});
 
             Log.v(TAG, "invoice sync updated");
         } catch (Exception ex) {
@@ -895,12 +924,22 @@ public class dbHelper extends SQLiteOpenHelper {
         return database.delete(DataContract.Invoice.TABLE_NAME, DataContract.Invoice.COL_INVOICE_NUMBER + "= ?", new String[]{invoice_no}) > 0;
     }
 
+    public void deleteInvoice(){
+        SQLiteDatabase database=getReadableDatabase();
+        database.execSQL("delete from "+ DataContract.Invoice.TABLE_NAME);
+    }
+    public void deleteInvoiceDetails(){
+        SQLiteDatabase database=getReadableDatabase();
+        database.execSQL("delete from "+ DataContract.InvoiceDetails.TABLE_NAME);
+    }
+
+
 
     /************************ end invoice*******************************************************/
 
     /************************ Receipt **********************************************************/
     public boolean saveReceipts(String receiptNo, String receiptDate, String salesmanId, String customerCode, String customerName,
-                                double balanceAmount,double receivedAmount, String paymentMode, String chqDate, String chqNumber, int status) {
+                                double balanceAmount,double receivedAmount, String paymentMode, String chqDate, String chqNumber,String remark, int status) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -915,6 +954,7 @@ public class dbHelper extends SQLiteOpenHelper {
             contentValues.put(DataContract.Receipts.COL_PAYMENT_TYPE, paymentMode);
             contentValues.put(DataContract.Receipts.COL_CHEQUE_DATE, chqDate);
             contentValues.put(DataContract.Receipts.COL_CHEQUE_NUMBER, chqNumber);
+            contentValues.put(DataContract.Receipts.COL_REMARK, remark);
             contentValues.put(DataContract.Receipts.COL_IS_SYNC, status);
             database.insert(DataContract.Receipts.TABLE_NAME, null, contentValues);
             database.close();
@@ -928,7 +968,7 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
     public boolean updateReceipt(String receiptNo, String receiptDate, String salesmanId, String customerCode, String customerName,
-                                 double balanceAmount,double receivedAmount, String paymentMode, String chqDate, String chqNumber, int status) {
+                                 double balanceAmount,double receivedAmount, String paymentMode, String chqDate, String chqNumber,String remark, int status) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -943,6 +983,7 @@ public class dbHelper extends SQLiteOpenHelper {
             contentValues.put(DataContract.Receipts.COL_PAYMENT_TYPE, paymentMode);
             contentValues.put(DataContract.Receipts.COL_CHEQUE_DATE, chqDate);
             contentValues.put(DataContract.Receipts.COL_CHEQUE_NUMBER, chqNumber);
+            contentValues.put(DataContract.Receipts.COL_REMARK, remark);
             contentValues.put(DataContract.Receipts.COL_IS_SYNC, status);
 
             database.update(DataContract.Receipts.TABLE_NAME, contentValues, DataContract.Receipts.COL_RECEIPT_NUMBER + "=?", new String[]{receiptNo});
@@ -954,6 +995,19 @@ public class dbHelper extends SQLiteOpenHelper {
         }
 
 
+    }
+
+    public void updateAllReceiptSync() {
+        try {
+            SQLiteDatabase database = getWritableDatabase();
+            ContentValues values = new ContentValues();
+            values.put(DataContract.Receipts.COL_IS_SYNC, DataContract.SYNC_STATUS_OK);
+            database.update(DataContract.Invoice.TABLE_NAME, values, DataContract.Receipts.COL_IS_SYNC + "=?", new String[]{String.valueOf(DataContract.SYNC_STATUS_FAILED)});
+
+            Log.v(TAG, "receipts sync updated");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     public int getLastReceiptNo() {
@@ -988,6 +1042,7 @@ public class dbHelper extends SQLiteOpenHelper {
                 DataContract.Receipts.COL_PAYMENT_TYPE,
                 DataContract.Receipts.COL_CHEQUE_DATE,
                 DataContract.Receipts.COL_CHEQUE_NUMBER,
+                DataContract.Receipts.COL_REMARK,
                 DataContract.Receipts.COL_IS_SYNC
         };
         String orderBy = DataContract.Receipts.COL_ID + " DESC ";
@@ -995,10 +1050,49 @@ public class dbHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
+    public Cursor getAllUnSyncReceipts(SQLiteDatabase database) {
+
+        Log.d(TAG, "get Un sync Receipts : ");
+        String[] projection = {
+                DataContract.Receipts.COL_RECEIPT_NUMBER,
+                DataContract.Receipts.COL_RECEIPT_DATE,
+                DataContract.Receipts.COL_SALESMAN_ID,
+                DataContract.Receipts.COL_CUSTOMER_CODE,
+                DataContract.Receipts.COL_CUSTOMER_NAME,
+                DataContract.Receipts.COL_RECEIVED_AMOUNT,
+                DataContract.Receipts.COL_BALANCE_AMOUNT,
+                DataContract.Receipts.COL_PAYMENT_TYPE,
+                DataContract.Receipts.COL_CHEQUE_DATE,
+                DataContract.Receipts.COL_CHEQUE_NUMBER,
+                DataContract.Receipts.COL_REMARK,
+                DataContract.Receipts.COL_IS_SYNC
+        };
+        String selection = DataContract.Receipts.COL_IS_SYNC + " LIKE ?";
+        String[] selection_ars = {String.valueOf(DataContract.SYNC_STATUS_FAILED)};
+        //Cursor cursor = database.rawQuery("select"+ DataContract.Invoice.COL_INVOICE_NUMBER+ "from " + DataContract.Invoice.TABLE_NAME + " where " + DataContract.Invoice.COL_IS_SYNC + "="+DataContract.SYNC_STATUS_FAILED , null);
+        Cursor cursor= database.query(DataContract.Receipts.TABLE_NAME, projection, selection, selection_ars, null, null, null);
+        return cursor;
+    }
+
+    public void deleteReceipt(){
+        SQLiteDatabase database=getReadableDatabase();
+        database.execSQL("delete from "+ DataContract.Receipts.TABLE_NAME);
+        database.close();
+    }
+
+
+
 
     /************************ end receipts*******************************************************/
     /************************************paper settings ********************************/
-    public boolean savePaperSettings(String Name, String Address, String Phone, String Footer, String Size) {
+
+
+    public void deletePaperSettings(){
+        SQLiteDatabase database=getReadableDatabase();
+        database.execSQL("delete from "+ DataContract.PaperSettings.TABLE_NAME);
+        database.close();
+    }
+    public boolean savePaperSettings(String Name, String Address, String Phone, String Footer, byte[] logo, String Size) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -1007,6 +1101,7 @@ public class dbHelper extends SQLiteOpenHelper {
             contentValues.put(DataContract.PaperSettings.COL_COMPANY_ADDRESS, Address);
             contentValues.put(DataContract.PaperSettings.COL_COMPANY_PHONE, Phone);
             contentValues.put(DataContract.PaperSettings.COL_FOOTER, Footer);
+            contentValues.put(DataContract.PaperSettings.COL_LOGO, logo);
             contentValues.put(DataContract.PaperSettings.COL_PAPER_SIZE, Size);
             database.insert(DataContract.PaperSettings.TABLE_NAME, null, contentValues);
             database.close();
@@ -1021,7 +1116,7 @@ public class dbHelper extends SQLiteOpenHelper {
     public Cursor getPaperSettings(SQLiteDatabase sqLiteDatabase) {
         String[] projections = {DataContract.PaperSettings.COL_COMPANY_NAME, DataContract.PaperSettings.COL_COMPANY_ADDRESS,
                 DataContract.PaperSettings.COL_COMPANY_PHONE, DataContract.PaperSettings.COL_FOOTER,
-                DataContract.PaperSettings.COL_PAPER_SIZE};
+                DataContract.PaperSettings.COL_PAPER_SIZE,DataContract.PaperSettings.COL_LOGO};
         Cursor cursor = sqLiteDatabase.query(DataContract.PaperSettings.TABLE_NAME, projections, null, null, null, null,
                 DataContract.PaperSettings.COL_ID + " DESC ", "1");
         return cursor;

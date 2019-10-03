@@ -199,7 +199,7 @@ public class VolleyServiceGateway {
         }
     }
 
-    public void ShowProgressDialog() {
+    private void ShowProgressDialog() {
         builder = new AlertDialog.Builder(mContext);
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View dialogView = inflater.inflate(R.layout.progress, null);
@@ -209,7 +209,7 @@ public class VolleyServiceGateway {
         alertDialog.show();
     }
 
-    public void HideProgressDialog() {
+    private void HideProgressDialog() {
 
         alertDialog.dismiss();
     }

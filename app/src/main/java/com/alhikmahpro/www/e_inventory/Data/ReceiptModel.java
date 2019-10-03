@@ -13,6 +13,15 @@ public class ReceiptModel {
     private String paymentType;
     private String chequeDate;
     private String chequeNumber;
+    private  String remark;
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
 
     int is_sync;
 

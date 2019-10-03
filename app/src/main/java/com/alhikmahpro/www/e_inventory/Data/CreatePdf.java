@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
 
+import com.alhikmahpro.www.e_inventory.AppUtils;
 import com.alhikmahpro.www.e_inventory.R;
 import com.alhikmahpro.www.e_inventory.View.ListReceiptActivity;
 import com.itextpdf.text.BaseColor;
@@ -46,7 +47,7 @@ public class CreatePdf extends AsyncTask<String,Void,String> {
     private static final String TAG = "CreatePdf";
 
     private String customerName="", invoiceDate, salesmanId, customerCode, paymentMode, Type;
-    private String companyName, companyAddress="", companyPhone="", footer="";
+    private String companyName="", companyAddress="", companyPhone="", footer="";
     private double netAmount, discountAmount, base_total;
     private String fileName;
     public CreatePdf(Context mContext, String invoiceNo) {
@@ -89,38 +90,51 @@ public class CreatePdf extends AsyncTask<String,Void,String> {
         }
         cursor1.close();
         database.close();
-
-        if(createPDF()){
-            return "PDF Created";
-        }else{
-            return "PDF Error";
+        // add invoiceDetails to mCart
+        helper.getInvoiceDetailsById(invoiceNo);
+        Log.d(TAG, "doInBackground: "+RuntimeData.mCartData.size());
+        String res="failed";
+        if(companyName.length()>0){
+            if(Cart.mCart.size()>0){
+                if(createPDF())
+                    return "success";
+            }
+        }else {
+            res="sss";
         }
 
-
-
+        return res;
     }
     @Override
     protected void onPostExecute(String result) {
         HideProgressDialog();
-        Toast.makeText(mContext, result, Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "onPostExecute: "+result);
+        if(result!=null && result.equals("success")){
+            Cart.mCart.clear();
+            openGeneratedPDF();
+        }else {
+            Toast.makeText(mContext, "Pdf Creation Failed", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
 
     private boolean createPDF(){
         final DecimalFormat decimalFormat = new DecimalFormat("0.00");
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+
+        String mDate= AppUtils.getFormattedDate();
         Document document = new Document();
         File pdfFile;
         File dir;
         try {
             //create directory
-            String directoryPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Invoice";
+            String directoryPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/PriceChecker/Invoice";
             dir = new File(directoryPath);
             if (!dir.exists()) {
                 dir.mkdir();
             }
 
-            fileName = invoiceNo + "-" + invoiceDate+".pdf";
+            fileName = invoiceNo+ "-"+mDate+".pdf";
             pdfFile = new File(dir, fileName);
 
             //PdfWriter.getInstance(document,new FileOutputStream(mFilePath));
@@ -246,6 +260,7 @@ public class CreatePdf extends AsyncTask<String,Void,String> {
                 String sub_total = String.valueOf(decimalFormat.format(mm.getNet()));
                 String item_format = price + " X " + mm.getQty();
 
+
                 insertCell(pTable, item, Element.ALIGN_RIGHT, 1, normal);
                 insertCell(pTable, item_format, Element.ALIGN_LEFT, 1, normal);
                 insertCell(pTable, price, Element.ALIGN_LEFT, 1, normal);
@@ -307,7 +322,7 @@ public class CreatePdf extends AsyncTask<String,Void,String> {
 
 //        File outputFile = new File(Environment.getExternalStoragePublicDirectory
 //                (Environment.DIRECTORY_DOWNLOADS), "sample.pdf");
-        File outputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Receipts/"+fileName);
+        File outputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/PriceChecker/Invoice/"+fileName);
         // Uri uri = Uri.fromFile(outputFile);
         Uri uri = FileProvider.getUriForFile(mContext, mContext.getPackageName() + ".provider", outputFile);
 

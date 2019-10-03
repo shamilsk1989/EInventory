@@ -155,7 +155,7 @@ public class ReceiptActivity extends AppCompatActivity {
     };
 
     private void updateLabel() {
-        String myFormat = "dd/MM/yy"; //In which you need put here
+        String myFormat = "dd-MM-yy"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
         editTextChequeDate.setText(sdf.format(myCalendar.getTime()));
     }
@@ -189,6 +189,7 @@ public class ReceiptActivity extends AppCompatActivity {
             editTextAmount.setText(String.valueOf(intent.getDoubleExtra("RECEIVED_AMOUNT",0)));
             editTextChequeDate.setText(intent.getStringExtra("CHEQUE_DATE"));
             editTextChequeNumber.setText(intent.getStringExtra("CHEQUE_NUMBER"));
+            editTextRemark.setText(intent.getStringExtra("REMARK"));
 
 
         }
@@ -242,7 +243,7 @@ public class ReceiptActivity extends AppCompatActivity {
             receiptObject.put(DataContract.Receipts.COL_RECEIVED_AMOUNT, editTextAmount.getText().toString());
             receiptObject.put(DataContract.Receipts.COL_CHEQUE_NUMBER, editTextChequeNumber.getText().toString());
             receiptObject.put(DataContract.Receipts.COL_CHEQUE_DATE, editTextChequeDate.getText().toString());
-            receiptObject.put("remark",editTextRemark.getText().toString());
+            receiptObject.put(DataContract.Receipts.COL_REMARK,editTextRemark.getText().toString());
 
 
         } catch (JSONException e) {
@@ -316,7 +317,7 @@ public class ReceiptActivity extends AppCompatActivity {
         dbHelper helper = new dbHelper(this);
         if (type.equals("EDIT")) {
             if (helper.updateReceipt(txtReceipt.getText().toString(), mDate, "Tab", customerCode, customerName, balanceAmount,receivedAmount,
-                    paymentType, editTextChequeDate.getText().toString(), editTextChequeNumber.getText().toString(), sync)) {
+                    paymentType, editTextChequeDate.getText().toString(), editTextChequeNumber.getText().toString(),editTextRemark.getText().toString(), sync)) {
                 Log.d(TAG, "saveToDatabase: updated");
                 billStatus = true;
                 printingJob();
@@ -324,7 +325,7 @@ public class ReceiptActivity extends AppCompatActivity {
 
         } else {
             if (helper.saveReceipts(txtReceipt.getText().toString(), mDate, "Tab", customerCode, customerName, balanceAmount,receivedAmount,
-                    paymentType, editTextChequeDate.getText().toString(), editTextChequeNumber.getText().toString(), sync)) {
+                    paymentType, editTextChequeDate.getText().toString(), editTextChequeNumber.getText().toString(), editTextRemark.getText().toString(),sync)) {
                 Log.d(TAG, "saveToDatabase: Saved");
                 billStatus = true;
                 printingJob();

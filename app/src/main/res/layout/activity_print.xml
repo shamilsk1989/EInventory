@@ -214,44 +214,48 @@
                 android:layout_marginTop="10dp"
                 />
 
-
-            <LinearLayout
+            <Button
+                android:id="@+id/btn_new"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="3"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:orientation="horizontal">
-                <Button
-                    android:id="@+id/btn_new"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="new"
-                    android:background="@android:color/holo_green_dark"
-                    android:textColor="@android:color/white"
-                    />
-                <!--<Button-->
-                    <!--android:id="@+id/btn_sync"-->
-                    <!--android:layout_width="0dp"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_weight="1"-->
-                    <!--android:text="SYNC"-->
-                    <!--android:layout_marginLeft="5dp"-->
-                    <!--android:background="@color/colorPrimary"-->
-                    <!--android:textColor="@android:color/white"-->
-                    <!--/>-->
-                <Button
-                    android:id="@+id/btn_pdf"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="PDF"
-                    android:layout_marginLeft="5dp"
-                    android:background="@android:color/holo_green_dark"
-                    android:textColor="@android:color/white"
-                    />
-            </LinearLayout>
+
+                android:text="new"
+                android:background="@android:color/holo_green_dark"
+                android:textColor="@android:color/white"
+                />
+
+
+            <!--<LinearLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_weight="3"-->
+                <!--android:layout_marginTop="10dp"-->
+                <!--android:layout_marginBottom="10dp"-->
+                <!--android:orientation="horizontal">-->
+           <!---->
+                <!--&lt;!&ndash;<Button&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:id="@+id/btn_sync"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_width="0dp"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_weight="1"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:text="SYNC"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_marginLeft="5dp"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:background="@color/colorPrimary"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:textColor="@android:color/white"&ndash;&gt;-->
+                    <!--&lt;!&ndash;/>&ndash;&gt;-->
+                <!--&lt;!&ndash;<Button&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:id="@+id/btn_pdf"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_width="0dp"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_weight="1"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:text="PDF"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:layout_marginLeft="5dp"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:background="@android:color/holo_green_dark"&ndash;&gt;-->
+                    <!--&lt;!&ndash;android:textColor="@android:color/white"&ndash;&gt;-->
+                    <!--&lt;!&ndash;/>&ndash;&gt;-->
+            <!--</LinearLayout>-->
 
         </LinearLayout>
 

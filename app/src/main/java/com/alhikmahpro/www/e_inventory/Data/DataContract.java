@@ -168,7 +168,9 @@ public class DataContract {
         public static final String COL_COMPANY_ADDRESS="company_address";
         public static final String COL_COMPANY_PHONE="company_phone";
         public static final String COL_FOOTER="footer";
+        public static final String COL_LOGO="logo";
         public static final String COL_PAPER_SIZE="paper_size";
+
     }
 
     public static class Receipts{
@@ -184,6 +186,7 @@ public class DataContract {
         public static final String COL_PAYMENT_TYPE="payment_type";
         public static final String COL_CHEQUE_DATE="cheque_date";
         public static final String COL_CHEQUE_NUMBER="cheque_number";
+        public static final String COL_REMARK="remark";
         public static final String COL_IS_SYNC="is_sync";
     }
 

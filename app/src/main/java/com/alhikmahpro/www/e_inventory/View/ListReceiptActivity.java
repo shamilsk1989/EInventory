@@ -31,6 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.Adapter.ReceiptAdapter;
+import com.alhikmahpro.www.e_inventory.AppUtils;
 import com.alhikmahpro.www.e_inventory.Data.Cart;
 import com.alhikmahpro.www.e_inventory.Data.CartModel;
 import com.alhikmahpro.www.e_inventory.Data.CreatePdf;
@@ -85,7 +86,7 @@ public class ListReceiptActivity extends AppCompatActivity {
     private static final String TAG = "ListReceiptActivity";
     String companyName, companyAddress, companyPhone, footer;
     String customerName, customerCode, receiptNo, receiptDate;
-    String  chqNumber, chqDate, paymentType, salesman;
+    String  chqNumber, chqDate, paymentType, salesman,remark;
     String fileName;
     double balanceAmount,receiptAmount;
     AlertDialog alertDialog;
@@ -141,6 +142,7 @@ public class ListReceiptActivity extends AppCompatActivity {
                 model.setPaymentType(cursor.getString(cursor.getColumnIndex(DataContract.Receipts.COL_PAYMENT_TYPE)));
                 model.setChequeNumber(cursor.getString(cursor.getColumnIndex(DataContract.Receipts.COL_CHEQUE_NUMBER)));
                 model.setChequeDate(cursor.getString(cursor.getColumnIndex(DataContract.Receipts.COL_CHEQUE_DATE)));
+                model.setRemark(cursor.getString(cursor.getColumnIndex(DataContract.Receipts.COL_REMARK)));
                 model.setIs_sync(cursor.getInt(cursor.getColumnIndex(DataContract.Receipts.COL_IS_SYNC)));
                 list.add(model);
             } while (cursor.moveToNext());
@@ -161,6 +163,7 @@ public class ListReceiptActivity extends AppCompatActivity {
                     paymentType = receiptModel.getPaymentType();
                     chqNumber = receiptModel.getChequeNumber();
                     chqDate = receiptModel.getChequeDate();
+                    remark=receiptModel.getRemark();
 
                     Log.d(TAG, "OnEditClicked: date" + receiptDate + "number" + receiptNo);
 
@@ -176,6 +179,7 @@ public class ListReceiptActivity extends AppCompatActivity {
                     intent.putExtra("PAYMENT_TYPE", paymentType);
                     intent.putExtra("CHEQUE_NUMBER", chqNumber);
                     intent.putExtra("CHEQUE_DATE", chqDate);
+                    intent.putExtra("REMARK", remark);
                     startActivity(intent);
                 }
 
@@ -339,9 +343,9 @@ public class ListReceiptActivity extends AppCompatActivity {
         protected String doInBackground(String... strings) {
 
             if (createPDF()) {
-                return "PDF Created";
+                return "success";
             } else {
-                return "PDF Error";
+                return "failed";
             }
 
         }
@@ -349,7 +353,10 @@ public class ListReceiptActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             HideProgressDialog();
-            //Toast.makeText(mContext, result, Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "onPostExecute: "+result);
+            if(result!=null & result.equals("success")) {
+                openGeneratedPDF();
+            }
         }
 
     }
@@ -357,21 +364,21 @@ public class ListReceiptActivity extends AppCompatActivity {
 
     private boolean createPDF() {
         final DecimalFormat decimalFormat = new DecimalFormat("0.00");
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        String mDate= AppUtils.getFormattedDate();
         Document document = new Document();
         File pdfFile;
         File dir;
         try {
 
 
-            //create directory
-            String directoryPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Receipts";
+            //create directory/PriceChecker/Receipts
+            String directoryPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/PriceChecker/Receipts";
             dir = new File(directoryPath);
             if (!dir.exists()) {
                 dir.mkdir();
             }
 
-            fileName = receiptDate+"-"+receiptNo+".pdf";
+            fileName = receiptNo+"-"+mDate+".pdf";
             pdfFile = new File(dir, fileName);
 
             //PdfWriter.getInstance(document,new FileOutputStream(mFilePath));
@@ -494,7 +501,6 @@ public class ListReceiptActivity extends AppCompatActivity {
             document.add(paragraph);
             document.close();
             Log.d(TAG, "createPDF: pdf created");
-            openGeneratedPDF();
             return true;
 
 
@@ -531,7 +537,7 @@ public class ListReceiptActivity extends AppCompatActivity {
 
 //        File outputFile = new File(Environment.getExternalStoragePublicDirectory
 //                (Environment.DIRECTORY_DOWNLOADS), "sample.pdf");
-        File outputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Receipts/"+fileName);
+        File outputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/PriceChecker/Receipts/"+fileName);
         // Uri uri = Uri.fromFile(outputFile);
         Uri uri = FileProvider.getUriForFile(ListReceiptActivity.this, ListReceiptActivity.this.getPackageName() + ".provider", outputFile);
 

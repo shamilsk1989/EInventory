@@ -12,6 +12,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -39,6 +42,7 @@ import com.alhikmahpro.www.e_inventory.Data.CreatePdf;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.PrinterCommands;
 import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
+import com.alhikmahpro.www.e_inventory.Data.Utils;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
 import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
@@ -74,6 +78,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -128,8 +133,8 @@ public class PrintViewActivity extends AppCompatActivity {
     TextView txtPayment;
 //    @BindView(R.id.btn_sync)
 //    Button btnSync;
-    @BindView(R.id.btn_pdf)
-    Button btnPdf;
+//    @BindView(R.id.btn_pdf)
+//    Button btnPdf;
 
 //    @BindView(R.id.toolbar)
 //    Toolbar toolbar;
@@ -155,6 +160,7 @@ public class PrintViewActivity extends AppCompatActivity {
             .fromString("00001101-0000-1000-8000-00805F9B34FB");
     BluetoothDevice mBluetoothDevice;
     boolean billStatus;
+    BitSet dots;
 
     RecyclerView.LayoutManager layoutManager;
     PrintViewAdapter adapter;
@@ -162,6 +168,7 @@ public class PrintViewActivity extends AppCompatActivity {
     String customerName, invoiceNo, total, invoiceDate, salesmanId, customerCode, paymentMode, Type;
     String companyName="", companyAddress="", companyPhone="", footer="";
     double netAmount, discountAmount, base_total;
+    Bitmap thumbnail;
     private static final int PERMISSION_CODE = 100;
     private static final int STORAGE_PERMISSION_CODE = 101;
     private String path;
@@ -206,6 +213,13 @@ public class PrintViewActivity extends AppCompatActivity {
             companyAddress = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_ADDRESS));
             companyPhone = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_PHONE));
             footer = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_FOOTER));
+            byte[] img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO));
+            try {
+                thumbnail = BitmapFactory.decodeByteArray(img, 0, img.length);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         Log.d(TAG, "initView: " + companyName);
 
@@ -248,7 +262,10 @@ public class PrintViewActivity extends AppCompatActivity {
         try {
             closePrinter();
             FindBluetoothDevice();
-            printData();
+            //printData();
+
+            printPhoto(R.drawable.img);
+
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -399,6 +416,30 @@ public class PrintViewActivity extends AppCompatActivity {
         }
     }
 
+    //print photo
+    public void printPhoto(int img) {
+        try {
+            Bitmap bmp = BitmapFactory.decodeResource(getResources(),img);
+            if(bmp!=null){
+                byte[] command = Utils.decodeBitmap(bmp);
+                outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
+                printText(command);
+            }else{
+                Log.e("Print Photo error", "the file isn't exists");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("PrintTools", "the file isn't exists");
+        }
+    }
+
+
+
+
+
+
+
+
     private void printData() {
 
         final DecimalFormat decimalFormat = new DecimalFormat("0.00");
@@ -408,9 +449,14 @@ public class PrintViewActivity extends AppCompatActivity {
             public void run() {
 
                 try {
-                    // byte[] printformat = new byte[]{0x1B, 0x21, 0x03};
-                    // byte[] printformat = new byte[]{30,35,0};
-                    //outputStream.write(printformat);
+                    if(thumbnail!=null){
+                        byte[] command = Utils.decodeBitmap(thumbnail);
+                        outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
+                        printText(command);
+                    }
+                     byte[] printformat = new byte[]{0x1B, 0x21, 0x03};
+                     //   byte[] printformat = new byte[]{30,35,0};
+                    outputStream.write(printformat);
 
                     printCustom(companyName, 2, 1);
                     printCustom(companyAddress, 1, 1);
@@ -527,6 +573,17 @@ public class PrintViewActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+    }
+    //print byte[]
+    private void printText(byte[] msg) {
+        Log.d(TAG, "printText: "+msg);
+        try {
+            // Print normal text
+            outputStream.write(msg);
+            printNewLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     //print text
@@ -646,94 +703,6 @@ public class PrintViewActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick(R.id.btn_pdf)
-    public void onBtnPdfClicked() {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
-            if (requestStoragePermission()) {
-                createPdfWrapper();
-            }
-        } else {
-            createPdfWrapper();
-        }
-
-    }
-
-    private boolean requestStoragePermission() {
-
-        int writePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        int readPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        List<String> listPermissions = new ArrayList<>();
-        if (writePermission != PackageManager.PERMISSION_GRANTED) {
-            listPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-        if (readPermission != PackageManager.PERMISSION_GRANTED) {
-            listPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-        }
-        if (!listPermissions.isEmpty()) {
-            ActivityCompat.requestPermissions(this, listPermissions.toArray(new String[listPermissions.size()]), PERMISSION_CODE);
-            return false;
-        }
-        return true;
-
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSION_CODE:
-                Map<String, Integer> perms = new HashMap<>();
-                perms.put(Manifest.permission.READ_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
-                perms.put(Manifest.permission.WRITE_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
-
-                if (grantResults.length > 0) {
-                    for (int i = 0; i < permissions.length; i++)
-                        perms.put(permissions[i], grantResults[i]);
-
-                    //check all permissions
-                    if (perms.get(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                            perms.get(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-
-                        Log.d(TAG, "permission granted ");
-                        createPdfWrapper();
-                    } else {
-                        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ||
-
-                                ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-
-                            new AlertDialog.Builder(PrintViewActivity.this)
-                                    .setTitle("Permission needed")
-                                    .setMessage("To continue please allow the permission ")
-                                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            requestStoragePermission();
-                                        }
-                                    })
-                                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                        @Override
-
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            dialog.cancel();
-                                        }
-                                    }).create().show();
-
-                        } else {
-                            Toast.makeText(this, "permission denied", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-
-        }
-
-
-    }
-    private void createPdfWrapper(){
-        CreatePdf createPdf=new CreatePdf(this,invoiceNo);
-        createPdf.execute();
-
-    }
 
 
 

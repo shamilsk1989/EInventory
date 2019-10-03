@@ -2,6 +2,7 @@ package com.alhikmahpro.www.e_inventory.View;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.arch.lifecycle.Observer;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -34,12 +35,19 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
+
+import com.alhikmahpro.www.e_inventory.AppUtils;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.RuntimeData;
 import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.Interface.FragmentActionListener;
 import com.alhikmahpro.www.e_inventory.R;
+import com.alhikmahpro.www.e_inventory.worker.SalesWorker;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.CaptureActivity;
@@ -90,6 +98,30 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         sale = navMenu.findItem(R.id.nav_sale);
         receipt = navMenu.findItem(R.id.nav_receipt);
 
+        //Initiate worker class
+
+        final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(SalesWorker.class).build();
+        WorkManager.getInstance().enqueue(workRequest);
+
+//        final PeriodicWorkRequest periodicWorkRequest
+//                = new PeriodicWorkRequest.Builder(MyWorker.class, 10, TimeUnit.HOURS)
+//                .build();
+
+        //creating constraints
+//        Constraints constraints = new Constraints.Builder()
+//                .setRequiresCharging(true) // you can add as many constraints as you want
+//                .build();
+        WorkManager.getInstance().getWorkInfoByIdLiveData(workRequest.getId())
+                .observe(this, new Observer<WorkInfo>() {
+                    @Override
+                    public void onChanged(@Nullable WorkInfo workInfo) {
+                        Log.d(TAG, "onChanged: "+workInfo.getState().name());
+
+                    }
+                });
+
+
+
 
         if (findViewById(R.id.fragment_container) != null) {
             if (savedInstanceState != null) {
@@ -107,8 +139,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         //hideMenu();
     }
 
+    //Listening work manager
+
 
     private void initView() {
+
+
 
         dbHelper helper = new dbHelper(this);
         SQLiteDatabase database = helper.getReadableDatabase();
@@ -166,8 +202,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             sale.setVisible(false);
             receipt.setVisible(false);
         }
+        cursor.close();
+        database.close();
         user = SessionHandler.getInstance(HomeActivity.this).getUser();
         navUser.setText(user);
+
+
     }
 
 
@@ -261,6 +301,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.nav_print:
                 startActivity(new Intent(HomeActivity.this, PrinterSettingsActivity.class));
+                break;
+            case R.id.nav_clear:
+                startActivity(new Intent(HomeActivity.this, ClearDataActivity.class));
                 break;
             default:
 //                fragment = new CheckerFragment();

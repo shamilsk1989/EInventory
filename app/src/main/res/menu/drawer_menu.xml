@@ -57,6 +57,10 @@
                 android:icon="@drawable/ic_printer"
                 android:title="Printer"/>
 
+            <item
+                android:id="@+id/nav_clear"
+                android:icon="@drawable/ic_clear_black_24dp"
+                android:title="Clear Data"/>
 
             <!--<item-->
                 <!--android:id="@+id/nav_change_password"-->
