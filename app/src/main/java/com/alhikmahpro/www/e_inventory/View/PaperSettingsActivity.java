@@ -87,7 +87,7 @@ public class PaperSettingsActivity extends AppCompatActivity implements AdapterV
         Cursor cursor=helper.getPaperSettings(database);
         if(cursor.moveToFirst()){
             do{
-                _id=cursor.getInt(cursor.getColumnIndex(DataContract.PaperSettings.COL_ID));
+                //_id=cursor.getInt(cursor.getColumnIndex(DataContract.PaperSettings.COL_ID));
                 txtCompanyName.setText(cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_NAME)));
                 txtCompanyAddress.setText(cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_ADDRESS)));
                 txtCompanyPhone.setText(cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_PHONE)));

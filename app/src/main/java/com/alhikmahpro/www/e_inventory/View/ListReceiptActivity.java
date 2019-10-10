@@ -84,7 +84,7 @@ public class ListReceiptActivity extends AppCompatActivity {
     private String type;
     List<ReceiptModel> list;
     private static final String TAG = "ListReceiptActivity";
-    String companyName, companyAddress, companyPhone, footer;
+    String companyName="xxxx", companyAddress="xxxx", companyPhone="xxxx", footer="xxxx";
     String customerName, customerCode, receiptNo, receiptDate;
     String  chqNumber, chqDate, paymentType, salesman,remark;
     String fileName;
@@ -281,9 +281,9 @@ public class ListReceiptActivity extends AppCompatActivity {
 
     }
     private void createPdfWrapper() {
+        Log.d(TAG, "createPdfWrapper: ");
         dbHelper helper = new dbHelper(ListReceiptActivity.this);
         SQLiteDatabase database = helper.getReadableDatabase();
-
         Cursor cursor = helper.getPaperSettings(database);
         if (cursor.moveToFirst()) {
             companyName = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_NAME));
@@ -291,12 +291,12 @@ public class ListReceiptActivity extends AppCompatActivity {
             companyPhone = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_PHONE));
             footer = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_FOOTER));
 
-            CreatePDF createPdf = new CreatePDF();
-            createPdf.execute();
         }
-        else {
-            Toast.makeText(ListReceiptActivity.this, "Setup header and footer ", Toast.LENGTH_SHORT).show();
-        }
+        CreatePDF createPdf = new CreatePDF();
+        createPdf.execute();
+//        else {
+//            Toast.makeText(ListReceiptActivity.this, "Setup header and footer ", Toast.LENGTH_SHORT).show();
+//        }
         cursor.close();
         database.close();
     }
@@ -310,6 +310,7 @@ public class ListReceiptActivity extends AppCompatActivity {
     }
 
     private boolean requestStoragePermission() {
+        Log.d(TAG, "requestStoragePermission: ");
 
         int writePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         int readPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);

@@ -115,7 +115,7 @@ public class ReceiptActivity extends AppCompatActivity {
     BluetoothDevice mBluetoothDevice;
     boolean billStatus;
 
-    String companyName, companyAddress, companyPhone, footer;
+    String companyName="xxxxx", companyAddress="xxxx", companyPhone="xxxxx", footer="xxxxxx";
     private static final String TAG = "ReceiptActivity";
 
     @Override
@@ -248,7 +248,7 @@ public class ReceiptActivity extends AppCompatActivity {
             receiptObject.put(DataContract.Receipts.COL_CHEQUE_NUMBER, editTextChequeNumber.getText().toString());
             receiptObject.put(DataContract.Receipts.COL_CHEQUE_DATE, editTextChequeDate.getText().toString());
             receiptObject.put(DataContract.Receipts.COL_REMARK,editTextRemark.getText().toString());
-            receiptObject.put("receipt_type ",paymentType );
+            receiptObject.put("receipt_type",paymentType );
             receiptArray.put(receiptObject);
 
             result.put("Receipt",receiptArray);
@@ -322,6 +322,7 @@ public class ReceiptActivity extends AppCompatActivity {
 
 
     private void saveToDatabase(int sync) {
+        Log.d(TAG, "saveToDatabase: "+sync);
         // save data to local data base
         double receivedAmount=ParseDouble(editTextAmount.getText().toString());
         dbHelper helper = new dbHelper(this);
@@ -404,7 +405,7 @@ public class ReceiptActivity extends AppCompatActivity {
             companyAddress = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_ADDRESS));
             companyPhone = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_PHONE));
             footer = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_FOOTER));
-
+        }
 
             try {
                 // close if any connection exists
@@ -416,9 +417,10 @@ public class ReceiptActivity extends AppCompatActivity {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-        } else {
-            Toast.makeText(this, "Setup header and footer before printing..", Toast.LENGTH_SHORT).show();
-        }
+
+//        else {
+//            Toast.makeText(this, "Setup header and footer before printing..", Toast.LENGTH_SHORT).show();
+//        }
         Log.d(TAG, "initView: " + companyName);
         cursor.close();
         database.close();
