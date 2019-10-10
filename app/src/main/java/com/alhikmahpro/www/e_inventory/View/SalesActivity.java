@@ -576,6 +576,11 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
 
     private void initView() {
+        // delete all data from cart if not empty
+        if(Cart.mCart.size()>0){
+            Log.d(TAG, "initView: cart not empty");
+            Cart.mCart.clear();
+        }
         Intent intent = getIntent();
         customerName = intent.getStringExtra("Customer");
         customerCode = intent.getStringExtra("CustomerCode");

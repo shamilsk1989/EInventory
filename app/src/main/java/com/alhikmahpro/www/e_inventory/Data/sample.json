@@ -1,54 +1,35 @@
 {
   "Invoice": [
     {
-      "invoice_number": "INV-4",
-      "invoice_date": "02-07-2019",
-      "customer_code": "C0007",
-      "customer_name": "IZDIHAR LIBRARY",
+      "invoice_number": "INV-6",
+      "invoice_date": "10-10-2019",
+      "customer_code": "C0002",
+      "customer_name": "WAKRA BOOK SHOP",
       "salesman_id": "S001",
-      "total_amount": 375,
-      "discount_amount": 25,
-      "net_amount": 350,
+      "total_amount": 150,
+      "discount_amount": 0,
+      "net_amount": 150,
       "payment_type": "Cash"
     }
   ],
   "Details": [
     {
       "serial_no": 1,
-      "invoice_number": "INV-4",
-      "bar_code": "101",
+      "invoice_number": "INV-6",
+      "bar_code": "5136910",
       "product_code": "513691",
       "product_name": "3+1ST ACTIVITY BOOK ENGLISH",
-      "quantity": 20,
+      "quantity": 10,
       "unit1": "EA",
       "unit2": "DOZ",
-      "unit3": "null",
+      "unit3": "",
       "selected_unit": "EA",
       "un_qty1": 1,
       "un_qty2": 12,
       "un_qty3": 0,
       "rate": 15,
       "discount": 0,
-      "net_amount": 300,
-      "sale_type": "Sale"
-    },
-    {
-      "serial_no": 2,
-      "invoice_number": "INV-4",
-      "bar_code": "5137520",
-      "product_code": "513752",
-      "product_name": "5+3RD ACTIVITY BOOK ENVIRONMENT ",
-      "quantity": 5,
-      "unit1": "EA",
-      "unit2": "null",
-      "unit3": "null",
-      "selected_unit": "EA",
-      "un_qty1": 1,
-      "un_qty2": 0,
-      "un_qty3": 0,
-      "rate": 15,
-      "discount": 0,
-      "net_amount": 75,
+      "net_amount": 150,
       "sale_type": "Sale"
     }
   ]

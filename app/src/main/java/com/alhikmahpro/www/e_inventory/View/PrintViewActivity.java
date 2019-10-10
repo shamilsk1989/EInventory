@@ -262,9 +262,10 @@ public class PrintViewActivity extends AppCompatActivity {
         try {
             closePrinter();
             FindBluetoothDevice();
-            //printData();
+            printData();
+            //clearActivity();
 
-            printPhoto(R.drawable.img);
+           // printPhoto(R.drawable.img);
 
 
         } catch (Exception ex) {
@@ -449,11 +450,11 @@ public class PrintViewActivity extends AppCompatActivity {
             public void run() {
 
                 try {
-                    if(thumbnail!=null){
-                        byte[] command = Utils.decodeBitmap(thumbnail);
-                        outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
-                        printText(command);
-                    }
+//                    if(thumbnail!=null){
+//                        byte[] command = Utils.decodeBitmap(thumbnail);
+//                        outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
+//                        printText(command);
+//                    }
                      byte[] printformat = new byte[]{0x1B, 0x21, 0x03};
                      //   byte[] printformat = new byte[]{30,35,0};
                     outputStream.write(printformat);

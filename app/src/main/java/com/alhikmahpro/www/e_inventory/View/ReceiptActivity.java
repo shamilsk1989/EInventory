@@ -32,6 +32,7 @@ import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
 import com.alhikmahpro.www.e_inventory.R;
 import com.android.volley.VolleyError;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -162,6 +163,7 @@ public class ReceiptActivity extends AppCompatActivity {
 
     private void initView() {
 
+
         if (paymentType != null && paymentType.equals("Cash")) {
             radioCash.setChecked(true);
             chequeLayout.setVisibility(View.GONE);
@@ -232,11 +234,13 @@ public class ReceiptActivity extends AppCompatActivity {
     }
 
     private void sendToServer() {
-        String url = "PriceChecker/receipts.php";
+        String url = "PriceChecker/Receipt_voucher.php";
         JSONObject receiptObject = new JSONObject();
+        JSONArray receiptArray = new JSONArray();
+        JSONObject result = new JSONObject();
         try {
-            receiptObject.put(DataContract.Receipts.COL_RECEIPT_NUMBER, txtReceipt.getText().toString());
-            receiptObject.put(DataContract.Receipts.COL_RECEIPT_DATE, mDate);
+            receiptObject.put("receipt_no", txtReceipt.getText().toString());
+            receiptObject.put("receipt_date", mDate);
             receiptObject.put(DataContract.Receipts.COL_CUSTOMER_CODE, customerCode);
             receiptObject.put(DataContract.Receipts.COL_CUSTOMER_NAME, customerName);
             //receiptObject.put(DataContract.Receipts.COL_SALESMAN_ID, salesmanId);
@@ -244,13 +248,19 @@ public class ReceiptActivity extends AppCompatActivity {
             receiptObject.put(DataContract.Receipts.COL_CHEQUE_NUMBER, editTextChequeNumber.getText().toString());
             receiptObject.put(DataContract.Receipts.COL_CHEQUE_DATE, editTextChequeDate.getText().toString());
             receiptObject.put(DataContract.Receipts.COL_REMARK,editTextRemark.getText().toString());
+            receiptObject.put("receipt_type ",paymentType );
+            receiptArray.put(receiptObject);
+
+            result.put("Receipt",receiptArray);
 
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        if (receiptObject.length() > 0) {
+        if (result.length() > 0) {
+
+
 
             //send to volley
             View view = this.getCurrentFocus();
@@ -264,7 +274,7 @@ public class ReceiptActivity extends AppCompatActivity {
             } else {
                 // if internet available send to server
                 serviceGateway = new VolleyServiceGateway(mVolleyListener, this);
-                serviceGateway.postDataVolley("POSTCALL", url, receiptObject);
+                serviceGateway.postDataVolley("POSTCALL", url, result);
             }
 
         }
@@ -340,7 +350,7 @@ public class ReceiptActivity extends AppCompatActivity {
         int radioId = radioGroup.getCheckedRadioButtonId();
         Log.d(TAG, "onRadioButtonClicked: " + radioId);
         radioButton = findViewById(radioId);
-        String paymentType = radioButton.getText().toString();
+        paymentType = radioButton.getText().toString();
         if (paymentType.equals("Cash")) {
             chequeLayout.setVisibility(View.GONE);
         } else {
@@ -551,9 +561,9 @@ public class ReceiptActivity extends AppCompatActivity {
                     printNewLine();
 
 
-                    printCustom("Invoice #" + txtReceipt.getText().toString(), 1, 0);
+                    printCustom("Receipt #" + txtReceipt.getText().toString(), 1, 0);
                     printCustom("Date :" + mDate, 1, 0);
-                    printCustom("Customer :" + customerName, 1, 0);
+                    printCustom("Received from :" + customerName, 1, 0);
                     //printCustom("Salesman :" + salesmanId, 1, 0);
                     printCustom(new String(new char[32]).replace("\0", "."), 1, 1);
                     double recAmount = ParseDouble(editTextAmount.getText().toString());

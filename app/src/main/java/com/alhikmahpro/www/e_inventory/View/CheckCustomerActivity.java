@@ -340,6 +340,7 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
             intent_rec.putExtra("PAYMENT_TYPE", "Cash");
             intent_rec.putExtra("CUS_NAME", customerName);
             intent_rec.putExtra("CUS_CODE", customerCode);
+            //intent_rec.putExtra("SALESMAN", );
             intent_rec.putExtra("BALANCE_AMOUNT", balanceAmount);
             startActivity(intent_rec);
         }
