@@ -395,6 +395,8 @@ public class ReceiptActivity extends AppCompatActivity {
             ex.printStackTrace();
         }
     }
+
+
     private void printingJob() {
         dbHelper helper = new dbHelper(this);
         SQLiteDatabase database = helper.getReadableDatabase();
@@ -425,6 +427,7 @@ public class ReceiptActivity extends AppCompatActivity {
         cursor.close();
         database.close();
     }
+
 
 
     private void clearActivity() {
@@ -548,9 +551,9 @@ public class ReceiptActivity extends AppCompatActivity {
 
         final DecimalFormat decimalFormat = new DecimalFormat("0.00");
         Log.d(TAG, "printBill");
-        Thread thread = new Thread() {
+       // Thread thread = new Thread() {
 
-            public void run() {
+            //public void run() {
 
                 try {
                     // byte[] printformat = new byte[]{0x1B, 0x21, 0x03};
@@ -584,10 +587,13 @@ public class ReceiptActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     Log.e(TAG, "Exe ", e);
                 }
+                finally {
+                    clearActivity();
+                }
 
-            }
-        };
-        thread.start();
+            //}
+       // };
+        //thread.start();
     }
 
 

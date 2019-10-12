@@ -1,12 +1,12 @@
 package com.alhikmahpro.www.e_inventory.View;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -24,10 +24,12 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
@@ -175,6 +177,9 @@ public class PrintViewActivity extends AppCompatActivity {
     private File pdfFile;
     private File dir;
     dbHelper helper;
+
+    android.support.v7.app.AlertDialog alertDialog;
+    AlertDialog.Builder builder;
 
 
     @Override
@@ -436,12 +441,78 @@ public class PrintViewActivity extends AppCompatActivity {
 
 
 
+    private void printData() throws IOException{
+
+        try{
+            ShowProgressDialog();
+            final DecimalFormat decimalFormat = new DecimalFormat("0.00");
+            byte[] printformat = new byte[]{0x1B, 0x21, 0x03};
+            //   byte[] printformat = new byte[]{30,35,0};
+            outputStream.write(printformat);
+
+            printCustom(companyName, 2, 1);
+            printCustom(companyAddress, 1, 1);
+            printCustom("Tel:" + companyPhone, 1, 1);
+            printNewLine();
+
+
+            //printText(leftRightAlign(date,"        "));
+            // printCustom(mDate, 1, 0);
+            printCustom("Invoice #" + invoiceNo, 1, 0);
+            printCustom("Date :" + invoiceDate, 1, 0);
+            printCustom("Customer :" + customerName, 1, 0);
+            printCustom("Salesman :" + salesmanId, 1, 0);
+            printCustom(new String(new char[32]).replace("\0", "."), 1, 1);
+
+            for (CartModel mm : Cart.mCart) {
+                String item = mm.getProductName();
+                String qty = String.valueOf(mm.getQty());
+                String price = String.valueOf(decimalFormat.format(mm.getRate()));
+                String sub_total = String.valueOf(decimalFormat.format(mm.getNet()));
+                String item_format = price + " X " + mm.getQty();
+                printText(leftRightAlign(item, sub_total));
+                printNewLine();
+                printText(leftRightAlign(item_format, " "));
+                printNewLine();
+            }
+            printCustom(new String(new char[32]).replace("\0", "."), 1, 1);
+
+            printText(leftRightAlign("Total", " " + decimalFormat.format(base_total)));
+            printNewLine();
+
+            printText(leftRightAlign("Dis ", "-" + decimalFormat.format(discountAmount)));
+            printNewLine();
+
+            leftRightAlignLarge("Net", String.valueOf(decimalFormat.format(netAmount)));
+            printNewLine();
+            printCustom(new String(new char[32]).replace("\0", " "), 1, 1);
+
+            printCustom(new String(new char[32]).replace("\0", "."), 1, 1);
+            printCustom(footer, 1, 1);
+
+            printNewLine();
+            printNewLine();
+            outputStream.flush();
+
+
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        finally {
+            HideProgressDialog();
+            clearActivity();
+        }
+    }
 
 
 
 
 
-    private void printData() {
+
+
+
+    private void printData1() {
 
         final DecimalFormat decimalFormat = new DecimalFormat("0.00");
         Log.d(TAG, "printBill");
@@ -704,6 +775,20 @@ public class PrintViewActivity extends AppCompatActivity {
         }
     }
 
+    private void ShowProgressDialog() {
+        builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View dialogView = inflater.inflate(R.layout.progress, null);
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+        alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void HideProgressDialog() {
+
+        alertDialog.dismiss();
+    }
 
 
 

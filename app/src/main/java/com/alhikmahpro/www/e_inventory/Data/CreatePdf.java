@@ -47,7 +47,7 @@ public class CreatePdf extends AsyncTask<String,Void,String> {
     private static final String TAG = "CreatePdf";
 
     private String customerName="", invoiceDate, salesmanId, customerCode, paymentMode, Type;
-    private String companyName="", companyAddress="", companyPhone="", footer="";
+    private String companyName="xxxx", companyAddress="xxxx", companyPhone="xxxx", footer="xxxx";
     private double netAmount, discountAmount, base_total;
     private String fileName;
     public CreatePdf(Context mContext, String invoiceNo) {

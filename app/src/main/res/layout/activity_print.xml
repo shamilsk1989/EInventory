@@ -2,18 +2,23 @@
 <android.support.constraint.ConstraintLayout
 
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
-    android:layout_marginTop="16dp">
-
+    android:layout_marginTop="16dp"
+    android:layout_marginRight="16dp">
 
 
     <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:id="@+id/scrollView2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:id="@+id/header_layout"
@@ -121,14 +126,13 @@
                 </android.support.v7.widget.RecyclerView>
 
                 <TextView
+                    android:id="@+id/txtEmpty"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/txtEmpty"
+                    android:gravity="center"
                     android:text="Cart Empty"
                     android:textColor="@android:color/black"
-                    android:textSize="30sp"
-                    android:gravity="center"
-                    />
+                    android:textSize="30sp" />
             </LinearLayout>
 
             <RelativeLayout
@@ -162,8 +166,8 @@
                     android:id="@+id/txtDiscName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
                     android:layout_below="@+id/txtTotalName"
+                    android:layout_alignParentStart="true"
                     android:gravity="center"
                     android:text="Discount"
                     android:textColor="@android:color/black"
@@ -174,8 +178,8 @@
                     android:id="@+id/txtDiscAmount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
                     android:layout_below="@+id/txtTotalAmount"
+                    android:layout_alignParentEnd="true"
                     android:gravity="center"
                     android:text="00.00"
                     android:textColor="@android:color/black"
@@ -185,8 +189,8 @@
                     android:id="@+id/txtNetName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
                     android:layout_below="@+id/txtDiscName"
+                    android:layout_alignParentStart="true"
                     android:gravity="center"
 
                     android:text="Net"
@@ -197,22 +201,22 @@
                     android:id="@+id/txtNetAmount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
                     android:layout_below="@+id/txtDiscName"
+                    android:layout_alignParentEnd="true"
                     android:gravity="center"
                     android:text="00.00"
                     android:textColor="@android:color/black"
                     android:textSize="@dimen/main_title_text_size" />
             </RelativeLayout>
+
             <Button
                 android:id="@+id/btn_print"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="print invoice"
-                android:background="@android:color/holo_green_dark"
-                android:textColor="@android:color/white"
                 android:layout_marginTop="10dp"
-                />
+                android:background="@android:color/holo_green_dark"
+                android:text="print invoice"
+                android:textColor="@android:color/white" />
 
             <Button
                 android:id="@+id/btn_new"
@@ -221,40 +225,39 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
 
-                android:text="new"
                 android:background="@android:color/holo_green_dark"
-                android:textColor="@android:color/white"
-                />
+                android:text="new"
+                android:textColor="@android:color/white" />
 
 
             <!--<LinearLayout-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_weight="3"-->
-                <!--android:layout_marginTop="10dp"-->
-                <!--android:layout_marginBottom="10dp"-->
-                <!--android:orientation="horizontal">-->
-           <!---->
-                <!--&lt;!&ndash;<Button&ndash;&gt;-->
-                    <!--&lt;!&ndash;android:id="@+id/btn_sync"&ndash;&gt;-->
-                    <!--&lt;!&ndash;android:layout_width="0dp"&ndash;&gt;-->
-                    <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
-                    <!--&lt;!&ndash;android:layout_weight="1"&ndash;&gt;-->
-                    <!--&lt;!&ndash;android:text="SYNC"&ndash;&gt;-->
-                    <!--&lt;!&ndash;android:layout_marginLeft="5dp"&ndash;&gt;-->
-                    <!--&lt;!&ndash;android:background="@color/colorPrimary"&ndash;&gt;-->
-                    <!--&lt;!&ndash;android:textColor="@android:color/white"&ndash;&gt;-->
-                    <!--&lt;!&ndash;/>&ndash;&gt;-->
-                <!--&lt;!&ndash;<Button&ndash;&gt;-->
-                    <!--&lt;!&ndash;android:id="@+id/btn_pdf"&ndash;&gt;-->
-                    <!--&lt;!&ndash;android:layout_width="0dp"&ndash;&gt;-->
-                    <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
-                    <!--&lt;!&ndash;android:layout_weight="1"&ndash;&gt;-->
-                    <!--&lt;!&ndash;android:text="PDF"&ndash;&gt;-->
-                    <!--&lt;!&ndash;android:layout_marginLeft="5dp"&ndash;&gt;-->
-                    <!--&lt;!&ndash;android:background="@android:color/holo_green_dark"&ndash;&gt;-->
-                    <!--&lt;!&ndash;android:textColor="@android:color/white"&ndash;&gt;-->
-                    <!--&lt;!&ndash;/>&ndash;&gt;-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="3"-->
+            <!--android:layout_marginTop="10dp"-->
+            <!--android:layout_marginBottom="10dp"-->
+            <!--android:orientation="horizontal">-->
+            <!---->
+            <!--&lt;!&ndash;<Button&ndash;&gt;-->
+            <!--&lt;!&ndash;android:id="@+id/btn_sync"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="0dp"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_weight="1"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:text="SYNC"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_marginLeft="5dp"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:background="@color/colorPrimary"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:textColor="@android:color/white"&ndash;&gt;-->
+            <!--&lt;!&ndash;/>&ndash;&gt;-->
+            <!--&lt;!&ndash;<Button&ndash;&gt;-->
+            <!--&lt;!&ndash;android:id="@+id/btn_pdf"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="0dp"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_weight="1"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:text="PDF"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_marginLeft="5dp"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:background="@android:color/holo_green_dark"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:textColor="@android:color/white"&ndash;&gt;-->
+            <!--&lt;!&ndash;/>&ndash;&gt;-->
             <!--</LinearLayout>-->
 
         </LinearLayout>
