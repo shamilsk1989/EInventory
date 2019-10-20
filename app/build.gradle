@@ -55,5 +55,11 @@ dependencies {
     implementation 'com.itextpdf:itextg:5.5.10'
     // work manager
     implementation 'android.arch.work:work-runtime:1.0.0-alpha11'
+    //Bluetooth printing
     implementation files('libs/printer_library_ap02.jar')
+    implementation files('libs/intermecarabic.jar')
+
+    //Runtime permission library
+    implementation 'com.karumi:dexter:4.2.0'
+
 }

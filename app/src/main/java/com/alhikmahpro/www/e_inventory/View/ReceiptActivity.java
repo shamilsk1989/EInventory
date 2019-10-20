@@ -26,11 +26,13 @@ import com.alhikmahpro.www.e_inventory.Data.Cart;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.PrinterCommands;
 import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
+import com.alhikmahpro.www.e_inventory.Data.Utils;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
 import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
 import com.alhikmahpro.www.e_inventory.R;
 import com.android.volley.VolleyError;
+import com.ganesh.intermecarabic.Arabic864;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -52,7 +54,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class ReceiptActivity extends AppCompatActivity {
+public class    ReceiptActivity extends AppCompatActivity {
 
     @BindView(R.id.txt_date)
     TextView txtDate;
@@ -211,8 +213,10 @@ public class ReceiptActivity extends AppCompatActivity {
                 new DatePickerDialog(this, date, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH)).show();
                 break;
             case R.id.btnPrint:
+
                 //check its first time or not; is first time then just print the bill;else send to server and save to local db
                 if (billStatus) {
+
                     printingJob();
                 } else {
                     sendToServer();
@@ -575,11 +579,13 @@ public class ReceiptActivity extends AppCompatActivity {
 
                     leftRightAlignLarge("Amount", decimalFormat.format(recAmount));//currencyFormatter(recAmount)
                     printNewLine();
+                   // leftRightAlignLarge("      ", convertToArabic(editTextAmount.getText().toString()));
+                    printNewLine();
                     printCustom(new String(new char[32]).replace("\0", " "), 1, 1);
 
                     printCustom(new String(new char[32]).replace("\0", "."), 1, 1);
-                    printCustom(footer, 1, 1);
-
+                    printCustom("فاشىن غخع", 1, 1);
+                   // printArabic("فاشىن غخع");
                     printNewLine();
                     printNewLine();
                     outputStream.flush();
@@ -596,8 +602,51 @@ public class ReceiptActivity extends AppCompatActivity {
         //thread.start();
     }
 
+    private String convertToArabic(String str){
+        Log.d(TAG, "convertToArabic: ");
 
-    private void printCustom(String msg, int size, int align) {
+        char[] arabicChars = {'٠','١','٢','٣','٤','٥','٦','٧','٨','٩'};
+        StringBuilder builder = new StringBuilder();
+        for(int i =0;i<str.length();i++)
+        {
+            if(Character.isDigit(str.charAt(i)))
+            {
+                builder.append(arabicChars[(int)(str.charAt(i))-48]);
+            }
+            else
+            {
+                builder.append(str.charAt(i));
+            }
+        }
+        Log.d(TAG, "Number in English : "+str);
+        Log.d(TAG, "Number In Arabic :"+builder.toString());
+        return  builder.toString();
+    }
+    private void printArabic(String msg){
+       // String print2 = "قيمت واحد" ;
+       // byte[] bytes23 = Utils.getBytes(print2,"windows-1256");
+        //outputStream.write(bytes23);
+        try {
+
+            Arabic864 arabic = new Arabic864();
+            byte[] arabicArr = arabic.Convert("للغة العربية", false);
+//
+//            outputStream.write(msg.getBytes());
+//            outputStream.write(arabicArr);
+            byte[] arab = new String("للغة العربية").getBytes("ISO-8859-1");
+            byte[] cc = new byte[]{0x1B, 0x21, 0x03};
+//            String str = new String(msg.getBytes(), "UTF-8");
+//            outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
+            outputStream.write(cc);
+            outputStream.write(arabicArr);
+            outputStream.write(PrinterCommands.LF);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void  printCustom(String msg, int size, int align) {
         //Print config "mode"
         byte[] cc = new byte[]{0x1B, 0x21, 0x03};  // 0- normal size text
         //byte[] cc1 = new byte[]{0x1B,0x21,0x00};  // 0- normal size text
