@@ -236,29 +236,29 @@ public class PaperSettingsActivity extends AppCompatActivity implements AdapterV
         startActivityForResult(intent, 101);
     }
 
-    private boolean checkAndRequestPermissions() {
-
-        int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-        int writePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        int readPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        List<String> listPermissionsNeeded = new ArrayList<>();
-        if (cameraPermission != PackageManager.PERMISSION_GRANTED) {
-            listPermissionsNeeded.add(Manifest.permission.CAMERA);
-        }
-        if (writePermission != PackageManager.PERMISSION_GRANTED) {
-            listPermissionsNeeded.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-        if (readPermission != PackageManager.PERMISSION_GRANTED) {
-            listPermissionsNeeded.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-        }
-        if (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), REQUEST_ID_MULTIPLE_PERMISSIONS);
-            return false;
-        }
-
-        return true;
-
-    }
+//    private boolean checkAndRequestPermissions() {
+//
+//        int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+//        int writePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+//        int readPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+//        List<String> listPermissionsNeeded = new ArrayList<>();
+//        if (cameraPermission != PackageManager.PERMISSION_GRANTED) {
+//            listPermissionsNeeded.add(Manifest.permission.CAMERA);
+//        }
+//        if (writePermission != PackageManager.PERMISSION_GRANTED) {
+//            listPermissionsNeeded.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+//        }
+//        if (readPermission != PackageManager.PERMISSION_GRANTED) {
+//            listPermissionsNeeded.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+//        }
+//        if (!listPermissionsNeeded.isEmpty()) {
+//            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), REQUEST_ID_MULTIPLE_PERMISSIONS);
+//            return false;
+//        }
+//
+//        return true;
+//
+//    }
     private void showOptions() {
         android.app.AlertDialog.Builder pictureDialog = new android.app.AlertDialog.Builder(this);
         pictureDialog.setTitle("Select Action");

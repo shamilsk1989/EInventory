@@ -13,6 +13,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -39,6 +40,7 @@ import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.ItemModel;
 import com.alhikmahpro.www.e_inventory.Data.ReceiptModel;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
+import com.alhikmahpro.www.e_inventory.FileUtils;
 import com.alhikmahpro.www.e_inventory.Interface.OnAdapterClickListener;
 import com.alhikmahpro.www.e_inventory.Interface.OnListAdapterClickListener;
 import com.alhikmahpro.www.e_inventory.R;
@@ -56,6 +58,11 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.draw.LineSeparator;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -84,11 +91,11 @@ public class ListReceiptActivity extends AppCompatActivity {
     private String type;
     List<ReceiptModel> list;
     private static final String TAG = "ListReceiptActivity";
-    String companyName="xxxx", companyAddress="xxxx", companyPhone="xxxx", footer="xxxx";
+    String companyName = "xxxx", companyAddress = "xxxx", companyPhone = "xxxx", footer = "xxxx";
     String customerName, customerCode, receiptNo, receiptDate;
-    String  chqNumber, chqDate, paymentType, salesman,remark;
+    String chqNumber, chqDate, paymentType, salesman, remark;
     String fileName;
-    double balanceAmount,receiptAmount;
+    double balanceAmount, receiptAmount;
     AlertDialog alertDialog;
     AlertDialog.Builder builder;
     private static final int PERMISSION_CODE = 100;
@@ -163,7 +170,7 @@ public class ListReceiptActivity extends AppCompatActivity {
                     paymentType = receiptModel.getPaymentType();
                     chqNumber = receiptModel.getChequeNumber();
                     chqDate = receiptModel.getChequeDate();
-                    remark=receiptModel.getRemark();
+                    remark = receiptModel.getRemark();
 
                     Log.d(TAG, "OnEditClicked: date" + receiptDate + "number" + receiptNo);
 
@@ -206,10 +213,8 @@ public class ListReceiptActivity extends AppCompatActivity {
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
-                        if(requestStoragePermission()){
-                            createPdfWrapper();
-                        }
-                    }else{
+                        requestStoragePermission();
+                    } else {
                         createPdfWrapper();
                     }
                 }
@@ -230,56 +235,8 @@ public class ListReceiptActivity extends AppCompatActivity {
         database.close();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSION_CODE:
-                Map<String, Integer> perms = new HashMap<>();
-                perms.put(Manifest.permission.READ_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
-                perms.put(Manifest.permission.WRITE_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
-
-                if (grantResults.length > 0) {
-                    for (int i = 0; i < permissions.length; i++)
-                        perms.put(permissions[i], grantResults[i]);
-
-                    //check all permissions
-                    if (perms.get(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                            perms.get(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-
-                        Log.d(TAG, "permission granted ");
-                        createPdfWrapper();
-                    } else {
-                        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ||
-
-                                ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-
-                            new android.app.AlertDialog.Builder(ListReceiptActivity.this)
-                                    .setTitle("Permission needed")
-                                    .setMessage("To continue please allow the permission ")
-                                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            requestStoragePermission();
-                                        }
-                                    })
-                                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                        @Override
-
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            dialog.cancel();
-                                        }
-                                    }).create().show();
-
-                        } else {
-                            Toast.makeText(this, "permission denied", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-
-        }
 
 
-    }
     private void createPdfWrapper() {
         Log.d(TAG, "createPdfWrapper: ");
         dbHelper helper = new dbHelper(ListReceiptActivity.this);
@@ -305,28 +262,63 @@ public class ListReceiptActivity extends AppCompatActivity {
     public void onViewClicked() {
 
         Intent intent = new Intent(ListReceiptActivity.this, CheckCustomerActivity.class);
-        intent.putExtra("Type","REC");
+        intent.putExtra("Type", "REC");
         startActivity(intent);
     }
 
-    private boolean requestStoragePermission() {
-        Log.d(TAG, "requestStoragePermission: ");
+    private void requestStoragePermission() {
+        Dexter.withActivity(this)
+                .withPermissions(
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+                .withListener(new MultiplePermissionsListener() {
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport report) {
+                        //check all permission granted
+                        if (report.areAllPermissionsGranted()) {
+                            createPdfWrapper();
+                        }
+                        //check any permission permanent denied
+                        if (report.isAnyPermissionPermanentlyDenied()) {
+                            showSettingDialog();
+                        }
+                    }
 
-        int writePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        int readPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        List<String> listPermissions = new ArrayList<>();
-        if (writePermission != PackageManager.PERMISSION_GRANTED) {
-            listPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-        if (readPermission != PackageManager.PERMISSION_GRANTED) {
-            listPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-        }
-        if (!listPermissions.isEmpty()) {
-            ActivityCompat.requestPermissions(this, listPermissions.toArray(new String[listPermissions.size()]),PERMISSION_CODE);
-            return false;
-        }
-        return true;
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                        token.continuePermissionRequest();
 
+                    }
+                }).check();
+
+
+    }
+    private void showSettingDialog() {
+        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(ListReceiptActivity.this);
+        builder.setTitle("Need Permissions");
+        builder.setMessage("This app needs permission to use this feature. You can grant them in app settings.");
+        builder.setPositiveButton("GOTO SETTINGS", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                openSettings();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
+    }
+
+    private void openSettings() {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        startActivityForResult(intent, 101);
     }
 
 
@@ -354,8 +346,8 @@ public class ListReceiptActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             HideProgressDialog();
-            Log.d(TAG, "onPostExecute: "+result);
-            if(result!=null & result.equals("success")) {
+            Log.d(TAG, "onPostExecute: " + result);
+            if (result != null & result.equals("success")) {
                 openGeneratedPDF();
             }
         }
@@ -365,7 +357,7 @@ public class ListReceiptActivity extends AppCompatActivity {
 
     private boolean createPDF() {
         final DecimalFormat decimalFormat = new DecimalFormat("0.00");
-        String mDate= AppUtils.getFormattedDate();
+        String mDate = AppUtils.getFormattedDate();
         Document document = new Document();
         File pdfFile;
         File dir;
@@ -379,7 +371,7 @@ public class ListReceiptActivity extends AppCompatActivity {
                 dir.mkdir();
             }
 
-            fileName = receiptNo+"-"+mDate+".pdf";
+            fileName = receiptNo + "-" + mDate + ".pdf";
             pdfFile = new File(dir, fileName);
 
             //PdfWriter.getInstance(document,new FileOutputStream(mFilePath));
@@ -446,7 +438,7 @@ public class ListReceiptActivity extends AppCompatActivity {
             document.add(mOrderIdParagraph);
 
             Font mOrderIdValueFont = new Font(urName, mValueFontSize, Font.NORMAL, BaseColor.BLACK);
-            Chunk mOrderIdValueChunk = new Chunk( receiptDate, mOrderIdValueFont);
+            Chunk mOrderIdValueChunk = new Chunk(receiptDate, mOrderIdValueFont);
             Paragraph mOrderIdValueParagraph = new Paragraph(mOrderIdValueChunk);
             document.add(mOrderIdValueParagraph);
 
@@ -494,8 +486,8 @@ public class ListReceiptActivity extends AppCompatActivity {
             document.add(mOrderAmountParagraph);
 
 
-            Font mOrderAmountValueFont = new Font(urName, mValueFontSize, Font.NORMAL,BaseColor.BLACK);
-            Chunk mOrderAmountValueChunk = new Chunk(decimalFormat.format(receiptAmount) ,mOrderAmountValueFont);
+            Font mOrderAmountValueFont = new Font(urName, mValueFontSize, Font.NORMAL, BaseColor.BLACK);
+            Chunk mOrderAmountValueChunk = new Chunk(decimalFormat.format(receiptAmount), mOrderAmountValueFont);
             Paragraph mOrderAmountValueParagraph = new Paragraph(mOrderAmountValueChunk);
             document.add(mOrderAmountValueParagraph);
 
@@ -533,12 +525,11 @@ public class ListReceiptActivity extends AppCompatActivity {
     }
 
 
-
     private void openGeneratedPDF() {
 
 //        File outputFile = new File(Environment.getExternalStoragePublicDirectory
 //                (Environment.DIRECTORY_DOWNLOADS), "sample.pdf");
-        File outputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/PriceChecker/Receipts/"+fileName);
+        File outputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/PriceChecker/Receipts/" + fileName);
         // Uri uri = Uri.fromFile(outputFile);
         Uri uri = FileProvider.getUriForFile(ListReceiptActivity.this, ListReceiptActivity.this.getPackageName() + ".provider", outputFile);
 

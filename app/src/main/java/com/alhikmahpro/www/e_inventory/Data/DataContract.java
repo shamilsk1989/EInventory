@@ -14,7 +14,8 @@ public class DataContract {
     public static final int GDS_OFF=0;
     public static final int REC_ON=1;
     public static final int REC_OFF=0;
-
+    public static final String DIR_RECEIPT="Receipt";
+    public static final String DIR_INVOICE="Invoice";
 
     public static class Settings{
 

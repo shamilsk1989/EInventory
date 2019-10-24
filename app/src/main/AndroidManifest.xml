@@ -17,9 +17,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
-        android:theme="@style/AppTheme">
-        <activity android:name=".View.ClearDataActivity"></activity>
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
+        <activity android:name=".View.ViewPdfActivity"></activity>
+        <activity android:name=".View.ClearDataActivity" />
         <activity android:name=".View.ListReceiptActivity" />
         <activity android:name=".View.ReceiptActivity" />
         <activity

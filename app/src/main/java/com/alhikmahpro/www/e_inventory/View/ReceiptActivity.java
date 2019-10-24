@@ -1,14 +1,23 @@
 package com.alhikmahpro.www.e_inventory.View;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -23,21 +32,44 @@ import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.AppUtils;
 import com.alhikmahpro.www.e_inventory.Data.Cart;
+import com.alhikmahpro.www.e_inventory.Data.DashedSeparator;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.PrinterCommands;
 import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
 import com.alhikmahpro.www.e_inventory.Data.Utils;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
+import com.alhikmahpro.www.e_inventory.FileUtils;
 import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
 import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
 import com.alhikmahpro.www.e_inventory.R;
 import com.android.volley.VolleyError;
 import com.ganesh.intermecarabic.Arabic864;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.draw.DottedLineSeparator;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -46,6 +78,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
@@ -116,8 +149,9 @@ public class    ReceiptActivity extends AppCompatActivity {
             .fromString("00001101-0000-1000-8000-00805F9B34FB");
     BluetoothDevice mBluetoothDevice;
     boolean billStatus;
+    Context mContext;
 
-    String companyName="xxxxx", companyAddress="xxxx", companyPhone="xxxxx", footer="xxxxxx";
+    String companyName="xxxxx", companyAddress="xxxx", companyPhone="xxxxx", footer="xxxxxx",fileName;
     private static final String TAG = "ReceiptActivity";
 
     @Override
@@ -137,6 +171,7 @@ public class    ReceiptActivity extends AppCompatActivity {
         balanceAmount = intent.getDoubleExtra("BALANCE_AMOUNT",0);
         paymentType = intent.getStringExtra("PAYMENT_TYPE");
         billStatus = false;
+        mContext=getApplicationContext();
 
         Log.d(TAG, "onCreate: balance :" + balanceAmount);
         myCalendar = Calendar.getInstance();
@@ -214,13 +249,22 @@ public class    ReceiptActivity extends AppCompatActivity {
                 break;
             case R.id.btnPrint:
 
-                //check its first time or not; is first time then just print the bill;else send to server and save to local db
-                if (billStatus) {
-
-                    printingJob();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    requestStoragePermission();
                 } else {
-                    sendToServer();
+                    //createPdff(FileUtils.getSubDirPath(mContext,DataContract.DIR_RECEIPT),0);
+                    showPdf("sample");
                 }
+
+
+                //check its first time or not; is first time then just print the bill;else send to server and save to local db then print
+//                if (billStatus) {
+//
+//                    printingJob();
+//                } else {
+//                    sendToServer();
+//                }
+
                 break;
             case R.id.btnNew:
                 clearActivity();
@@ -229,6 +273,317 @@ public class    ReceiptActivity extends AppCompatActivity {
 
     }
 
+    private void requestStoragePermission() {
+        Dexter.withActivity(this)
+                .withPermissions(
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+                .withListener(new MultiplePermissionsListener() {
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport report) {
+                        //check all permission granted
+                        if(report.areAllPermissionsGranted()){
+                            createPdff(FileUtils.getSubDirPath(mContext,DataContract.DIR_RECEIPT),0);
+                        }
+                        //check any permission permanent denied
+                        if(report.isAnyPermissionPermanentlyDenied()){
+                            showSettingDialog();
+                        }
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                        token.continuePermissionRequest();
+
+                    }
+                }).check();
+    }
+    private  void createPdff(String dest ,float docsize) {
+
+        Paragraph paragraph=null;
+        PdfPTable table;
+        PdfPCell cell;
+        PdfContentByte cb;
+        String fileName=dest+"sample2.pdf";
+        if (new File(fileName).exists()) {
+            new File(fileName).delete();
+        }
+        Log.d(TAG, "createPdff: "+fileName);
+
+        try {
+
+
+            /***
+             * Variables for further use....
+             */
+            BaseColor mColorAccent = new BaseColor(0, 153, 204, 255);
+            float mHeadingFontSize = 20.0f;
+            float mValueFontSize = 26.0f;
+            //  ElementList el = parseToElementList(is, new XMLWorkerFontProvider("resources/fonts/"));
+//
+            // width of 204pt
+            float width = 316;
+
+            // height as 10000pt (which is much more than we'll ever need)
+            float max =100;// PageSize.LETTER.getHeight();
+            if(docsize!=0)
+            {
+                max=docsize;
+            }
+
+
+
+            Rectangle pagesize = new Rectangle(width, max + 25);
+            // Document with predefined page size
+            Document document = new Document(pagesize, 10, 10, 50, 0);
+            // Getting PDF Writer
+            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(fileName));
+            document.open();
+            // Column with a writer
+            try {
+
+//                Drawable d = getResources().getDrawable(R.mipmap.ic_launcher);
+//                BitmapDrawable bitDw = ((BitmapDrawable) d);
+//                Bitmap bmp = bitDw.getBitmap();
+//                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//                bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+//                Image image = Image.getInstance(stream.toByteArray());
+//                // image.setAbsolutePosition(((width/2)-(image.getPlainWidth()/2)),max-image.getHeight());
+//                image.setAlignment(Image.ALIGN_TOP|Image.ALIGN_CENTER);
+//                document.add(image);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            paragraph = new Paragraph("Hotel VApps");
+            paragraph.setAlignment(Element.ALIGN_CENTER);
+            document.add(paragraph);
+
+            paragraph = new Paragraph("Phone: 9943123000");
+            paragraph.setAlignment(Element.ALIGN_CENTER);
+            document.add(paragraph);
+
+            paragraph = new Paragraph("Email : vijaydhasxx@gmail.com");
+            paragraph.setAlignment(Element.ALIGN_CENTER);
+            document.add(paragraph);
+
+            DashedSeparator separator = new DashedSeparator();
+            separator.setPercentage(59500f / 523f);
+            Chunk linebreak = new Chunk(separator);
+            document.add(linebreak);
+
+            paragraph = new Paragraph("Bill No: 12345");
+            paragraph.setAlignment(Element.ALIGN_LEFT);
+            document.add(paragraph);
+
+            paragraph = new Paragraph("Bill Date: 01/04/2015 10:30:55 PM");
+            paragraph.setAlignment(Element.ALIGN_LEFT);
+            document.add(paragraph);
+            document.add(linebreak)  ;
+            float p=(width-20)/3;
+            float re= (p*2)/5;
+            float rem=re/3;
+
+            float[] columnWidths = { re,p, re+rem,re+rem,re+rem };
+            table = new PdfPTable(columnWidths);
+            table.setTotalWidth(width-20);
+            table.setLockedWidth(true);
+            table.setHorizontalAlignment(Element.ALIGN_LEFT);
+
+            cell = new PdfPCell(new Phrase("SN"));
+            cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            cell = new PdfPCell(new Phrase("Item "));
+            cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            cell = new PdfPCell(new Phrase("Rate"));
+            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            cell = new PdfPCell(new Phrase("Qty"));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            cell = new PdfPCell(new Phrase("Total"));
+            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+            DashedSeparator separato= new DashedSeparator();
+            separato.setPercentage(59500f / 523f);
+            cell = new PdfPCell(new Phrase(new Chunk(separato)));
+            cell.setColspan(5);
+            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+            table.setHeaderRows(1);
+
+            for (int i = 0; i <  15; i++) {
+                cell = new PdfPCell(new Phrase(String.valueOf(i + 1)));
+                cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+                cell.setBorder(Rectangle.NO_BORDER);
+                table.addCell(cell);
+
+                cell = new PdfPCell(new Phrase("product"+i));
+                cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+                cell.setBorder(Rectangle.NO_BORDER);
+                table.addCell(cell);
+
+                cell = new PdfPCell(new Phrase(i+10+""));
+                cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                cell.setBorder(Rectangle.NO_BORDER);
+                table.addCell(cell);
+
+                cell = new PdfPCell(new Phrase(2+i+""));
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setBorder(Rectangle.NO_BORDER);
+                table.addCell(cell);
+
+                //total += Double.parseDouble(i+2);
+
+                cell = new PdfPCell(new Phrase("10"));
+                cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                cell.setBorder(Rectangle.NO_BORDER);
+                table.addCell(cell);
+
+            }
+            DashedSeparator separator1 = new DashedSeparator();
+            separator1.setPercentage(59500f / 523f);
+            cell = new PdfPCell(new Phrase(new Chunk(separator1)));
+            cell.setColspan(5);
+            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            cell = new PdfPCell(new Phrase("Item Total"));
+            cell.setColspan(3);
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            cell = new PdfPCell(new Phrase(String.valueOf(100)));
+            cell.setColspan(2);
+            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            cell = new PdfPCell(new Phrase("Tax"));
+            cell.setColspan(3);
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            cell = new PdfPCell(new Phrase(String.valueOf(100)));
+            cell.setColspan(2);
+            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            cell = new PdfPCell(new Phrase("Total"));
+            cell.setColspan(3);
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            cell = new PdfPCell(new Phrase(String.valueOf(100)));
+            cell.setColspan(2);
+            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            cell = new PdfPCell(new Phrase(new Chunk(separator1)));
+            cell.setColspan(5);
+            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            cell = new PdfPCell(new Phrase("Discount"));
+            cell.setColspan(3);
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            cell = new PdfPCell(new Phrase(String.valueOf(100)));
+            cell.setColspan(2);
+            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            cell = new PdfPCell(new Phrase(new Chunk(separator1)));
+            cell.setColspan(5);
+            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            cell = new PdfPCell(new Phrase("Cash"));
+            cell.setColspan(3);
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            cell = new PdfPCell(new Phrase(String.valueOf(100)));
+            cell.setColspan(2);
+            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            cell = new PdfPCell(new Phrase(new Chunk(separator1)));
+            cell.setColspan(5);
+            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+
+            document.add(table);
+            DottedLineSeparator separatorr = new DottedLineSeparator();
+            separator1.setPercentage(59500f / 523f);
+            cell = new PdfPCell(new Phrase(new Chunk(separator1)));
+            cell.setColspan(5);
+            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            cell.setBorder(Rectangle.NO_BORDER);
+            table.addCell(cell);
+            paragraph = new Paragraph("Thank You for Your Purchase");
+            paragraph.setAlignment(Element.ALIGN_CENTER);
+            document.add(paragraph);
+           /* ct = new ColumnText(writer.getDirectContent());
+            ct.setSimpleColumn(pagesize);
+            for (int i=0;i<10;i++) {
+
+                ct.addText(new Chunk("Pratik Butani"));
+
+            }
+            ct.go();
+            // closing the document
+            document.close();*/
+
+            document.close();
+            Log.d(TAG, "PDF created: "+docsize);
+            if(docsize==0) {
+                float size=(writer.getPageNumber())*max;
+                createPdff(dest, size);
+            }
+            else
+            {showPdf(fileName);}
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+    }
+
+    private void showPdf(String filename) {
+
+        Intent view_pdf = new Intent(this, ViewPdfActivity.class);
+        view_pdf.putExtra("FILE_NAME", filename);
+        startActivity(view_pdf);
+
+
+
+    }
 
     @Override
     public void onBackPressed() {
@@ -765,6 +1120,33 @@ public class    ReceiptActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    private void showSettingDialog() {
+        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(ReceiptActivity.this);
+        builder.setTitle("Need Permissions");
+        builder.setMessage("This app needs permission to use this feature. You can grant them in app settings.");
+        builder.setPositiveButton("GOTO SETTINGS", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                openSettings();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
+    }
+
+    private void openSettings() {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        startActivityForResult(intent, 101);
     }
 
 }
