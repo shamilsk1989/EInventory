@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -49,6 +50,8 @@ public class AddPrinterActivity extends AppCompatActivity implements Runnable {
     BluetoothDevice mBluetoothDevice;
     String deviceAddress, deviceName;
     ProgressDialog progressDialog;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
     private UUID applicationUUID = UUID
             .fromString("00001101-0000-1000-8000-00805F9B34FB");
 
@@ -59,13 +62,14 @@ public class AddPrinterActivity extends AppCompatActivity implements Runnable {
         ButterKnife.bind(this);
 
         progressDialog = new ProgressDialog(this);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Printer");
-
+        toolbar.setTitle("Printer");
 
         pref = getApplicationContext().getSharedPreferences(MY_PREFS_NAME, 0);
         editor = pref.edit();
+        editor.apply();
     }
 
     @OnClick(R.id.add_layout)

@@ -17,13 +17,13 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -45,8 +45,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
-
-import static android.media.MediaRecorder.VideoSource.CAMERA;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -86,19 +84,22 @@ public class SettingsActivity extends AppCompatActivity {
     Switch switchSale;
 
     dbHelper helper;
-    int is_sale=0,is_gds=0,is_inv=0,is_rec=0;
+    int is_sale = 0, is_gds = 0, is_inv = 0, is_rec = 0;
     public static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
     private int GALLERY = 1, CAMERA = 2;
     Bitmap thumbnail;
-    int _id=0;
+    int _id = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         ButterKnife.bind(this);
         helper = new dbHelper(this);
-        getSupportActionBar().setTitle("Settings");
-
+        setSupportActionBar(toolbar);
+        toolbar.setTitle("Settings");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
@@ -107,17 +108,17 @@ public class SettingsActivity extends AppCompatActivity {
         Cursor cursor = helper.getSettings(sqLiteDatabase);
         if (cursor.moveToFirst()) {
 
-            _id=cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_ID));
+            _id = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_ID));
             txtCompanyName.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME)));
             txtCompanyCode.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_CODE)));
             txtBranchCode.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_BRANCH_CODE)));
             txtLocationCode.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_LOCATION_CODE)));
             txtPeriodCode.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_PERIOD_CODE)));
             txtDeviceId.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID)));
-            is_inv=cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_INV));
-            is_gds=cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_GDS));
-            is_sale=cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_SALE));
-            is_rec=cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_REC));
+            is_inv = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_INV));
+            is_gds = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_GDS));
+            is_sale = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_SALE));
+            is_rec = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_REC));
             byte[] img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO));
 
             //get url from shared prefernce
@@ -132,20 +133,18 @@ public class SettingsActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            if(is_sale==DataContract.SALE_ON){
+            if (is_sale == DataContract.SALE_ON) {
                 switchSale.setChecked(true);
             }
-            if(is_gds==DataContract.GDS_ON){
+            if (is_gds == DataContract.GDS_ON) {
                 switchGoods.setChecked(true);
             }
-            if(is_inv==DataContract.INV_ON){
+            if (is_inv == DataContract.INV_ON) {
                 switchInventory.setChecked(true);
             }
-            if(is_rec==DataContract.REC_ON){
+            if (is_rec == DataContract.REC_ON) {
                 switchReceipt.setChecked(true);
             }
-
-
 
 
         }
@@ -153,20 +152,17 @@ public class SettingsActivity extends AppCompatActivity {
         sqLiteDatabase.close();
 
 
-
-
-
         switchInventory.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (switchInventory.isChecked()) {
-                    is_inv=DataContract.INV_ON;
+                    is_inv = DataContract.INV_ON;
 
                 } else {
-                    is_inv=DataContract.INV_OFF;
+                    is_inv = DataContract.INV_OFF;
                 }
 
-                Log.d(TAG, "Inventory onCheckedChanged: "+is_inv);
+                Log.d(TAG, "Inventory onCheckedChanged: " + is_inv);
             }
         });
 
@@ -176,13 +172,13 @@ public class SettingsActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (switchGoods.isChecked()) {
 
-                    is_gds=DataContract.GDS_ON;
+                    is_gds = DataContract.GDS_ON;
 
                 } else {
-                    is_gds=DataContract.GDS_OFF;
+                    is_gds = DataContract.GDS_OFF;
                 }
 
-                Log.d(TAG, "Goods onCheckedChanged: "+is_gds);
+                Log.d(TAG, "Goods onCheckedChanged: " + is_gds);
 
             }
         });
@@ -191,12 +187,12 @@ public class SettingsActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (switchSale.isChecked()) {
 
-                    is_sale=DataContract.SALE_ON;
+                    is_sale = DataContract.SALE_ON;
                 } else {
 
-                    is_sale=DataContract.SALE_OFF;
+                    is_sale = DataContract.SALE_OFF;
                 }
-                Log.d(TAG, "Sale onCheckedChanged: "+is_sale);
+                Log.d(TAG, "Sale onCheckedChanged: " + is_sale);
 
             }
         });
@@ -204,12 +200,12 @@ public class SettingsActivity extends AppCompatActivity {
         switchReceipt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if(switchReceipt.isChecked()){
-                    is_rec=DataContract.REC_ON;
-                }else{
-                    is_rec=DataContract.REC_OFF;
+                if (switchReceipt.isChecked()) {
+                    is_rec = DataContract.REC_ON;
+                } else {
+                    is_rec = DataContract.REC_OFF;
                 }
-                Log.d(TAG, "Receipt onCheckedChanged: "+is_rec);
+                Log.d(TAG, "Receipt onCheckedChanged: " + is_rec);
 
             }
         });
@@ -230,7 +226,6 @@ public class SettingsActivity extends AppCompatActivity {
 
 
     private void initValues() {
-
 
 
     }
@@ -267,7 +262,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     @OnClick(R.id.btnSave)
     public void onBtnSaveClicked() {
-        Log.d(TAG, "onBtnSaveClicked: Sale:"+is_sale+"inventory:"+is_inv+"goods: "+is_gds);
+        Log.d(TAG, "onBtnSaveClicked: Sale:" + is_sale + "inventory:" + is_inv + "goods: " + is_gds);
         closeKey();
         String c_name = txtCompanyName.getText().toString();
         String c_code = txtCompanyCode.getText().toString();
@@ -282,15 +277,15 @@ public class SettingsActivity extends AppCompatActivity {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         byte[] img_data = stream.toByteArray();
-        if(validate(c_code,url)){
+        if (validate(c_code, url)) {
             //save url to shared preference
 
             SessionHandler.getInstance(this).setHost(url);
             // check settings table if data is there; update else save setting details to DB
-            if(_id>0){
-                helper.updateSettings(_id,c_code,c_name,b_code,l_code,p_code,device,img_data,is_sale,is_inv,is_gds,is_rec);
-            }else{
-                helper.saveSettings(c_code, c_name, b_code, l_code, p_code, device,img_data,is_sale,is_inv,is_gds,is_rec);
+            if (_id > 0) {
+                helper.updateSettings(_id, c_code, c_name, b_code, l_code, p_code, device, img_data, is_sale, is_inv, is_gds, is_rec);
+            } else {
+                helper.saveSettings(c_code, c_name, b_code, l_code, p_code, device, img_data, is_sale, is_inv, is_gds, is_rec);
             }
             Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
             finish();
@@ -322,6 +317,7 @@ public class SettingsActivity extends AppCompatActivity {
         return true;
 
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -374,7 +370,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void showOptions() {
-        android.app.AlertDialog.Builder pictureDialog = new android.app.AlertDialog.Builder(this);
+        AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);
         pictureDialog.setTitle("Select Action");
         String[] pictureDialogItems = {
                 "Select photo from gallery",
@@ -395,6 +391,7 @@ public class SettingsActivity extends AppCompatActivity {
                 });
         pictureDialog.show();
     }
+
     private void takePhotoFromCamera() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(intent, CAMERA);
@@ -408,6 +405,7 @@ public class SettingsActivity extends AppCompatActivity {
 
 
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

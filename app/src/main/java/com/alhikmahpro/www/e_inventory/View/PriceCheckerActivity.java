@@ -5,18 +5,15 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -26,7 +23,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -89,6 +85,8 @@ public class PriceCheckerActivity extends AppCompatActivity {
     TextView txtViewPrice3;
     @BindView(R.id.btnClear)
     Button btnClear;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
     private String BASE_URL = "";
     private ConnectivityManager connectivityManager;
     ProgressDialog progressDialog;
@@ -104,7 +102,8 @@ public class PriceCheckerActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         //progressDialog = new ProgressDialog(this);
-        getSupportActionBar().setTitle("Price Checker");
+        setSupportActionBar(toolbar);
+        toolbar.setTitle("Price Checker");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         initValues();
@@ -342,7 +341,7 @@ public class PriceCheckerActivity extends AppCompatActivity {
                 .withListener(new PermissionListener() {
                     @Override
                     public void onPermissionGranted(PermissionGrantedResponse response) {
-                    //permission granted
+                        //permission granted
                         scanBarcode();
 
                     }

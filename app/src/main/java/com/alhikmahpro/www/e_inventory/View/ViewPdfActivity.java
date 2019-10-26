@@ -2,7 +2,10 @@ package com.alhikmahpro.www.e_inventory.View;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -16,6 +19,7 @@ import android.widget.Button;
 
 import com.alhikmahpro.www.e_inventory.Data.DashedSeparator;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
+import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.FileUtils;
 import com.alhikmahpro.www.e_inventory.R;
 import com.github.barteksc.pdfviewer.PDFView;
@@ -36,6 +40,8 @@ import com.itextpdf.text.pdf.draw.DottedLineSeparator;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,15 +51,13 @@ public class ViewPdfActivity extends AppCompatActivity {
 
     @BindView(R.id.pdfView)
     PDFView pdfView;
-//    @BindView(R.id.btnPrint)
-//    Button btnPrint;
-//    @BindView(R.id.btnShare)
-//    Button btnShare;
-//    @BindView(R.id.btnCancel)
-//    Button btnCancel;
+
 
     private static final String TAG = "ViewPdfActivity";
     Context mContext;
+    MenuItem itemPrint,itemSync,itemShare;
+    String customerName,receiptNo,receiptDate,salesmanId,action;
+    double amount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,14 +67,58 @@ public class ViewPdfActivity extends AppCompatActivity {
         Intent mIntent = getIntent();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        String fileName = mIntent.getStringExtra("FILE_NAME");
         mContext=getApplicationContext();
+
+        Intent intent = getIntent();
+        action = intent.getStringExtra("TYPE");
+        customerName = intent.getStringExtra("CUS_NAME");
+        receiptNo = intent.getStringExtra("RECEIPT_NO");
+        receiptDate = intent.getStringExtra("RECEIPT_DATE");
+        salesmanId = intent.getStringExtra("SALESMAN_ID");
+        amount = intent.getDoubleExtra("REC_AMOUNT",0);
+
         createPdff(FileUtils.getSubDirPath(mContext,DataContract.DIR_RECEIPT),0);
 
 
 
     }
     private  void createPdff(String dest ,float docsize) {
+
+        dbHelper helper = new dbHelper(this);
+        SQLiteDatabase database = helper.getReadableDatabase();
+        Cursor cursor = helper.getPaperSettings(database);
+        String companyName="",companyAddress="",companyPhone="",footer="";
+        byte[] img;
+//        InputStream ims = null;
+//        try {
+//            ims = getAssets().open("img.png");
+//            Log.d(TAG, "createPdff: "+ims);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        Bitmap bitmap = BitmapFactory.decodeStream(ims);
+        Bitmap bitmap=null;
+
+
+
+        if (cursor.moveToFirst()) {
+            companyName = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_NAME));
+            companyAddress = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_ADDRESS));
+            companyPhone = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_PHONE));
+            footer = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_FOOTER));
+
+            img = cursor.getBlob(cursor.getColumnIndex(DataContract.PaperSettings.COL_LOGO));
+            try {
+                 bitmap = BitmapFactory.decodeByteArray(img, 0, img.length);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        cursor.close();
+        database.close();
+
+
 
         Paragraph paragraph=null;
         PdfPTable table;
@@ -124,18 +172,23 @@ public class ViewPdfActivity extends AppCompatActivity {
 //                image.setAlignment(Image.ALIGN_TOP|Image.ALIGN_CENTER);
 //                document.add(image);
 
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                Image image = Image.getInstance(stream.toByteArray());
+                document.add(image);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            paragraph = new Paragraph("Hotel VApps");
+            paragraph = new Paragraph(companyName);
             paragraph.setAlignment(Element.ALIGN_CENTER);
             document.add(paragraph);
 
-            paragraph = new Paragraph("Phone: 9943123000");
+            paragraph = new Paragraph("Phone:"+companyPhone);
             paragraph.setAlignment(Element.ALIGN_CENTER);
             document.add(paragraph);
 
-            paragraph = new Paragraph("Email : vijaydhasxx@gmail.com");
+            paragraph = new Paragraph(companyAddress);
             paragraph.setAlignment(Element.ALIGN_CENTER);
             document.add(paragraph);
 
@@ -144,11 +197,11 @@ public class ViewPdfActivity extends AppCompatActivity {
             Chunk linebreak = new Chunk(separator);
             document.add(linebreak);
 
-            paragraph = new Paragraph("Bill No: 12345");
+            paragraph = new Paragraph("Receipt No:"+receiptNo);
             paragraph.setAlignment(Element.ALIGN_LEFT);
             document.add(paragraph);
 
-            paragraph = new Paragraph("Bill Date: 01/04/2015 10:30:55 PM");
+            paragraph = new Paragraph("Receipt Date:"+receiptDate);
             paragraph.setAlignment(Element.ALIGN_LEFT);
             document.add(paragraph);
             document.add(linebreak)  ;
@@ -232,13 +285,13 @@ public class ViewPdfActivity extends AppCompatActivity {
             cell.setBorder(Rectangle.NO_BORDER);
             table.addCell(cell);
 
-            cell = new PdfPCell(new Phrase("Item Total"));
+            cell = new PdfPCell(new Phrase("Amount "));
             cell.setColspan(3);
             cell.setHorizontalAlignment(Element.ALIGN_CENTER);
             cell.setBorder(Rectangle.NO_BORDER);
             table.addCell(cell);
 
-            cell = new PdfPCell(new Phrase(String.valueOf(100)));
+            cell = new PdfPCell(new Phrase(String.valueOf(amount)));
             cell.setColspan(2);
             cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
             cell.setBorder(Rectangle.NO_BORDER);
@@ -318,7 +371,7 @@ public class ViewPdfActivity extends AppCompatActivity {
             cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
             cell.setBorder(Rectangle.NO_BORDER);
             table.addCell(cell);
-            paragraph = new Paragraph("Thank You for Your Purchase");
+            paragraph = new Paragraph(footer);
             paragraph.setAlignment(Element.ALIGN_CENTER);
             document.add(paragraph);
            /* ct = new ColumnText(writer.getDirectContent());
@@ -371,22 +424,14 @@ public class ViewPdfActivity extends AppCompatActivity {
 
     }
 
-//    @OnClick({R.id.btnPrint, R.id.btnShare, R.id.btnCancel})
-//    public void onViewClicked(View view) {
-//        switch (view.getId()) {
-//            case R.id.btnPrint:
-//                break;
-//            case R.id.btnShare:
-//                break;
-//            case R.id.btnCancel:
-//                break;
-//        }
-//    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.tool_bar, menu);
+        itemPrint=menu.findItem(R.id.action_print);
+        itemSync=menu.findItem(R.id.action_sync);
+        itemShare=menu.findItem(R.id.action_share);
+         itemSync.setVisible(false);
         return true;
     }
 
@@ -398,7 +443,7 @@ public class ViewPdfActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_download) {
+        if (id == R.id.action_print) {
             return true;
         }
 

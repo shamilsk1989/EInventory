@@ -19,22 +19,19 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".View.ViewPdfActivity"></activity>
-        <activity android:name=".View.ClearDataActivity" />
-        <activity android:name=".View.ListReceiptActivity" />
-        <activity android:name=".View.ReceiptActivity" />
+
+
         <activity
-            android:name=".View.SplashActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:name=".View.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".View.HomeActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity android:name=".View.HomeActivity" />
+
         <activity android:name=".View.LoginActivity" />
         <activity android:name=".View.ScanBarcodeActivity" />
         <activity android:name=".View.ZXingBrcodeScanActivity" />
@@ -43,6 +40,7 @@
             android:screenOrientation="portrait"
             android:stateNotNeeded="true"
             android:windowSoftInputMode="stateAlwaysHidden" />
+
         <activity android:name=".View.PriceCheckerActivity" />
         <activity android:name=".View.SettingsActivity" />
         <activity android:name=".View.ListDocActivity" />
@@ -62,6 +60,11 @@
         <activity android:name=".View.AddPrinterActivity" />
         <activity android:name=".View.DeviceListActivity" />
         <activity android:name=".View.ListSalesActivity" />
+
+        <activity android:name=".View.ViewPdfActivity"/>
+        <activity android:name=".View.ClearDataActivity" />
+        <activity android:name=".View.ListReceiptActivity" />
+        <activity android:name=".View.ReceiptActivity" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"

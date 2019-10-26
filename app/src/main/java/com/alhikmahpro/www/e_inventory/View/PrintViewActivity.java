@@ -1,33 +1,21 @@
 package com.alhikmahpro.www.e_inventory.View;
 
-import android.Manifest;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,7 +28,6 @@ import com.alhikmahpro.www.e_inventory.Adapter.PrintViewAdapter;
 import com.alhikmahpro.www.e_inventory.AppUtils;
 import com.alhikmahpro.www.e_inventory.Data.Cart;
 import com.alhikmahpro.www.e_inventory.Data.CartModel;
-import com.alhikmahpro.www.e_inventory.Data.CreatePdf;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.PrinterCommands;
 import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
@@ -49,43 +36,14 @@ import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
 import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
 import com.alhikmahpro.www.e_inventory.R;
-import com.android.volley.VolleyError;
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.text.pdf.draw.LineSeparator;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -133,6 +91,8 @@ public class PrintViewActivity extends AppCompatActivity {
     TextView txtEmpty;
     @BindView(R.id.txtPayment)
     TextView txtPayment;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 //    @BindView(R.id.btn_sync)
 //    Button btnSync;
 //    @BindView(R.id.btn_pdf)
@@ -168,7 +128,7 @@ public class PrintViewActivity extends AppCompatActivity {
     PrintViewAdapter adapter;
     private static final String TAG = "PrintViewActivity";
     String customerName, invoiceNo, total, invoiceDate, salesmanId, customerCode, paymentMode, Type;
-    String companyName="", companyAddress="", companyPhone="", footer="";
+    String companyName = "", companyAddress = "", companyPhone = "", footer = "";
     double netAmount, discountAmount, base_total;
     Bitmap thumbnail;
     private static final int PERMISSION_CODE = 100;
@@ -178,7 +138,7 @@ public class PrintViewActivity extends AppCompatActivity {
     private File dir;
     dbHelper helper;
 
-    android.support.v7.app.AlertDialog alertDialog;
+    AlertDialog alertDialog;
     AlertDialog.Builder builder;
 
 
@@ -187,8 +147,8 @@ public class PrintViewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_print);
         ButterKnife.bind(this);
-        getSupportActionBar().setTitle("Payment");
-        //setSupportActionBar(toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setTitle("Payment");
         Intent intent = getIntent();
         Type = intent.getStringExtra("TYPE");
         customerName = intent.getStringExtra("CUS_NAME");
@@ -270,7 +230,7 @@ public class PrintViewActivity extends AppCompatActivity {
             printData();
             //clearActivity();
 
-           // printPhoto(R.drawable.img);
+            // printPhoto(R.drawable.img);
 
 
         } catch (Exception ex) {
@@ -342,8 +302,7 @@ public class PrintViewActivity extends AppCompatActivity {
                         Log.d(TAG, "Printer Found " + pairedDev.getName());
                         openBluetoothPrinter();
                         break;
-                    }
-                    else{
+                    } else {
                         Toast.makeText(this, "Printer not found", Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -425,12 +384,12 @@ public class PrintViewActivity extends AppCompatActivity {
     //print photo
     public void printPhoto(int img) {
         try {
-            Bitmap bmp = BitmapFactory.decodeResource(getResources(),img);
-            if(bmp!=null){
+            Bitmap bmp = BitmapFactory.decodeResource(getResources(), img);
+            if (bmp != null) {
                 byte[] command = Utils.decodeBitmap(bmp);
                 outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
                 printText(command);
-            }else{
+            } else {
                 Log.e("Print Photo error", "the file isn't exists");
             }
         } catch (Exception e) {
@@ -440,10 +399,9 @@ public class PrintViewActivity extends AppCompatActivity {
     }
 
 
+    private void printData() throws IOException {
 
-    private void printData() throws IOException{
-
-        try{
+        try {
             ShowProgressDialog();
             final DecimalFormat decimalFormat = new DecimalFormat("0.00");
             byte[] printformat = new byte[]{0x1B, 0x21, 0x03};
@@ -495,21 +453,13 @@ public class PrintViewActivity extends AppCompatActivity {
             outputStream.flush();
 
 
-
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }
-        finally {
+        } finally {
             HideProgressDialog();
             clearActivity();
         }
     }
-
-
-
-
-
-
 
 
     private void printData1() {
@@ -526,8 +476,8 @@ public class PrintViewActivity extends AppCompatActivity {
 //                        outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
 //                        printText(command);
 //                    }
-                     byte[] printformat = new byte[]{0x1B, 0x21, 0x03};
-                     //   byte[] printformat = new byte[]{30,35,0};
+                    byte[] printformat = new byte[]{0x1B, 0x21, 0x03};
+                    //   byte[] printformat = new byte[]{30,35,0};
                     outputStream.write(printformat);
 
                     printCustom(companyName, 2, 1);
@@ -646,9 +596,10 @@ public class PrintViewActivity extends AppCompatActivity {
         }
 
     }
+
     //print byte[]
     private void printText(byte[] msg) {
-        Log.d(TAG, "printText: "+msg);
+        Log.d(TAG, "printText: " + msg);
         try {
             // Print normal text
             outputStream.write(msg);
@@ -789,11 +740,6 @@ public class PrintViewActivity extends AppCompatActivity {
 
         alertDialog.dismiss();
     }
-
-
-
-
-
 
 
 }

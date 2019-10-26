@@ -1,21 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginRight="16dp"
-    android:layout_marginLeft="16dp"
     android:orientation="vertical">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar_layout">
+
+    </include>
 
     <LinearLayout
         android:id="@+id/header_layout"
+        android:layout_below="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:orientation="horizontal"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="16dp"
         android:weightSum="3">
 
         <EditText
@@ -51,7 +59,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/header_layout"
         android:id="@+id/content_layout"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="16dp"
         android:orientation="vertical">
 
 
@@ -92,7 +102,7 @@
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:layout_marginTop="10dp"
-            android:text="Price " />
+            android:text="Price 1 " />
 
         <EditText
             android:id="@+id/txtPrice1"
@@ -108,7 +118,7 @@
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:layout_marginTop="10dp"
-            android:text="Price " />
+            android:text="Price 2 " />
 
         <EditText
             android:id="@+id/txtPrice2"
@@ -124,7 +134,7 @@
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:layout_marginTop="10dp"
-            android:text="Price " />
+            android:text="Price 3 " />
 
         <EditText
             android:id="@+id/txtPrice3"
@@ -155,8 +165,10 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
 
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="16dp"
         android:layout_marginBottom="10dp"
         android:id="@+id/btnClear"
         android:layout_below="@+id/content_layout"

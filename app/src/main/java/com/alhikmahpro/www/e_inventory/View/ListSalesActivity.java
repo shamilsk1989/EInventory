@@ -1,54 +1,42 @@
 package com.alhikmahpro.www.e_inventory.View;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.alhikmahpro.www.e_inventory.Adapter.DocAdapter;
 import com.alhikmahpro.www.e_inventory.Adapter.SalesListAdapter;
 import com.alhikmahpro.www.e_inventory.Data.Cart;
-import com.alhikmahpro.www.e_inventory.Data.CartModel;
 import com.alhikmahpro.www.e_inventory.Data.CreatePdf;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.ItemModel;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
-import com.alhikmahpro.www.e_inventory.Interface.OnAdapterClickListener;
 import com.alhikmahpro.www.e_inventory.Interface.OnListAdapterClickListener;
 import com.alhikmahpro.www.e_inventory.R;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
-import com.karumi.dexter.listener.PermissionDeniedResponse;
-import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
-import com.karumi.dexter.listener.single.PermissionListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -62,29 +50,32 @@ public class ListSalesActivity extends AppCompatActivity {
     TextView txtEmpty;
     @BindView(R.id.fab)
     FloatingActionButton fab;
-    List<ItemModel> list=new ArrayList<>();
+    List<ItemModel> list = new ArrayList<>();
     RecyclerView.LayoutManager layoutManager;
     SalesListAdapter adapter;
     private static final String TAG = "ListSalesActivity";
     String type;
     private static final int PERMISSION_CODE = 100;
-    String invoiceNo="";
+    String invoiceNo = "";
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_sales);
         ButterKnife.bind(this);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 //        Intent intent = getIntent();
 //        type= intent.getStringExtra("Type");
-        getSupportActionBar().setTitle("SALES");
+        toolbar.setTitle("SALES");
         populateRecycler();
     }
 
     private void populateRecycler() {
-        if(list.size()>0){
+        if (list.size() > 0) {
             list.clear();
         }
         layoutManager = new LinearLayoutManager(this);
@@ -105,7 +96,7 @@ public class ListSalesActivity extends AppCompatActivity {
                 ItemModel model = new ItemModel();
                 model.setInvoiceNo(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_INVOICE_NUMBER)));
                 model.setInvoiceDate(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_INVOICE_DATE)));
-                Log.d(TAG, "populateRecycler: Date "+cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_INVOICE_DATE)));
+                Log.d(TAG, "populateRecycler: Date " + cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_INVOICE_DATE)));
                 model.setStaffName(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_SALESMAN_ID)));
                 model.setCustomerCode(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_CUSTOMER_CODE)));
                 model.setCustomerName(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_CUSTOMER_NAME)));
@@ -118,7 +109,7 @@ public class ListSalesActivity extends AppCompatActivity {
             } while (cursor.moveToNext());
 
 
-            adapter=new SalesListAdapter(this, list, new OnListAdapterClickListener() {
+            adapter = new SalesListAdapter(this, list, new OnListAdapterClickListener() {
                 @Override
                 public void OnEditClicked(int position) {
                     goToNext(position);
@@ -132,20 +123,16 @@ public class ListSalesActivity extends AppCompatActivity {
                 @Override
                 public void OnShareClicked(int position) {
                     Log.d(TAG, "OnShareClicked: ");
-                    ItemModel itemModel=list.get(position);
-                    invoiceNo=itemModel.getInvoiceNo();
+                    ItemModel itemModel = list.get(position);
+                    invoiceNo = itemModel.getInvoiceNo();
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
-//                        if (requestStoragePermission()) {
-//                            createPdfWrapper();
-//                        }
                         requestStoragePermission();
 
                     } else {
                         createPdfWrapper();
                     }
-
 
 
                 }
@@ -168,60 +155,61 @@ public class ListSalesActivity extends AppCompatActivity {
     private void createPdfWrapper() {
         Log.d(TAG, "createPdfWrapper: ");
 
-        CreatePdf createPdf=new CreatePdf(this,invoiceNo);
+        CreatePdf createPdf = new CreatePdf(this, invoiceNo);
         createPdf.execute();
 
     }
 
     private void goToNext(int position) {
         Cart.mCart.clear();
-        ItemModel itemModel=list.get(position);
-        invoiceNo=itemModel.getInvoiceNo();
+        ItemModel itemModel = list.get(position);
+        invoiceNo = itemModel.getInvoiceNo();
 
-        Log.d(TAG, "goToNext: "+itemModel.getCustomerName());
-        dbHelper helper=new dbHelper(this);
+        Log.d(TAG, "goToNext: " + itemModel.getCustomerName());
+        dbHelper helper = new dbHelper(this);
 
         //get invoice details and add to the cart
         helper.getInvoiceDetailsById(invoiceNo);
-        Log.d(TAG, "goToNext:cart size "+Cart.mCart.size());
+        Log.d(TAG, "goToNext:cart size " + Cart.mCart.size());
         Intent intent;
 
         // syc successfully then goto PrintViewActivity
-        if(itemModel.getIs_sync()==DataContract.SYNC_STATUS_OK){
-             intent=new Intent(ListSalesActivity.this,PrintViewActivity.class);
-        }else {
-            intent = new Intent(ListSalesActivity.this,ViewCartActivity.class);
+        if (itemModel.getIs_sync() == DataContract.SYNC_STATUS_OK) {
+            intent = new Intent(ListSalesActivity.this, PrintViewActivity.class);
+        } else {
+            intent = new Intent(ListSalesActivity.this, ViewCartActivity.class);
         }
 
-        intent.putExtra("ACTION","EDIT");
-        intent.putExtra("TYPE","SAL");
+        intent.putExtra("ACTION", "EDIT");
+        intent.putExtra("TYPE", "SAL");
         intent.putExtra("CUS_NAME", itemModel.getCustomerName());
         intent.putExtra("CUS_CODE", itemModel.getCustomerCode());
         intent.putExtra("DISCOUNT", itemModel.getDiscount());
         intent.putExtra("SALESMAN_ID", itemModel.getStaffName());
         intent.putExtra("DOC_NO", itemModel.getInvoiceNo());
         intent.putExtra("DOC_DATE", itemModel.getInvoiceDate());
-        intent.putExtra("TOTAL",itemModel.getTotal());
-        intent.putExtra("NET",itemModel.getNet());
+        intent.putExtra("TOTAL", itemModel.getTotal());
+        intent.putExtra("NET", itemModel.getNet());
         intent.putExtra("PAY_MOD", itemModel.getPaymentType());
         startActivity(intent);
     }
+
     private void requestStoragePermission() {
 
         Dexter.withActivity(this)
                 .withPermissions(
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
                         Manifest.permission.READ_EXTERNAL_STORAGE
-                        )
+                )
                 .withListener(new MultiplePermissionsListener() {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
                         //check all permission granted
-                        if(report.areAllPermissionsGranted()){
+                        if (report.areAllPermissionsGranted()) {
                             createPdfWrapper();
                         }
                         //check any permission permanent denied
-                        if(report.isAnyPermissionPermanentlyDenied()){
+                        if (report.isAnyPermissionPermanentlyDenied()) {
                             showSettingDialog();
                         }
                     }
@@ -253,7 +241,7 @@ public class ListSalesActivity extends AppCompatActivity {
 
 
     private void showSettingDialog() {
-        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(ListSalesActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(ListSalesActivity.this);
         builder.setTitle("Need Permissions");
         builder.setMessage("This app needs permission to use this feature. You can grant them in app settings.");
         builder.setPositiveButton("GOTO SETTINGS", new DialogInterface.OnClickListener() {
@@ -295,8 +283,8 @@ public class ListSalesActivity extends AppCompatActivity {
 
     @OnClick(R.id.fab)
     public void onViewClicked() {
-        Intent intent=new Intent(ListSalesActivity.this,CheckCustomerActivity.class);
-        intent.putExtra("Type","SAL");
+        Intent intent = new Intent(ListSalesActivity.this, CheckCustomerActivity.class);
+        intent.putExtra("Type", "SAL");
         startActivity(intent);
     }
 //    @Override

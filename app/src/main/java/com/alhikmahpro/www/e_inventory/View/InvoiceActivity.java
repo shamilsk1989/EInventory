@@ -2,47 +2,27 @@ package com.alhikmahpro.www.e_inventory.View;
 
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.AppUtils;
-import com.alhikmahpro.www.e_inventory.Data.DataContract;
-import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
 import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
 import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
-import com.alhikmahpro.www.e_inventory.Network.VolleySingleton;
-import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.R;
-import com.android.volley.AuthFailureError;
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.NetworkError;
-import com.android.volley.NoConnectionError;
-import com.android.volley.ParseError;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.ServerError;
-import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,9 +30,7 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -88,6 +66,8 @@ public class InvoiceActivity extends AppCompatActivity implements ListSupplierFr
 
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,14 +75,12 @@ public class InvoiceActivity extends AppCompatActivity implements ListSupplierFr
         setContentView(R.layout.activity_invoice);
         ButterKnife.bind(this);
 
-
-
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Check Supplier");
+        toolbar.setTitle("Check Supplier");
 
         txtInvoiceDate.setEnabled(false);
-
 
 
         initView();
@@ -110,7 +88,7 @@ public class InvoiceActivity extends AppCompatActivity implements ListSupplierFr
     }
 
     private void initVolleyCallBack() {
-        mVolleyListener=new volleyListener() {
+        mVolleyListener = new volleyListener() {
             @Override
             public void notifySuccess(String requestType, JSONObject response) {
 
@@ -121,15 +99,15 @@ public class InvoiceActivity extends AppCompatActivity implements ListSupplierFr
                     try {
                         supplierName = response.getString("SupplierName");
                         btnCheck.setEnabled(true);
-                        status=true;
-                        showAlert(supplierName,status);
+                        status = true;
+                        showAlert(supplierName, status);
 
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 } else {
-                    status=false;
-                    showAlert("Not Found",status);
+                    status = false;
+                    showAlert("Not Found", status);
 
                 }
 
@@ -139,8 +117,8 @@ public class InvoiceActivity extends AppCompatActivity implements ListSupplierFr
             public void notifyError(String requestType, VolleyError error) {
 
                 progressDialog.dismiss();
-                boolean status=false;
-                showAlert("Network error",status);
+                boolean status = false;
+                showAlert("Network error", status);
             }
         };
     }
@@ -201,7 +179,7 @@ public class InvoiceActivity extends AppCompatActivity implements ListSupplierFr
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if(status){
+                if (status) {
                     gotoNext();
                 }
                 dialog.cancel();
@@ -233,7 +211,7 @@ public class InvoiceActivity extends AppCompatActivity implements ListSupplierFr
     }
 
 
-    @OnClick({R.id.imgSearch, R.id.btnCheck,R.id.imgCalender})
+    @OnClick({R.id.imgSearch, R.id.btnCheck, R.id.imgCalender})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.imgSearch:
@@ -254,7 +232,7 @@ public class InvoiceActivity extends AppCompatActivity implements ListSupplierFr
                 break;
             case R.id.imgCalender:
 
-                calendar=Calendar.getInstance();
+                calendar = Calendar.getInstance();
 
                 final DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
                     @Override

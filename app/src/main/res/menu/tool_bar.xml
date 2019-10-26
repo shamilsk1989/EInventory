@@ -3,17 +3,27 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
-    <item
-        android:id="@+id/action_download"
-        android:icon="@drawable/ic_file_download_white"
-        android:title="@string/action_download"
-        app:showAsAction="ifRoom" />
 
+
+    <item
+        android:id="@+id/action_print"
+        android:icon="@drawable/ic_print_white"
+        android:title="@string/action_print"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/action_share"
+        android:icon="@drawable/ic_share_white"
+        android:title="@string/action_share"
+        app:showAsAction="always"/>
     <item
         android:id="@+id/action_sync"
         android:icon="@drawable/ic_sync_white"
         android:title="@string/action_sync"
         app:showAsAction="always" />
+
+
+
+
 
 
 </menu>

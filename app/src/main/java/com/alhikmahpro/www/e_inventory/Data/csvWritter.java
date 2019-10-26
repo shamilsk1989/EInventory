@@ -11,6 +11,7 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.alhikmahpro.www.e_inventory.FileUtils;
 import com.alhikmahpro.www.e_inventory.R;
 import com.opencsv.CSVWriter;
 
@@ -39,7 +40,7 @@ public class csvWritter {
         this.mContext = mContext;
         this.docNo=doc;
         this.mDate=dt;
-        folder_path = createDirectory(getPath(null), folder_name);
+        folder_path = FileUtils.getAppPath(mContext);
         Log.d(TAG, "folder path: "+folder_path);
 
     }

@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar_layout">
+
+    </include>
+
     <ScrollView
+        android:layout_below="@+id/toolbar"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
 
@@ -318,4 +325,4 @@
 
     </ScrollView>
 
-</android.support.design.widget.CoordinatorLayout>
+</RelativeLayout>

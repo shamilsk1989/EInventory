@@ -10,23 +10,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.Adapter.DocAdapter;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.ItemModel;
-import com.alhikmahpro.www.e_inventory.Data.ReceiptModel;
 import com.alhikmahpro.www.e_inventory.Data.RuntimeData;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
-import com.alhikmahpro.www.e_inventory.Interface.FragmentActionListener;
 import com.alhikmahpro.www.e_inventory.Interface.OnAdapterClickListener;
 import com.alhikmahpro.www.e_inventory.R;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
@@ -44,6 +41,8 @@ public class ListDocActivity extends AppCompatActivity {
     private static final String TAG = "ListDocActivity";
     RecyclerView.Adapter adapter;
     RecyclerView.LayoutManager layoutManager;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
     private String type;
     List<ItemModel> list;
 
@@ -52,9 +51,11 @@ public class ListDocActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_doc);
         ButterKnife.bind(this);
-
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+
         Log.d(TAG, "onCreate: ");
 
         Intent mIntent = getIntent();
@@ -62,6 +63,7 @@ public class ListDocActivity extends AppCompatActivity {
         list = new ArrayList<>();
 
     }
+
     private void loadInventory() {
 
         list.clear();
@@ -72,7 +74,7 @@ public class ListDocActivity extends AppCompatActivity {
 
             txtEmpty.setVisibility(View.GONE);
             do {
-                Log.d(TAG, "loadInventory: "+cursor.getInt(cursor.getColumnIndex(DataContract.Stocks.COL_DOCUMENT_NUMBER)));
+                Log.d(TAG, "loadInventory: " + cursor.getInt(cursor.getColumnIndex(DataContract.Stocks.COL_DOCUMENT_NUMBER)));
                 ItemModel model = new ItemModel();
                 model.setDocNo(cursor.getInt(cursor.getColumnIndex(DataContract.Stocks.COL_DOCUMENT_NUMBER)));
                 model.setStaffName(cursor.getString(cursor.getColumnIndex(DataContract.Stocks.COL_STAFF_NAME)));
@@ -121,8 +123,7 @@ public class ListDocActivity extends AppCompatActivity {
     }
 
 
-
-    private void populateRecycler()   {
+    private void populateRecycler() {
 
         layoutManager = new LinearLayoutManager(this);
         docListRv.setLayoutManager(layoutManager);
@@ -150,22 +151,21 @@ public class ListDocActivity extends AppCompatActivity {
         if (type.equals("INV")) {
             Intent intent = new Intent(this, ListItemActivity.class);
             intent.putExtra("ACTION", "Edit");
-            intent.putExtra("DOC_NO",itemModel.getDocNo());
+            intent.putExtra("DOC_NO", itemModel.getDocNo());
             intent.putExtra("USER", itemModel.getStaffName());
             startActivity(intent);
-        }
-        else if(type.equals("GDS")){
+        } else if (type.equals("GDS")) {
 
-            Log.d(TAG, "editDoc:supp code "+itemModel.getSupplierCode());
-            Intent intent=new Intent(this,GoodsItemListActivity.class);
-            intent.putExtra("ACTION","Edit");
-            intent.putExtra("DOC_NO",itemModel.getDocNo());
-            intent.putExtra("ORD_NO",itemModel.getOrderNo());
-            intent.putExtra("SUPP_CODE",itemModel.getSupplierCode());
-            intent.putExtra("SUPP_NAME",itemModel.getSupplierName());
+            Log.d(TAG, "editDoc:supp code " + itemModel.getSupplierCode());
+            Intent intent = new Intent(this, GoodsItemListActivity.class);
+            intent.putExtra("ACTION", "Edit");
+            intent.putExtra("DOC_NO", itemModel.getDocNo());
+            intent.putExtra("ORD_NO", itemModel.getOrderNo());
+            intent.putExtra("SUPP_CODE", itemModel.getSupplierCode());
+            intent.putExtra("SUPP_NAME", itemModel.getSupplierName());
             intent.putExtra("INV_NO", itemModel.getInvoiceNo());
-            intent.putExtra("INV_DATE",itemModel.getInvoiceDate());
-            intent.putExtra("USER",itemModel.getStaffName());
+            intent.putExtra("INV_DATE", itemModel.getInvoiceDate());
+            intent.putExtra("USER", itemModel.getStaffName());
             startActivity(intent);
         }
     }
@@ -175,11 +175,11 @@ public class ListDocActivity extends AppCompatActivity {
         super.onResume();
         RuntimeData.mCartData.clear();
         if (type.equals("INV")) {
-            getSupportActionBar().setTitle("Inventory");
+            toolbar.setTitle("Inventory");
             loadInventory();
 
         } else if (type.equals("GDS")) {
-            getSupportActionBar().setTitle("Goods Receive");
+            toolbar.setTitle("Goods Receive");
             loadGoods();
         }
 //        else if(type.equals("REC")){
@@ -188,8 +188,6 @@ public class ListDocActivity extends AppCompatActivity {
 //        }
         populateRecycler();
     }
-
-
 
 
 //    private void editDoc(int no,String user) {
@@ -241,7 +239,6 @@ public class ListDocActivity extends AppCompatActivity {
 //            Intent intent = new Intent(ListDocActivity.this, ReceiptActivity.class);
 //            startActivity(intent);
 //        }
-
 
 
     }

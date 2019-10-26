@@ -1,5 +1,6 @@
 package com.alhikmahpro.www.e_inventory.View;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -7,53 +8,29 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.Adapter.CartAdapter;
-import com.alhikmahpro.www.e_inventory.AppUtils;
 import com.alhikmahpro.www.e_inventory.Data.Cart;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.ItemModel;
-import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
-import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
-import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
-import com.alhikmahpro.www.e_inventory.Network.VolleySingleton;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.Interface.OnAdapterClickListener;
+import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
+import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
 import com.alhikmahpro.www.e_inventory.R;
-import com.android.volley.AuthFailureError;
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.NetworkError;
-import com.android.volley.NoConnectionError;
-import com.android.volley.ParseError;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.ServerError;
-import com.android.volley.TimeoutError;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -84,6 +61,8 @@ public class GoodsItemListActivity extends AppCompatActivity {
 
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,10 +82,10 @@ public class GoodsItemListActivity extends AppCompatActivity {
         invoiceNo = mIntent.getStringExtra("INV_NO");
         user = mIntent.getStringExtra("USER");
         invoiceDate = mIntent.getStringExtra("INV_DATE");
-
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Document  " + docNo);
+        toolbar.setTitle("Document  " + docNo);
         helper = new dbHelper(this);
 
         // check action is edit or not if edit then load item db to gCart;
@@ -190,7 +169,7 @@ public class GoodsItemListActivity extends AppCompatActivity {
 //                    } else {
 
                     // Remove item from cart
-                    new android.app.AlertDialog.Builder(GoodsItemListActivity.this)
+                    new AlertDialog.Builder(GoodsItemListActivity.this)
                             .setTitle("Confirm")
                             .setMessage("Do you want to delete this item?")
                             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -239,7 +218,7 @@ public class GoodsItemListActivity extends AppCompatActivity {
     public void onViewClicked() {
 
         Log.d(TAG, "onViewClicked: " + "doc :" + docNo + "suppl :" + supplierName);
-        Log.d(TAG, "onViewClicked:gCart "+Cart.gCart.size());
+        Log.d(TAG, "onViewClicked:gCart " + Cart.gCart.size());
         Intent intent_payment = new Intent(GoodsItemListActivity.this, PaymentActivity.class);
         intent_payment.putExtra("ACTION", "NEW");
         intent_payment.putExtra("TYPE", "GDS");
@@ -254,8 +233,6 @@ public class GoodsItemListActivity extends AppCompatActivity {
         intent_payment.putExtra("TOTAL", totalAmount);
         startActivity(intent_payment);
     }
-
-
 
 
     @Override

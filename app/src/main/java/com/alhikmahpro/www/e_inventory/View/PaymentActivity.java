@@ -1,11 +1,12 @@
 package com.alhikmahpro.www.e_inventory.View;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -38,8 +39,6 @@ import org.json.JSONObject;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -82,7 +81,8 @@ public class PaymentActivity extends AppCompatActivity {
     TextView textViewTotalRow;
     @BindView(R.id.btn_delete)
     Button btnDelete;
-
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
 
     @Override
@@ -90,9 +90,10 @@ public class PaymentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
         ButterKnife.bind(this);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Payment");
+        toolbar.setTitle("Payment");
         Intent intent = getIntent();
         Action = intent.getStringExtra("ACTION");
         type = intent.getStringExtra("TYPE");
@@ -127,7 +128,7 @@ public class PaymentActivity extends AppCompatActivity {
         paymentMode = radioButton.getText().toString();
         //SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         //mDate = sdf.format(new Date());
-        mDate=AppUtils.getDateAndTime();
+        mDate = AppUtils.getDateAndTime();
         helper = new dbHelper(this);
 
         editTextDiscount.addTextChangedListener(new TextWatcher() {
@@ -212,7 +213,6 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
 
-
     private JSONObject generateSalesJSON() {
 
         //create invoice json array
@@ -221,7 +221,7 @@ public class PaymentActivity extends AppCompatActivity {
         JSONObject invoiceObject = new JSONObject();
         try {
             invoiceObject.put(DataContract.Invoice.COL_INVOICE_NUMBER, invoiceNo);
-            invoiceObject.put(DataContract.Invoice.COL_INVOICE_DATE,invoiceDate.substring(0,10));
+            invoiceObject.put(DataContract.Invoice.COL_INVOICE_DATE, invoiceDate.substring(0, 10));
             invoiceObject.put(DataContract.Invoice.COL_CUSTOMER_CODE, customerCode);
             invoiceObject.put(DataContract.Invoice.COL_CUSTOMER_NAME, customerName);
             invoiceObject.put(DataContract.Invoice.COL_SALESMAN_ID, salesmanId);
@@ -293,13 +293,13 @@ public class PaymentActivity extends AppCompatActivity {
             object.put(DataContract.GoodsReceive.COL_ORDER_NUMBER, orderNo);
             object.put(DataContract.GoodsReceive.COL_SUPPLIER_CODE, customerCode);
             object.put(DataContract.GoodsReceive.COL_INVOICE_NUMBER, invoiceNo);
-            object.put(DataContract.GoodsReceive.COL_INVOICE_DATE, invoiceDate.substring(0,10));
+            object.put(DataContract.GoodsReceive.COL_INVOICE_DATE, invoiceDate.substring(0, 10));
             object.put(DataContract.GoodsReceive.COL_STAFF_NAME, salesmanId);
             object.put(DataContract.GoodsReceive.COL_TOTAL, base_total);
             object.put(DataContract.GoodsReceive.COL_DISCOUNT_AMOUNT, disc);
             object.put(DataContract.GoodsReceive.COL_NET_AMOUNT, netAmount);
             object.put(DataContract.GoodsReceive.COL_PAYMENT_TYPE, paymentMode);
-            object.put(DataContract.GoodsReceive.COL_DATE_TIME, mDate.substring(0,10));
+            object.put(DataContract.GoodsReceive.COL_DATE_TIME, mDate.substring(0, 10));
             goodsArray.put(object);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -402,7 +402,7 @@ public class PaymentActivity extends AppCompatActivity {
     public void saveSales(int sync) {
 
         SaleData saleData = new SaleData(invoiceNo, customerCode, customerName, invoiceDate, salesmanId, base_total, disc, netAmount, paymentMode, mDate, sync);
-        SaveSales.TaskListener listener=new SaveSales.TaskListener() {
+        SaveSales.TaskListener listener = new SaveSales.TaskListener() {
             @Override
             public void onFinished(String result) {
                 if (result.equals("Saved")) {
@@ -412,7 +412,7 @@ public class PaymentActivity extends AppCompatActivity {
                 }
             }
         };
-        SaveSales saveSales = new SaveSales(this,listener);
+        SaveSales saveSales = new SaveSales(this, listener);
         saveSales.execute(saleData);
 
 
@@ -426,7 +426,7 @@ public class PaymentActivity extends AppCompatActivity {
             public void onFinished(String result) {
                 if (result.equals("Saved")) {
                     Log.d(TAG, "onFinished: " + result);
-                   // Toast.makeText(PaymentActivity.this, "Saved", Toast.LENGTH_SHORT).show();
+                    // Toast.makeText(PaymentActivity.this, "Saved", Toast.LENGTH_SHORT).show();
                     gotoNext();
                 }
 
@@ -462,7 +462,7 @@ public class PaymentActivity extends AppCompatActivity {
     @OnClick(R.id.btn_delete)
     public void onBtnDeleteClicked() {
 
-        new android.app.AlertDialog.Builder(PaymentActivity.this)
+        new AlertDialog.Builder(PaymentActivity.this)
                 .setTitle("Confirm")
                 .setMessage("Do you want to delete the cart ?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {

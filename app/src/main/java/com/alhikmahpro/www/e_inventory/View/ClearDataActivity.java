@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -25,6 +26,8 @@ public class ClearDataActivity extends AppCompatActivity {
     LinearLayout paperLayout;
     @BindView(R.id.layoutReceipt)
     LinearLayout layoutReceipt;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
 //    AlertDialog alertDialog;
 //    AlertDialog.Builder builder;
@@ -33,6 +36,10 @@ public class ClearDataActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_clear_data);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        toolbar.setTitle("Clear Data");
         ButterKnife.bind(this);
     }
 
@@ -94,6 +101,11 @@ public class ClearDataActivity extends AppCompatActivity {
         }).start();
 
 
+    }
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
 

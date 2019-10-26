@@ -22,6 +22,8 @@
     <string name="action_download">Pdf</string>
     <string name="action_sync">Sync</string>
     <string name="nav_receipt">Receipts</string>
+    <string name="action_print">print</string>
+    <string name="action_share">share</string>
 
 
     <!--Spinner -->

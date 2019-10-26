@@ -8,8 +8,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -17,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -29,8 +32,14 @@ import com.alhikmahpro.www.e_inventory.Data.ItemModel;
 import com.alhikmahpro.www.e_inventory.Data.RuntimeData;
 import com.alhikmahpro.www.e_inventory.Data.csvWritter;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
+import com.alhikmahpro.www.e_inventory.FileUtils;
 import com.alhikmahpro.www.e_inventory.Interface.OnAdapterClickListener;
 import com.alhikmahpro.www.e_inventory.R;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -62,6 +71,8 @@ public class ListItemActivity extends AppCompatActivity {
     List<ItemModel> listItem = new ArrayList<>();
     @BindView(R.id.txtCount)
     TextView txtCount;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
 
     @Override
@@ -72,16 +83,16 @@ public class ListItemActivity extends AppCompatActivity {
         progressDialog = new ProgressDialog(this);
         Intent mIntent = getIntent();
         action = mIntent.getStringExtra("ACTION");
-        Log.d(TAG, "onCreate Action: "+action);
-        docNo=mIntent.getIntExtra("DOC_NO",0);
+        Log.d(TAG, "onCreate Action: " + action);
+        docNo = mIntent.getIntExtra("DOC_NO", 0);
         staffName = mIntent.getStringExtra("USER");
 
-        Log.d(TAG, "onCreate: document NO "+docNo+ "user "+staffName);
+        Log.d(TAG, "onCreate: document NO " + docNo + "user " + staffName);
         helper = new dbHelper(this);
-
-        getSupportActionBar().setTitle("Document  " + docNo);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+        toolbar.setTitle("Document  " + docNo);
         initView();
 
 
@@ -106,13 +117,8 @@ public class ListItemActivity extends AppCompatActivity {
         Log.d(TAG, "onViewClicked: ");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             //csvWritter writer=new csvWritter(getContext(),docNo);
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "Permission already granted: ");
-                //writeToCSV();
-                saveToDataBase();
-            } else {
-                requestStoragePermission();
-            }
+            requestStoragePermission();
+
         } else {
             saveToDataBase();
         }
@@ -147,7 +153,7 @@ public class ListItemActivity extends AppCompatActivity {
         if (listItem.size() > 0) {
 
             txtEmpty.setVisibility(View.GONE);
-            txtCount.setText("Total Items :"+String.valueOf(listItem.size()));
+            txtCount.setText("Total Items :" + String.valueOf(listItem.size()));
             layoutManager = new LinearLayoutManager(this);
             itemListRv.setLayoutManager(layoutManager);
             itemListRv.setItemAnimator(new DefaultItemAnimator());
@@ -181,8 +187,6 @@ public class ListItemActivity extends AppCompatActivity {
                             }).create().show();
 
 
-
-
                 }
             });
             itemListRv.setAdapter(adapter);
@@ -196,8 +200,6 @@ public class ListItemActivity extends AppCompatActivity {
     private void deleteItem(int id, int position) {
 
 
-
-
         Log.d(TAG, "deleteItem: ID" + position);
 
         boolean del = helper.deleteStockDetailsById(id);
@@ -206,7 +208,7 @@ public class ListItemActivity extends AppCompatActivity {
             listItem.remove(position);
             adapter.notifyItemRemoved(position);
             adapter.notifyItemRangeChanged(position, listItem.size());
-            txtCount.setText("Total Items :"+String.valueOf(listItem.size()));
+            txtCount.setText("Total Items :" + String.valueOf(listItem.size()));
             Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show();
 
         } else {
@@ -217,38 +219,66 @@ public class ListItemActivity extends AppCompatActivity {
     }
 
 
-
-
     private void requestStoragePermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(ListItemActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
 
-            new AlertDialog.Builder(ListItemActivity.this)
-                    .setTitle("Permission needed")
-                    .setMessage("To continue please allow the permission ")
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions(ListItemActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
 
+        Dexter.withActivity(this)
+                .withPermissions(
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+                .withListener(new MultiplePermissionsListener() {
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport report) {
+                        //check all permission granted
+                        if (report.areAllPermissionsGranted()) {
+                            saveToDataBase();
                         }
-                    })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
+                        //check any permission permanent denied
+                        if (report.isAnyPermissionPermanentlyDenied()) {
+                            showSettingDialog();
                         }
-                    }).create().show();
+                    }
 
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                        token.continuePermissionRequest();
 
-        } else {
-            ActivityCompat.requestPermissions(ListItemActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
-        }
+                    }
+                }).check();
+
+    }
+
+    private void showSettingDialog() {
+        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(ListItemActivity.this);
+        builder.setTitle("Need Permissions");
+        builder.setMessage("This app needs permission to use this feature. You can grant them in app settings.");
+        builder.setPositiveButton("GOTO SETTINGS", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                openSettings();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
+    }
+
+    private void openSettings() {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        startActivityForResult(intent, 101);
     }
 
     private void saveToDataBase() {
 
-        if(listItem.size()>0){
+        if (listItem.size() > 0) {
             double total = 0;
             for (ItemModel itemModel : RuntimeData.mCartData) {
                 total = total + itemModel.getQty() * itemModel.getCostPrice();
@@ -260,14 +290,9 @@ public class ListItemActivity extends AppCompatActivity {
 // set the new task and clear flags
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(i);
-        }
-        else {
+        } else {
             Toast.makeText(this, "No items", Toast.LENGTH_SHORT).show();
         }
-
-
-
-
 
 
     }
@@ -303,16 +328,6 @@ public class ListItemActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == STORAGE_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "onRequestPermissionsResult: permission granted ");
-                saveToDataBase();
-            } else {
-                Log.d(TAG, "onRequestPermissionsResult: permission not granted");
-            }
-        }
-    }
+
 
 }

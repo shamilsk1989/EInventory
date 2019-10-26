@@ -1,10 +1,8 @@
 package com.alhikmahpro.www.e_inventory.View;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -14,12 +12,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -40,10 +36,7 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -65,9 +58,11 @@ public class PaperSettingsActivity extends AppCompatActivity implements AdapterV
     @BindView(R.id.txtFooter)
     EditText txtFooter;
     String companyName, companyAddress, companyPhone, selectedPaper, footer;
-    int _id=0;
+    int _id = 0;
     ArrayAdapter<CharSequence> adapter;
     public static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
     private int GALLERY = 1, CAMERA = 2;
     Bitmap thumbnail;
     @BindView(R.id.imgLogo)
@@ -80,19 +75,20 @@ public class PaperSettingsActivity extends AppCompatActivity implements AdapterV
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_paper_settings);
         ButterKnife.bind(this);
-        helper= new dbHelper(this);
-        getSupportActionBar().setTitle("Clear Data");
+        helper = new dbHelper(this);
 
+        setSupportActionBar(toolbar);
+        toolbar.setTitle("Template");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         initView();
     }
 
     private void initView() {
-        SQLiteDatabase database=helper.getReadableDatabase();
-        Cursor cursor=helper.getPaperSettings(database);
-        if(cursor.moveToFirst()){
-            do{
+        SQLiteDatabase database = helper.getReadableDatabase();
+        Cursor cursor = helper.getPaperSettings(database);
+        if (cursor.moveToFirst()) {
+            do {
                 //_id=cursor.getInt(cursor.getColumnIndex(DataContract.PaperSettings.COL_ID));
                 txtCompanyName.setText(cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_NAME)));
                 txtCompanyAddress.setText(cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_ADDRESS)));
@@ -106,7 +102,7 @@ public class PaperSettingsActivity extends AppCompatActivity implements AdapterV
                     e.printStackTrace();
                 }
 
-            }while (cursor.moveToNext());
+            } while (cursor.moveToNext());
         }
         adapter = ArrayAdapter.createFromResource(this, R.array.paper_size, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -114,6 +110,7 @@ public class PaperSettingsActivity extends AppCompatActivity implements AdapterV
         spinner.setOnItemSelectedListener(this);
 
     }
+
     @OnClick(R.id.imgLogo)
     public void onImgLogoClicked() {
 
@@ -145,7 +142,7 @@ public class PaperSettingsActivity extends AppCompatActivity implements AdapterV
         if (Validate(companyPhone, companyAddress, companyName)) {
             // delete previous records  from paper settings table before inserting new record
             helper.deletePaperSettings();
-            if(helper.savePaperSettings(companyName, companyAddress, companyPhone, footer, img_data, selectedPaper)){
+            if (helper.savePaperSettings(companyName, companyAddress, companyPhone, footer, img_data, selectedPaper)) {
                 Toast.makeText(this, "Inserted", Toast.LENGTH_SHORT).show();
                 finish();
             }
@@ -180,6 +177,7 @@ public class PaperSettingsActivity extends AppCompatActivity implements AdapterV
     public void onNothingSelected(AdapterView<?> adapterView) {
 
     }
+
     private void requestStoragePermission() {
 
         Dexter.withActivity(this)
@@ -210,7 +208,7 @@ public class PaperSettingsActivity extends AppCompatActivity implements AdapterV
     }
 
     private void showSettingDialog() {
-        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(PaperSettingsActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(PaperSettingsActivity.this);
         builder.setTitle("Need Permissions");
         builder.setMessage("This app needs permission to use this feature. You can grant them in app settings.");
         builder.setPositiveButton("GOTO SETTINGS", new DialogInterface.OnClickListener() {
@@ -236,7 +234,7 @@ public class PaperSettingsActivity extends AppCompatActivity implements AdapterV
         startActivityForResult(intent, 101);
     }
 
-//    private boolean checkAndRequestPermissions() {
+    //    private boolean checkAndRequestPermissions() {
 //
 //        int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
 //        int writePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -278,6 +276,7 @@ public class PaperSettingsActivity extends AppCompatActivity implements AdapterV
                 });
         pictureDialog.show();
     }
+
     private void takePhotoFromCamera() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(intent, CAMERA);
@@ -291,6 +290,7 @@ public class PaperSettingsActivity extends AppCompatActivity implements AdapterV
 
 
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

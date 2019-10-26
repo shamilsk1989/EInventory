@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
@@ -13,13 +12,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -113,6 +110,8 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
     LinearLayout contentLayout;
     @BindView(R.id.imgSubmit)
     ImageView imgSubmit;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
     private String BASE_URL = "";
     ProgressDialog progressDialog;
     String companyCode, companyName, deviceId, branchCode, periodCode, locationCode;
@@ -136,9 +135,11 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         progressDialog = new ProgressDialog(this);
 
-        getSupportActionBar().setTitle("Inventory");
+
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+        toolbar.setTitle("Inventory");
         is_first = true;
         setDoc();
         initView();
@@ -236,7 +237,6 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
     }
 
 
-
     @OnClick(R.id.imgSearch)
     public void onImgSearchClicked() {
 
@@ -299,16 +299,14 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
         int docNo;
         try {
             docNo = Integer.parseInt(txtDocNo.getText().toString());
-        }
-        catch (NumberFormatException e)
-        {
+        } catch (NumberFormatException e) {
             e.printStackTrace();
             docNo = 0;
         }
-        Log.d(TAG, "onBtnNextClicked: document no :"+docNo);
+        Log.d(TAG, "onBtnNextClicked: document no :" + docNo);
         Intent intent = new Intent(InventoryActivity.this, ListItemActivity.class);
         intent.putExtra("ACTION", "New");
-        intent.putExtra("DOC_NO",docNo);
+        intent.putExtra("DOC_NO", docNo);
         intent.putExtra("USER", txtUser.getText().toString());
         startActivity(intent);
 

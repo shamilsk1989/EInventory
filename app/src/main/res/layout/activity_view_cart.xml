@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<RelativeLayout
 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -8,113 +8,129 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="16dp"
-        android:orientation="vertical">
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar_layout">
+
+    </include>
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_below="@+id/toolbar"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
         <LinearLayout
-            android:id="@+id/layout1"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/editext_border"
-            android:orientation="horizontal"
-            android:weightSum="2">
+            android:layout_height="match_parent"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/layout1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/editext_border"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center|left"
+                    android:padding="10dp"
+                    android:text="Total Count:"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/txtTotalCount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center|left"
+                    android:padding="10dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp">
+
+                </TextView>
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/layout2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/layout1"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/editext_border"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center|left"
+                    android:padding="10dp"
+                    android:text="Total Amount:"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/txtTotal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center|left"
+                    android:padding="10dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp">
+                </TextView>
+            </LinearLayout>
 
             <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center|left"
-                android:padding="10dp"
-                android:text="Total Count:"
-                android:textColor="@android:color/black"
-                android:textSize="18sp" />
 
-            <TextView
-                android:id="@+id/txtTotalCount"
-                android:layout_width="0dp"
+                android:id="@+id/txtEmpty"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center|left"
-                android:padding="10dp"
-                android:textColor="@android:color/black"
-                android:textSize="18sp">
+                android:gravity="center"
+                android:text="No Items"
+                android:textSize="30sp" />
 
-            </TextView>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/item_list_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/editext_border"
+                android:scrollbars="vertical">
+
+            </android.support.v7.widget.RecyclerView>
+
+
+            <Button
+                android:id="@+id/btnNext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp"
+                android:background="@android:color/holo_green_dark"
+                android:text="Next"
+                android:textColor="@android:color/white"
+
+                />
 
         </LinearLayout>
 
-
-        <LinearLayout
-            android:id="@+id/layout2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/layout1"
-            android:layout_marginTop="5dp"
-            android:background="@drawable/editext_border"
-            android:orientation="horizontal"
-            android:weightSum="2">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center|left"
-                android:padding="10dp"
-                android:text="Total Amount:"
-                android:textColor="@android:color/black"
-                android:textSize="18sp" />
-
-            <TextView
-                android:id="@+id/txtTotal"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center|left"
-                android:padding="10dp"
-                android:textColor="@android:color/black"
-                android:textSize="18sp">
-            </TextView>
-        </LinearLayout>
-
-        <TextView
-
-            android:id="@+id/txtEmpty"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="No Items"
-            android:textSize="30sp" />
+    </ScrollView>
 
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/item_list_rv"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/editext_border"
-            android:scrollbars="vertical">
-
-        </android.support.v7.widget.RecyclerView>
 
 
-        <Button
-            android:id="@+id/btnNext"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="10dp"
-            android:background="@android:color/holo_green_dark"
-            android:text="Next"
-            android:textColor="@android:color/white"
-
-            />
-
-    </LinearLayout>
-
-
-</ScrollView>
+</RelativeLayout>

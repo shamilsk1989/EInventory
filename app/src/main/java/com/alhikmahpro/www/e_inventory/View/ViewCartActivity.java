@@ -1,12 +1,13 @@
 package com.alhikmahpro.www.e_inventory.View;
 
-import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -42,15 +43,18 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
     double total;
     String customerName, invoiceNo, salesmanId, customerCode, invoiceDate, Action;
     private static final String TAG = "ViewCartActivity";
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_cart);
         ButterKnife.bind(this);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Cart ");
+        toolbar.setTitle("Cart ");
         Intent intent = getIntent();
         Action = intent.getStringExtra("ACTION");
         customerName = intent.getStringExtra("CUS_NAME");
@@ -58,7 +62,7 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
         salesmanId = intent.getStringExtra("SALESMAN_ID");
         invoiceNo = intent.getStringExtra("DOC_NO");
         invoiceDate = intent.getStringExtra("DOC_DATE");
-        Log.d(TAG, "view cart onCreate: invoice no: and Date" + invoiceNo+"/"+invoiceDate);
+        Log.d(TAG, "view cart onCreate: invoice no: and Date" + invoiceNo + "/" + invoiceDate);
         dbHelper helper = new dbHelper(this);
         loadRecyclerView();
         calculate();
@@ -84,8 +88,8 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
     @OnClick(R.id.btnNext)
     public void onViewClicked() {
 
-        Intent intent_payment = new Intent(ViewCartActivity.this,PaymentActivity.class);
-        intent_payment.putExtra("ACTION", Action );
+        Intent intent_payment = new Intent(ViewCartActivity.this, PaymentActivity.class);
+        intent_payment.putExtra("ACTION", Action);
         intent_payment.putExtra("TYPE", "SAL");
         intent_payment.putExtra("CUS_NAME", customerName);
         intent_payment.putExtra("CUS_CODE", customerCode);
@@ -106,7 +110,7 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
     @Override
     public void onItemClick(final int position) {
 
-        new android.app.AlertDialog.Builder(ViewCartActivity.this)
+        new AlertDialog.Builder(ViewCartActivity.this)
                 .setTitle("Confirm")
                 .setMessage("Remove Item From Cart ?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {

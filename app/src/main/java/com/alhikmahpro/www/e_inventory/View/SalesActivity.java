@@ -15,6 +15,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -25,6 +26,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -112,6 +114,14 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     private static final int CAMERA_PERMISSION_CODE = 101;
     @BindView(R.id.progressBar)
     ProgressBar progressBar;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.title_layout2)
+    LinearLayout titleLayout2;
+    @BindView(R.id.radioReturn)
+    RadioButton radioReturn;
+    @BindView(R.id.radioFree)
+    RadioButton radioFree;
     private String customerName, salesmanId, customerCode;
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
@@ -128,10 +138,10 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         setContentView(R.layout.activity_sales);
         ButterKnife.bind(this);
 
-
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("New Sales");
+        toolbar.setTitle("New Sales");
         list = new ArrayList<>();
         initView();
         initVolleyCallBack();
@@ -577,7 +587,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
     private void initView() {
         // delete all data from cart if not empty
-        if(Cart.mCart.size()>0){
+        if (Cart.mCart.size() > 0) {
             Log.d(TAG, "initView: cart not empty");
             Cart.mCart.clear();
         }
@@ -617,7 +627,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         invoiceDate = AppUtils.getDateAndTime();
         helper = new dbHelper(this);
         int last_no = helper.getLastInvoiceNo();
-        Log.d(TAG, "setDoc: " + last_no +"***" + invoiceDate);
+        Log.d(TAG, "setDoc: " + last_no + "***" + invoiceDate);
         int mDoc = last_no + 1;
         textViewDate.setText(invoiceDate);
         invoiceNo = "INV" + "-" + mDoc;

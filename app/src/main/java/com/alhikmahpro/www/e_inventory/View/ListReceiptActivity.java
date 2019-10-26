@@ -1,11 +1,9 @@
 package com.alhikmahpro.www.e_inventory.View;
 
 import android.Manifest;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -14,10 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
@@ -25,23 +20,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.Adapter.ReceiptAdapter;
 import com.alhikmahpro.www.e_inventory.AppUtils;
-import com.alhikmahpro.www.e_inventory.Data.Cart;
-import com.alhikmahpro.www.e_inventory.Data.CartModel;
-import com.alhikmahpro.www.e_inventory.Data.CreatePdf;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
-import com.alhikmahpro.www.e_inventory.Data.ItemModel;
 import com.alhikmahpro.www.e_inventory.Data.ReceiptModel;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
-import com.alhikmahpro.www.e_inventory.FileUtils;
-import com.alhikmahpro.www.e_inventory.Interface.OnAdapterClickListener;
 import com.alhikmahpro.www.e_inventory.Interface.OnListAdapterClickListener;
 import com.alhikmahpro.www.e_inventory.R;
 import com.itextpdf.text.BaseColor;
@@ -52,10 +41,7 @@ import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.draw.LineSeparator;
 import com.karumi.dexter.Dexter;
@@ -68,11 +54,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -88,6 +71,8 @@ public class ListReceiptActivity extends AppCompatActivity {
     FloatingActionButton fab;
     RecyclerView.Adapter adapter;
     RecyclerView.LayoutManager layoutManager;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
     private String type;
     List<ReceiptModel> list;
     private static final String TAG = "ListReceiptActivity";
@@ -106,11 +91,12 @@ public class ListReceiptActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_receipt);
         ButterKnife.bind(this);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 //        Intent intent = getIntent();
 //        type= intent.getStringExtra("Type");
-        getSupportActionBar().setTitle("Receipts");
+        toolbar.setTitle("Receipts");
         list = new ArrayList<>();
 
     }
@@ -198,25 +184,26 @@ public class ListReceiptActivity extends AppCompatActivity {
                 @Override
                 public void OnShareClicked(int position) {
 
-                    ReceiptModel receiptModel = list.get(position);
-                    customerName = receiptModel.getCustomerName();
-                    customerCode = receiptModel.getCustomerCode();
-                    salesman = receiptModel.getSalesmanId();
-                    receiptNo = receiptModel.getReceiptNo();
-                    receiptDate = receiptModel.getReceiptDate();
-                    balanceAmount = receiptModel.getBalanceAmount();
-                    receiptAmount = receiptModel.getReceivedAmount();
-                    paymentType = receiptModel.getPaymentType();
-                    chqNumber = receiptModel.getChequeNumber();
-                    chqDate = receiptModel.getChequeDate();
-                    Log.d(TAG, "onShare: date" + receiptDate + "number" + receiptNo);
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
-                        requestStoragePermission();
-                    } else {
-                        createPdfWrapper();
-                    }
+                    gotoNext(position);
+//                    ReceiptModel receiptModel = list.get(position);
+//                    customerName = receiptModel.getCustomerName();
+//                    customerCode = receiptModel.getCustomerCode();
+//                    salesman = receiptModel.getSalesmanId();
+//                    receiptNo = receiptModel.getReceiptNo();
+//                    receiptDate = receiptModel.getReceiptDate();
+//                    balanceAmount = receiptModel.getBalanceAmount();
+//                    receiptAmount = receiptModel.getReceivedAmount();
+//                    paymentType = receiptModel.getPaymentType();
+//                    chqNumber = receiptModel.getChequeNumber();
+//                    chqDate = receiptModel.getChequeDate();
+//                    Log.d(TAG, "onShare: date" + receiptDate + "number" + receiptNo);
+//
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//
+//                        requestStoragePermission();
+//                    } else {
+//                        createPdfWrapper();
+//                    }
                 }
 
                 @Override
@@ -235,7 +222,23 @@ public class ListReceiptActivity extends AppCompatActivity {
         database.close();
     }
 
-
+    private void gotoNext(int position) {
+        Intent view_pdf = new Intent(this, ViewPdfActivity.class);
+        ReceiptModel receiptModel = list.get(position);
+        view_pdf.putExtra("TYPE","Edit");
+        view_pdf.putExtra("CUSTOMER_NAME",receiptModel.getCustomerName());
+        view_pdf.putExtra("CUSTOMER_CODE",receiptModel.getCustomerCode());
+        view_pdf.putExtra("SALESMAN_ID",receiptModel.getSalesmanId());
+        view_pdf.putExtra("RECEIPT_NO",receiptModel.getReceiptNo());
+        view_pdf.putExtra("RECEIPT_DATE",receiptModel.getReceiptDate());
+        view_pdf.putExtra("BAL_AMOUNT",receiptModel.getBalanceAmount());
+        view_pdf.putExtra("REC_AMOUNT",receiptModel.getReceivedAmount());
+        view_pdf.putExtra("PAY_TYPE",receiptModel.getPaymentType());
+        view_pdf.putExtra("CHQ_NUMBER",receiptModel.getChequeNumber());
+        view_pdf.putExtra("CHQ_DATE",receiptModel.getChequeDate());
+        view_pdf.putExtra("REMARK",receiptModel.getRemark());
+        startActivity(view_pdf);
+    }
 
     private void createPdfWrapper() {
         Log.d(TAG, "createPdfWrapper: ");
@@ -294,8 +297,9 @@ public class ListReceiptActivity extends AppCompatActivity {
 
 
     }
+
     private void showSettingDialog() {
-        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(ListReceiptActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(ListReceiptActivity.this);
         builder.setTitle("Need Permissions");
         builder.setMessage("This app needs permission to use this feature. You can grant them in app settings.");
         builder.setPositiveButton("GOTO SETTINGS", new DialogInterface.OnClickListener() {

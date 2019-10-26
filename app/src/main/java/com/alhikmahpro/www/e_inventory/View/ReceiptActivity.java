@@ -11,14 +11,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -31,12 +30,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.AppUtils;
-import com.alhikmahpro.www.e_inventory.Data.Cart;
 import com.alhikmahpro.www.e_inventory.Data.DashedSeparator;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.PrinterCommands;
 import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
-import com.alhikmahpro.www.e_inventory.Data.Utils;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.FileUtils;
 import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
@@ -48,7 +45,6 @@ import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Element;
-import com.itextpdf.text.Image;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.Rectangle;
@@ -67,7 +63,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -87,7 +82,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class    ReceiptActivity extends AppCompatActivity {
+public class ReceiptActivity extends AppCompatActivity {
 
     @BindView(R.id.txt_date)
     TextView txtDate;
@@ -124,10 +119,12 @@ public class    ReceiptActivity extends AppCompatActivity {
     String mDate, mDoc;
 
     String type, paymentType;
-    String customerName, customerCode;
-    double balanceAmount,receivedAmount;
+    String customerName, customerCode,salesmanId;
+    double balanceAmount, receivedAmount;
     RadioButton radioButton;
     Calendar myCalendar;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
     private ProgressDialog dialog;
     volleyListener mVolleyListener;
@@ -151,7 +148,7 @@ public class    ReceiptActivity extends AppCompatActivity {
     boolean billStatus;
     Context mContext;
 
-    String companyName="xxxxx", companyAddress="xxxx", companyPhone="xxxxx", footer="xxxxxx",fileName;
+    String companyName = "xxxxx", companyAddress = "xxxx", companyPhone = "xxxxx", footer = "xxxxxx", fileName;
     private static final String TAG = "ReceiptActivity";
 
     @Override
@@ -159,19 +156,21 @@ public class    ReceiptActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receipt);
         ButterKnife.bind(this);
-
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+        toolbar.setTitle("New Receipts");
+
         editTextBalance.setEnabled(false);
-        getSupportActionBar().setTitle("New Receipts");
         Intent intent = getIntent();
         type = intent.getStringExtra("TYPE");
         customerName = intent.getStringExtra("CUS_NAME");
         customerCode = intent.getStringExtra("CUS_CODE");
-        balanceAmount = intent.getDoubleExtra("BALANCE_AMOUNT",0);
+        balanceAmount = intent.getDoubleExtra("BALANCE_AMOUNT", 0);
         paymentType = intent.getStringExtra("PAYMENT_TYPE");
+        salesmanId = intent.getStringExtra("SALESMAN");
         billStatus = false;
-        mContext=getApplicationContext();
+        mContext = getApplicationContext();
 
         Log.d(TAG, "onCreate: balance :" + balanceAmount);
         myCalendar = Calendar.getInstance();
@@ -225,7 +224,7 @@ public class    ReceiptActivity extends AppCompatActivity {
             mDoc = intent.getStringExtra("RECEIPT_NO");
             String recAmount = intent.getStringExtra("RECEIVED_AMOUNT");
             //double amount = ParseDouble(intent.getDoubleExtra("RECEIVED_AMOUNT",0));
-            editTextAmount.setText(String.valueOf(intent.getDoubleExtra("RECEIVED_AMOUNT",0)));
+            editTextAmount.setText(String.valueOf(intent.getDoubleExtra("RECEIVED_AMOUNT", 0)));
             editTextChequeDate.setText(intent.getStringExtra("CHEQUE_DATE"));
             editTextChequeNumber.setText(intent.getStringExtra("CHEQUE_NUMBER"));
             editTextRemark.setText(intent.getStringExtra("REMARK"));
@@ -248,23 +247,7 @@ public class    ReceiptActivity extends AppCompatActivity {
                 new DatePickerDialog(this, date, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH)).show();
                 break;
             case R.id.btnPrint:
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    requestStoragePermission();
-                } else {
-                    //createPdff(FileUtils.getSubDirPath(mContext,DataContract.DIR_RECEIPT),0);
-                    showPdf("sample");
-                }
-
-
-                //check its first time or not; is first time then just print the bill;else send to server and save to local db then print
-//                if (billStatus) {
-//
-//                    printingJob();
-//                } else {
-//                    sendToServer();
-//                }
-
+                gotoNext();
                 break;
             case R.id.btnNew:
                 clearActivity();
@@ -273,317 +256,26 @@ public class    ReceiptActivity extends AppCompatActivity {
 
     }
 
-    private void requestStoragePermission() {
-        Dexter.withActivity(this)
-                .withPermissions(
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.READ_EXTERNAL_STORAGE
-                )
-                .withListener(new MultiplePermissionsListener() {
-                    @Override
-                    public void onPermissionsChecked(MultiplePermissionsReport report) {
-                        //check all permission granted
-                        if(report.areAllPermissionsGranted()){
-                            createPdff(FileUtils.getSubDirPath(mContext,DataContract.DIR_RECEIPT),0);
-                        }
-                        //check any permission permanent denied
-                        if(report.isAnyPermissionPermanentlyDenied()){
-                            showSettingDialog();
-                        }
-                    }
-
-                    @Override
-                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
-                        token.continuePermissionRequest();
-
-                    }
-                }).check();
-    }
-    private  void createPdff(String dest ,float docsize) {
-
-        Paragraph paragraph=null;
-        PdfPTable table;
-        PdfPCell cell;
-        PdfContentByte cb;
-        String fileName=dest+"sample2.pdf";
-        if (new File(fileName).exists()) {
-            new File(fileName).delete();
-        }
-        Log.d(TAG, "createPdff: "+fileName);
-
-        try {
-
-
-            /***
-             * Variables for further use....
-             */
-            BaseColor mColorAccent = new BaseColor(0, 153, 204, 255);
-            float mHeadingFontSize = 20.0f;
-            float mValueFontSize = 26.0f;
-            //  ElementList el = parseToElementList(is, new XMLWorkerFontProvider("resources/fonts/"));
-//
-            // width of 204pt
-            float width = 316;
-
-            // height as 10000pt (which is much more than we'll ever need)
-            float max =100;// PageSize.LETTER.getHeight();
-            if(docsize!=0)
-            {
-                max=docsize;
-            }
-
-
-
-            Rectangle pagesize = new Rectangle(width, max + 25);
-            // Document with predefined page size
-            Document document = new Document(pagesize, 10, 10, 50, 0);
-            // Getting PDF Writer
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(fileName));
-            document.open();
-            // Column with a writer
-            try {
-
-//                Drawable d = getResources().getDrawable(R.mipmap.ic_launcher);
-//                BitmapDrawable bitDw = ((BitmapDrawable) d);
-//                Bitmap bmp = bitDw.getBitmap();
-//                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//                bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
-//                Image image = Image.getInstance(stream.toByteArray());
-//                // image.setAbsolutePosition(((width/2)-(image.getPlainWidth()/2)),max-image.getHeight());
-//                image.setAlignment(Image.ALIGN_TOP|Image.ALIGN_CENTER);
-//                document.add(image);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            paragraph = new Paragraph("Hotel VApps");
-            paragraph.setAlignment(Element.ALIGN_CENTER);
-            document.add(paragraph);
-
-            paragraph = new Paragraph("Phone: 9943123000");
-            paragraph.setAlignment(Element.ALIGN_CENTER);
-            document.add(paragraph);
-
-            paragraph = new Paragraph("Email : vijaydhasxx@gmail.com");
-            paragraph.setAlignment(Element.ALIGN_CENTER);
-            document.add(paragraph);
-
-            DashedSeparator separator = new DashedSeparator();
-            separator.setPercentage(59500f / 523f);
-            Chunk linebreak = new Chunk(separator);
-            document.add(linebreak);
-
-            paragraph = new Paragraph("Bill No: 12345");
-            paragraph.setAlignment(Element.ALIGN_LEFT);
-            document.add(paragraph);
-
-            paragraph = new Paragraph("Bill Date: 01/04/2015 10:30:55 PM");
-            paragraph.setAlignment(Element.ALIGN_LEFT);
-            document.add(paragraph);
-            document.add(linebreak)  ;
-            float p=(width-20)/3;
-            float re= (p*2)/5;
-            float rem=re/3;
-
-            float[] columnWidths = { re,p, re+rem,re+rem,re+rem };
-            table = new PdfPTable(columnWidths);
-            table.setTotalWidth(width-20);
-            table.setLockedWidth(true);
-            table.setHorizontalAlignment(Element.ALIGN_LEFT);
-
-            cell = new PdfPCell(new Phrase("SN"));
-            cell.setHorizontalAlignment(Element.ALIGN_LEFT);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase("Item "));
-            cell.setHorizontalAlignment(Element.ALIGN_LEFT);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase("Rate"));
-            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase("Qty"));
-            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase("Total"));
-            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-            DashedSeparator separato= new DashedSeparator();
-            separato.setPercentage(59500f / 523f);
-            cell = new PdfPCell(new Phrase(new Chunk(separato)));
-            cell.setColspan(5);
-            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-            table.setHeaderRows(1);
-
-            for (int i = 0; i <  15; i++) {
-                cell = new PdfPCell(new Phrase(String.valueOf(i + 1)));
-                cell.setHorizontalAlignment(Element.ALIGN_LEFT);
-                cell.setBorder(Rectangle.NO_BORDER);
-                table.addCell(cell);
-
-                cell = new PdfPCell(new Phrase("product"+i));
-                cell.setHorizontalAlignment(Element.ALIGN_LEFT);
-                cell.setBorder(Rectangle.NO_BORDER);
-                table.addCell(cell);
-
-                cell = new PdfPCell(new Phrase(i+10+""));
-                cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-                cell.setBorder(Rectangle.NO_BORDER);
-                table.addCell(cell);
-
-                cell = new PdfPCell(new Phrase(2+i+""));
-                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-                cell.setBorder(Rectangle.NO_BORDER);
-                table.addCell(cell);
-
-                //total += Double.parseDouble(i+2);
-
-                cell = new PdfPCell(new Phrase("10"));
-                cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-                cell.setBorder(Rectangle.NO_BORDER);
-                table.addCell(cell);
-
-            }
-            DashedSeparator separator1 = new DashedSeparator();
-            separator1.setPercentage(59500f / 523f);
-            cell = new PdfPCell(new Phrase(new Chunk(separator1)));
-            cell.setColspan(5);
-            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase("Item Total"));
-            cell.setColspan(3);
-            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase(String.valueOf(100)));
-            cell.setColspan(2);
-            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase("Tax"));
-            cell.setColspan(3);
-            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase(String.valueOf(100)));
-            cell.setColspan(2);
-            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase("Total"));
-            cell.setColspan(3);
-            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase(String.valueOf(100)));
-            cell.setColspan(2);
-            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase(new Chunk(separator1)));
-            cell.setColspan(5);
-            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase("Discount"));
-            cell.setColspan(3);
-            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase(String.valueOf(100)));
-            cell.setColspan(2);
-            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase(new Chunk(separator1)));
-            cell.setColspan(5);
-            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase("Cash"));
-            cell.setColspan(3);
-            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase(String.valueOf(100)));
-            cell.setColspan(2);
-            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            cell = new PdfPCell(new Phrase(new Chunk(separator1)));
-            cell.setColspan(5);
-            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-
-            document.add(table);
-            DottedLineSeparator separatorr = new DottedLineSeparator();
-            separator1.setPercentage(59500f / 523f);
-            cell = new PdfPCell(new Phrase(new Chunk(separator1)));
-            cell.setColspan(5);
-            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            cell.setBorder(Rectangle.NO_BORDER);
-            table.addCell(cell);
-            paragraph = new Paragraph("Thank You for Your Purchase");
-            paragraph.setAlignment(Element.ALIGN_CENTER);
-            document.add(paragraph);
-           /* ct = new ColumnText(writer.getDirectContent());
-            ct.setSimpleColumn(pagesize);
-            for (int i=0;i<10;i++) {
-
-                ct.addText(new Chunk("Pratik Butani"));
-
-            }
-            ct.go();
-            // closing the document
-            document.close();*/
-
-            document.close();
-            Log.d(TAG, "PDF created: "+docsize);
-            if(docsize==0) {
-                float size=(writer.getPageNumber())*max;
-                createPdff(dest, size);
-            }
-            else
-            {showPdf(fileName);}
-        } catch (Exception e) {
-            e.printStackTrace();
-
-        }
-    }
-
-    private void showPdf(String filename) {
-
+    private void gotoNext() {
         Intent view_pdf = new Intent(this, ViewPdfActivity.class);
-        view_pdf.putExtra("FILE_NAME", filename);
+        view_pdf.putExtra("TYPE","New");
+        view_pdf.putExtra("CUSTOMER_NAME",customerName);
+        view_pdf.putExtra("CUSTOMER_CODE",customerCode);
+        view_pdf.putExtra("SALESMAN_ID",salesmanId);
+        view_pdf.putExtra("RECEIPT_NO",txtReceipt.getText().toString());
+        view_pdf.putExtra("RECEIPT_DATE",mDate);
+        view_pdf.putExtra("BAL_AMOUNT",balanceAmount);
+        view_pdf.putExtra("REC_AMOUNT",receivedAmount);
+        view_pdf.putExtra("PAY_TYPE",paymentType);
+        view_pdf.putExtra("CHQ_NUMBER",editTextChequeNumber.getText().toString());
+        view_pdf.putExtra("CHQ_DATE",editTextChequeDate.getText().toString());
+        view_pdf.putExtra("REMARK",editTextRemark.getText().toString());
         startActivity(view_pdf);
 
-
-
     }
+
+
+
 
     @Override
     public void onBackPressed() {
@@ -606,11 +298,11 @@ public class    ReceiptActivity extends AppCompatActivity {
             receiptObject.put(DataContract.Receipts.COL_RECEIVED_AMOUNT, editTextAmount.getText().toString());
             receiptObject.put(DataContract.Receipts.COL_CHEQUE_NUMBER, editTextChequeNumber.getText().toString());
             receiptObject.put(DataContract.Receipts.COL_CHEQUE_DATE, editTextChequeDate.getText().toString());
-            receiptObject.put(DataContract.Receipts.COL_REMARK,editTextRemark.getText().toString());
-            receiptObject.put("receipt_type",paymentType );
+            receiptObject.put(DataContract.Receipts.COL_REMARK, editTextRemark.getText().toString());
+            receiptObject.put("receipt_type", paymentType);
             receiptArray.put(receiptObject);
 
-            result.put("Receipt",receiptArray);
+            result.put("Receipt", receiptArray);
 
 
         } catch (JSONException e) {
@@ -618,7 +310,6 @@ public class    ReceiptActivity extends AppCompatActivity {
         }
 
         if (result.length() > 0) {
-
 
 
             //send to volley
@@ -681,21 +372,21 @@ public class    ReceiptActivity extends AppCompatActivity {
 
 
     private void saveToDatabase(int sync) {
-        Log.d(TAG, "saveToDatabase: "+sync);
+        Log.d(TAG, "saveToDatabase: " + sync);
         // save data to local data base
-        double receivedAmount=ParseDouble(editTextAmount.getText().toString());
+        double receivedAmount = ParseDouble(editTextAmount.getText().toString());
         dbHelper helper = new dbHelper(this);
         if (type.equals("EDIT")) {
-            if (helper.updateReceipt(txtReceipt.getText().toString(), mDate, "Tab", customerCode, customerName, balanceAmount,receivedAmount,
-                    paymentType, editTextChequeDate.getText().toString(), editTextChequeNumber.getText().toString(),editTextRemark.getText().toString(), sync)) {
+            if (helper.updateReceipt(txtReceipt.getText().toString(), mDate, salesmanId, customerCode, customerName, balanceAmount, receivedAmount,
+                    paymentType, editTextChequeDate.getText().toString(), editTextChequeNumber.getText().toString(), editTextRemark.getText().toString(), sync)) {
                 Log.d(TAG, "saveToDatabase: updated");
                 billStatus = true;
                 printingJob();
             }
 
         } else {
-            if (helper.saveReceipts(txtReceipt.getText().toString(), mDate, "Tab", customerCode, customerName, balanceAmount,receivedAmount,
-                    paymentType, editTextChequeDate.getText().toString(), editTextChequeNumber.getText().toString(), editTextRemark.getText().toString(),sync)) {
+            if (helper.saveReceipts(txtReceipt.getText().toString(), mDate, salesmanId, customerCode, customerName, balanceAmount, receivedAmount,
+                    paymentType, editTextChequeDate.getText().toString(), editTextChequeNumber.getText().toString(), editTextRemark.getText().toString(), sync)) {
                 Log.d(TAG, "saveToDatabase: Saved");
                 billStatus = true;
                 printingJob();
@@ -768,16 +459,16 @@ public class    ReceiptActivity extends AppCompatActivity {
             footer = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_FOOTER));
         }
 
-            try {
-                // close if any connection exists
-                closePrinter();
-                FindBluetoothDevice();
-                // openBluetoothPrinter();
-                printData();
+        try {
+            // close if any connection exists
+            closePrinter();
+            FindBluetoothDevice();
+            // openBluetoothPrinter();
+            printData();
 
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
 //        else {
 //            Toast.makeText(this, "Setup header and footer before printing..", Toast.LENGTH_SHORT).show();
@@ -786,7 +477,6 @@ public class    ReceiptActivity extends AppCompatActivity {
         cursor.close();
         database.close();
     }
-
 
 
     private void clearActivity() {
@@ -824,12 +514,11 @@ public class    ReceiptActivity extends AppCompatActivity {
                         Log.d(TAG, "Printer Found " + pairedDev.getName());
                         openBluetoothPrinter();
                         break;
-                    }
-                    else {
+                    } else {
                         Toast.makeText(this, "Printer not found", Toast.LENGTH_SHORT).show();
                     }
                 }
-            }else {
+            } else {
                 Toast.makeText(this, "Printer not paired", Toast.LENGTH_SHORT).show();
             }
 
@@ -910,76 +599,72 @@ public class    ReceiptActivity extends AppCompatActivity {
 
         final DecimalFormat decimalFormat = new DecimalFormat("0.00");
         Log.d(TAG, "printBill");
-       // Thread thread = new Thread() {
+        // Thread thread = new Thread() {
 
-            //public void run() {
+        //public void run() {
 
-                try {
-                    // byte[] printformat = new byte[]{0x1B, 0x21, 0x03};
-                    // byte[] printformat = new byte[]{30,35,0};
-                    //outputStream.write(printformat);
+        try {
+            // byte[] printformat = new byte[]{0x1B, 0x21, 0x03};
+            // byte[] printformat = new byte[]{30,35,0};
+            //outputStream.write(printformat);
 
-                    printCustom(companyName, 2, 1);
-                    printCustom(companyAddress, 1, 1);
-                    printCustom("Tel:" + companyPhone, 1, 1);
-                    printNewLine();
+            printCustom(companyName, 2, 1);
+            printCustom(companyAddress, 1, 1);
+            printCustom("Tel:" + companyPhone, 1, 1);
+            printNewLine();
 
 
-                    printCustom("Receipt #" + txtReceipt.getText().toString(), 1, 0);
-                    printCustom("Date :" + mDate, 1, 0);
-                    printCustom("Received from :" + customerName, 1, 0);
-                    //printCustom("Salesman :" + salesmanId, 1, 0);
-                    printCustom(new String(new char[32]).replace("\0", "."), 1, 1);
-                    double recAmount = ParseDouble(editTextAmount.getText().toString());
+            printCustom("Receipt #" + txtReceipt.getText().toString(), 1, 0);
+            printCustom("Date :" + mDate, 1, 0);
+            printCustom("Received from :" + customerName, 1, 0);
+            //printCustom("Salesman :" + salesmanId, 1, 0);
+            printCustom(new String(new char[32]).replace("\0", "."), 1, 1);
+            double recAmount = ParseDouble(editTextAmount.getText().toString());
 
-                    leftRightAlignLarge("Amount", decimalFormat.format(recAmount));//currencyFormatter(recAmount)
-                    printNewLine();
-                   // leftRightAlignLarge("      ", convertToArabic(editTextAmount.getText().toString()));
-                    printNewLine();
-                    printCustom(new String(new char[32]).replace("\0", " "), 1, 1);
+            leftRightAlignLarge("Amount", decimalFormat.format(recAmount));//currencyFormatter(recAmount)
+            printNewLine();
+            // leftRightAlignLarge("      ", convertToArabic(editTextAmount.getText().toString()));
+            printNewLine();
+            printCustom(new String(new char[32]).replace("\0", " "), 1, 1);
 
-                    printCustom(new String(new char[32]).replace("\0", "."), 1, 1);
-                    printCustom("فاشىن غخع", 1, 1);
-                   // printArabic("فاشىن غخع");
-                    printNewLine();
-                    printNewLine();
-                    outputStream.flush();
+            printCustom(new String(new char[32]).replace("\0", "."), 1, 1);
+            printCustom("فاشىن غخع", 1, 1);
+            // printArabic("فاشىن غخع");
+            printNewLine();
+            printNewLine();
+            outputStream.flush();
 
-                } catch (Exception e) {
-                    Log.e(TAG, "Exe ", e);
-                }
-                finally {
-                    clearActivity();
-                }
+        } catch (Exception e) {
+            Log.e(TAG, "Exe ", e);
+        } finally {
+            clearActivity();
+        }
 
-            //}
-       // };
+        //}
+        // };
         //thread.start();
     }
 
-    private String convertToArabic(String str){
+    private String convertToArabic(String str) {
         Log.d(TAG, "convertToArabic: ");
 
-        char[] arabicChars = {'٠','١','٢','٣','٤','٥','٦','٧','٨','٩'};
+        char[] arabicChars = {'٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'};
         StringBuilder builder = new StringBuilder();
-        for(int i =0;i<str.length();i++)
-        {
-            if(Character.isDigit(str.charAt(i)))
-            {
-                builder.append(arabicChars[(int)(str.charAt(i))-48]);
-            }
-            else
-            {
+        for (int i = 0; i < str.length(); i++) {
+            if (Character.isDigit(str.charAt(i))) {
+                builder.append(arabicChars[(int) (str.charAt(i)) - 48]);
+            } else {
                 builder.append(str.charAt(i));
             }
         }
-        Log.d(TAG, "Number in English : "+str);
-        Log.d(TAG, "Number In Arabic :"+builder.toString());
-        return  builder.toString();
+        Log.d(TAG, "Number in English : " + str);
+        Log.d(TAG, "Number In Arabic :" + builder.toString());
+        return builder.toString();
     }
-    private void printArabic(String msg){
-       // String print2 = "قيمت واحد" ;
-       // byte[] bytes23 = Utils.getBytes(print2,"windows-1256");
+
+    private void printArabic(String msg) {
+        // String print2 = "قيمت واحد" ;
+        // byte[] bytes23 = Utils.getBytes(print2,"windows-1256");
         //outputStream.write(bytes23);
         try {
 
@@ -1001,7 +686,7 @@ public class    ReceiptActivity extends AppCompatActivity {
     }
 
 
-    private void  printCustom(String msg, int size, int align) {
+    private void printCustom(String msg, int size, int align) {
         //Print config "mode"
         byte[] cc = new byte[]{0x1B, 0x21, 0x03};  // 0- normal size text
         //byte[] cc1 = new byte[]{0x1B,0x21,0x00};  // 0- normal size text
@@ -1115,38 +800,12 @@ public class    ReceiptActivity extends AppCompatActivity {
     }
 
 
-
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
     }
 
-    private void showSettingDialog() {
-        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(ReceiptActivity.this);
-        builder.setTitle("Need Permissions");
-        builder.setMessage("This app needs permission to use this feature. You can grant them in app settings.");
-        builder.setPositiveButton("GOTO SETTINGS", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-                openSettings();
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        builder.show();
-    }
 
-    private void openSettings() {
-        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        Uri uri = Uri.fromParts("package", getPackageName(), null);
-        intent.setData(uri);
-        startActivityForResult(intent, 101);
-    }
 
 }

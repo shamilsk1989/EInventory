@@ -277,6 +277,20 @@ public class dbHelper extends SQLiteOpenHelper {
         return cursor;
 
     }
+
+    public Cursor getDeviceIdFromSettings(SQLiteDatabase sqLiteDatabase) {
+        String[] projections = {
+                DataContract.Settings.COL_DEVICE_ID, DataContract.Settings.COL_DEVICE_ID,
+        };
+        Cursor cursor = sqLiteDatabase.query(DataContract.Settings.TABLE_NAME, projections, null,
+                null, null, null, DataContract.Settings.COL_ID + " DESC ", "1 ");
+
+        // database.close();DataContract.BillTitles.COL_TITLE_ID +" DESC ","1"
+        return cursor;
+
+    }
+
+
     /*******************************end settings table***********************************/
 
     /******************************* login table***********************************/

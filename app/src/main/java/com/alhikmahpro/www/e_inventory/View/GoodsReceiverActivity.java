@@ -18,6 +18,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -35,7 +36,6 @@ import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.AppUtils;
 import com.alhikmahpro.www.e_inventory.Data.Cart;
-import com.alhikmahpro.www.e_inventory.Data.CartModel;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.ItemModel;
 import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
@@ -55,7 +55,6 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -128,6 +127,8 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     LinearLayout contentLayout;
     @BindView(R.id.imgSubmit)
     ImageView imgSubmit;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
     private String BASE_URL = "";
     private String companyCode, companyName, deviceId, branchCode, locationCode, periodCode;
     ProgressDialog progressDialog;
@@ -151,9 +152,12 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_goods_receiver);
         ButterKnife.bind(this);
-        getSupportActionBar().setTitle("Goods Receive");
+
+
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+        toolbar.setTitle("Goods Receive");
         Intent mIntent = getIntent();
         supplierCode = mIntent.getStringExtra("SupplierCode");
         supplierName = mIntent.getStringExtra("SupplierName");

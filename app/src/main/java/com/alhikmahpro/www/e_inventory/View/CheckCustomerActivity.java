@@ -1,22 +1,20 @@
 package com.alhikmahpro.www.e_inventory.View;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -25,11 +23,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.AppUtils;
+import com.alhikmahpro.www.e_inventory.Data.DataContract;
+import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
 import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
 import com.alhikmahpro.www.e_inventory.R;
@@ -72,15 +71,17 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
     EditText editTextLastInvoice;
     @BindView(R.id.editTextLastReceipt)
     EditText editTextLastReceipt;
-//    @BindView(R.id.btnReceipt)
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    //    @BindView(R.id.btnReceipt)
 //    Button btnReceipts;
     @BindView(R.id.btnInvoice)
     Button btnInvoice;
 
 
-
     private static final int CAMERA_PERMISSION_CODE = 100;
     private static final String TAG = "CheckCustomerActivity";
+
     private ConnectivityManager connectivityManager;
     String companyCode, companyName, deviceId, locationCode, branchCode, periodCode;
     String customerCode, customerName, lastInvoiceNo, lastReceiptNo;
@@ -97,12 +98,12 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_cutomer);
         ButterKnife.bind(this);
-
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Check Customer");
-        Intent intent=getIntent();
-        type=intent.getStringExtra("Type");
+        toolbar.setTitle("Check Customer");
+        Intent intent = getIntent();
+        type = intent.getStringExtra("Type");
 
         //disable edit text
 
@@ -147,13 +148,13 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
                         customerName = response.getString("CustomerName");
                         lastInvoiceNo = response.getString("LastInvoice");
                         lastReceiptNo = response.getString("LastReceipt");
-                        balanceAmount =ParseDouble(response.getString("CurrentBalance"));
+                        balanceAmount = ParseDouble(response.getString("CurrentBalance"));
 
                         textViewCustomerName.setText(customerName);
                         editTextLastInvoice.setText(lastInvoiceNo);
                         editTextLastReceipt.setText(lastReceiptNo);
                         editTextBalance.setText(currencyFormatter(balanceAmount));
-                        Log.d(TAG, "notifySuccess: "+currencyFormatter(balanceAmount));
+                        Log.d(TAG, "notifySuccess: " + currencyFormatter(balanceAmount));
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -327,10 +328,9 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
 
     @OnClick(R.id.btnInvoice)
     public void onBtnInvoiceClicked() {
-        if(type!=null && type.equals("REC")){
+        if (type != null && type.equals("REC")) {
             loadReceiptActivity();
-        }
-        else if(type!=null & type.equals("SAL")){
+        } else if (type != null & type.equals("SAL")) {
             loadSalesActivity();
         }
 
@@ -353,7 +353,7 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
 //
 //    }
 
-    private void loadSalesActivity(){
+    private void loadSalesActivity() {
         if (TextUtils.isEmpty(textViewCustomerName.getText().toString())) {
             textViewCustomerName.setError("Invalid customer");
         } else {
@@ -365,18 +365,30 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
         }
 
     }
-    private void loadReceiptActivity(){
+
+    private void loadReceiptActivity() {
 
         if (TextUtils.isEmpty(textViewCustomerName.getText().toString())) {
             textViewCustomerName.setError("Invalid customer");
         } else {
+
+            // fetch device id from data base
+            dbHelper helper = new dbHelper(this);
+            SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
+            Cursor cursor = helper.getDeviceIdFromSettings(sqLiteDatabase);
+            String deviceId="";
+            if(cursor.moveToFirst()){
+                deviceId=cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID));
+            }
+            cursor.close();
+            sqLiteDatabase.close();
             clearView();
             Intent intent_rec = new Intent(CheckCustomerActivity.this, ReceiptActivity.class);
             intent_rec.putExtra("TYPE", "NEW");
-            intent_rec.putExtra("PAYMENT_TYPE", "Cash");
+            intent_rec.putExtra("PAYMENT_TYPE", "Cash");///default value set to cash
             intent_rec.putExtra("CUS_NAME", customerName);
             intent_rec.putExtra("CUS_CODE", customerCode);
-            //intent_rec.putExtra("SALESMAN", );
+            intent_rec.putExtra("SALESMAN",deviceId );
             intent_rec.putExtra("BALANCE_AMOUNT", balanceAmount);
             startActivity(intent_rec);
         }
@@ -410,7 +422,6 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
         intent.setData(uri);
         startActivityForResult(intent, 101);
     }
-
 
 
     @Override
@@ -473,6 +484,7 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
         return String.valueOf(newFormat.format(val));
 
     }
+
     double ParseDouble(String strNumber) {
         if (strNumber != null && strNumber.length() > 0) {
             try {
