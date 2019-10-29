@@ -21,6 +21,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -41,7 +42,6 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class PaperSettingsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
@@ -63,10 +63,13 @@ public class PaperSettingsActivity extends AppCompatActivity implements AdapterV
     public static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+    @BindView(R.id.imgLogo)
+    ImageView imgLogo;
+
+    //    @BindView(R.id.imgLogo)
+//    CircleImageView imgLogo;
     private int GALLERY = 1, CAMERA = 2;
     Bitmap thumbnail;
-    @BindView(R.id.imgLogo)
-    CircleImageView imgLogo;
     dbHelper helper;
     private static final String TAG = "PaperSettingsActivity";
 

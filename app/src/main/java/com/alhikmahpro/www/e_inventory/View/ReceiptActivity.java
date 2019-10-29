@@ -222,7 +222,7 @@ public class ReceiptActivity extends AppCompatActivity {
             Intent intent = getIntent();
             mDate = intent.getStringExtra("RECEIPT_DATE");
             mDoc = intent.getStringExtra("RECEIPT_NO");
-            String recAmount = intent.getStringExtra("RECEIVED_AMOUNT");
+           // String recAmount = intent.getStringExtra("RECEIVED_AMOUNT");
             //double amount = ParseDouble(intent.getDoubleExtra("RECEIVED_AMOUNT",0));
             editTextAmount.setText(String.valueOf(intent.getDoubleExtra("RECEIVED_AMOUNT", 0)));
             editTextChequeDate.setText(intent.getStringExtra("CHEQUE_DATE"));

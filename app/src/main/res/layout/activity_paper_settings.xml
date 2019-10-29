@@ -131,16 +131,25 @@
                         android:textStyle="bold" />
 
 
-                    <de.hdodenhof.circleimageview.CircleImageView
+                    <!--<de.hdodenhof.circleimageview.CircleImageView-->
 
-                        android:id="@+id/imgLogo"
+                        <!--android:id="@+id/imgLogo"-->
+                        <!--android:layout_width="100dp"-->
+                        <!--android:layout_height="100dp"-->
+                        <!--android:src="@mipmap/ic_launcher"-->
+                        <!--app:civ_border_color="#FF000000"-->
+                        <!--app:civ_border_width="0dp">-->
+
+                    <!--</de.hdodenhof.circleimageview.CircleImageView>-->
+
+                    <ImageView
                         android:layout_width="100dp"
                         android:layout_height="100dp"
+                        android:id="@+id/imgLogo"
                         android:src="@mipmap/ic_launcher"
-                        app:civ_border_color="#FF000000"
-                        app:civ_border_width="0dp">
+                        />
 
-                    </de.hdodenhof.circleimageview.CircleImageView>
+
 
 
                     <TextView

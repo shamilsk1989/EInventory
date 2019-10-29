@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.AppUtils;
+import com.alhikmahpro.www.e_inventory.FileUtils;
 import com.alhikmahpro.www.e_inventory.R;
 import com.alhikmahpro.www.e_inventory.View.ListReceiptActivity;
 import com.itextpdf.text.BaseColor;
@@ -23,6 +24,7 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
@@ -125,16 +127,20 @@ public class CreatePdf extends AsyncTask<String,Void,String> {
         String mDate= AppUtils.getFormattedDate();
         Document document = new Document();
         File pdfFile;
-        File dir;
+       //File dir;
         try {
             //create directory
-            String directoryPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/PriceChecker/Invoice";
-            dir = new File(directoryPath);
+            String appPath= FileUtils.getAppPath(mContext);
+
+            File dir = new File(appPath+File.separator+"Sample");
+
             if (!dir.exists()) {
                 dir.mkdir();
             }
 
-            fileName = invoiceNo+ "-"+mDate+".pdf";
+            fileName ="smaple2.pdf";
+
+            Log.d(TAG, "fileName: "+fileName);
             pdfFile = new File(dir, fileName);
 
             //PdfWriter.getInstance(document,new FileOutputStream(mFilePath));
@@ -161,10 +167,16 @@ public class CreatePdf extends AsyncTask<String,Void,String> {
 
 
             //font
-            BaseFont urName = BaseFont.createFont("assets/fonts/brandon_medium.otf", "UTF-8", BaseFont.EMBEDDED);
+            BaseFont urName = BaseFont.createFont("assets/brandon_bold.otf", "UTF-8", BaseFont.EMBEDDED);
 
             Font heading = new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD, new BaseColor(0, 0, 0));
             Font normal = new Font(Font.FontFamily.TIMES_ROMAN, 12);
+            Font arabic = FontFactory.getFont("assets/fonts/Arial.ttf", BaseFont.IDENTITY_H, 16, Font.BOLDITALIC);
+
+            BaseFont bf = BaseFont.createFont ("assets/fonts/Arial.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            Font font = new Font(bf, 12);
+
+
 
             // LINE SEPARATOR
             LineSeparator lineSeparator = new LineSeparator();
@@ -213,6 +225,10 @@ public class CreatePdf extends AsyncTask<String,Void,String> {
             document.add(new Paragraph(""));
 
             // Fields of Order Details...
+
+
+
+
             Font mOrderAcNameFont = new Font(urName, mHeadingFontSize, Font.NORMAL, mColorAccent);
             Chunk mOrderAcNameChunk = new Chunk("Customer Name:", mOrderAcNameFont);
             Paragraph mOrderAcNameParagraph = new Paragraph(mOrderAcNameChunk);
@@ -273,6 +289,10 @@ public class CreatePdf extends AsyncTask<String,Void,String> {
             insertCell(pTable, decimalFormat.format(discountAmount), Element.ALIGN_RIGHT, 1, normal);
             insertCell(pTable, "Net :", Element.ALIGN_RIGHT, 2, normal);
             insertCell(pTable, decimalFormat.format(netAmount), Element.ALIGN_RIGHT, 1, normal);
+            insertCell(pTable, "العناصر :", Element.ALIGN_RIGHT, 2, arabic);
+            insertCell(pTable, decimalFormat.format(netAmount), Element.ALIGN_RIGHT, 1, normal);
+
+
             paragraph.add(pTable);
             document.add(paragraph);
             document.close();

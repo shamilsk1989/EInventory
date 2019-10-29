@@ -7,6 +7,7 @@ import android.support.v7.widget.Toolbar;
 import android.widget.LinearLayout;
 
 import com.alhikmahpro.www.e_inventory.R;
+import com.mocoo.hang.rtprinter.main.MainPrintSettings;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -43,7 +44,7 @@ public class PrinterSettingsActivity extends AppCompatActivity {
 
     @OnClick(R.id.printer_layout)
     public void onPrinterLayoutClicked() {
-        Intent intent_printer = new Intent(PrinterSettingsActivity.this, AddPrinterActivity.class);
+        Intent intent_printer = new Intent(PrinterSettingsActivity.this, MainPrintSettings.class);
         startActivity(intent_printer);
     }
 

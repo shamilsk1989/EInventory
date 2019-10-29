@@ -18,6 +18,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:name=".App.AppController"
         android:usesCleartextTraffic="true">
 
 
@@ -30,11 +31,24 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="com.mocoo.hang.rtprinter.main.MainPrintSettings"
+            android:configChanges="orientation"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+
         <activity android:name=".View.HomeActivity" />
 
         <activity android:name=".View.LoginActivity" />
         <activity android:name=".View.ScanBarcodeActivity" />
-        <activity android:name=".View.ZXingBrcodeScanActivity" />
+        <!--<activity android:name=".View.ZXingBrcodeScanActivity" />-->
         <activity
             android:name=".View.CaptureActivityPortrait"
             android:screenOrientation="portrait"
@@ -65,6 +79,135 @@
         <activity android:name=".View.ClearDataActivity" />
         <activity android:name=".View.ListReceiptActivity" />
         <activity android:name=".View.ReceiptActivity" />
+
+
+
+        <activity
+            android:name="com.mocoo.hang.rtprinter.main.HeatSensitiveActivity"
+            android:configChanges="orientation"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.mocoo.hang.rtprinter.main.LabelActivity"
+            android:configChanges="orientation"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.mocoo.hang.rtprinter.main.WifiSettingActivity"
+            android:configChanges="orientation"
+            android:launchMode="singleInstance"
+            android:windowSoftInputMode="stateHidden"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.mocoo.hang.rtprinter.main.WifiSettingNetActivity"
+            android:configChanges="orientation"
+            android:launchMode="singleInstance"
+            android:windowSoftInputMode="stateHidden"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.mocoo.hang.rtprinter.print.BarcodeActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
+            android:theme="@style/SwipeBackTheme" />
+        <activity
+            android:name="com.mocoo.hang.rtprinter.print.BarcodePrintActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:theme="@style/SwipeBackTheme"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name="com.mocoo.hang.rtprinter.templet.HsTempletActivity1"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:theme="@style/SwipeBackTheme"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name="com.mocoo.hang.rtprinter.templet.LabelTempletActivity1"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:theme="@style/SwipeBackTheme"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name="com.mocoo.hang.rtprinter.print.ImagePrintActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
+            android:theme="@style/SwipeBackTheme" />
+        <activity
+            android:name="com.mocoo.hang.rtprinter.print.WebPagePrintActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:theme="@style/SwipeBackTheme"
+            android:windowSoftInputMode="stateHidden|adjustPan" /><!-- ATTENTION: This was auto-generated to add Google Play services to your project for
+     App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <!--pdf-->
+        <activity
+            android:name="com.mocoo.hang.rtprinter.pdf.ChoosePDFActivity"
+            android:theme="@android:style/Theme.Light"
+            android:label="@string/app_name">
+        </activity>
+
+        <activity
+            android:name="com.mocoo.hang.rtprinter.pdf.MuPDFActivity"
+            android:theme="@style/AppBaseTheme"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="application/vnd.ms-xpsdocument"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="application/pdf"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="application/x-cbz"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="file"/>
+                <data android:mimeType="*/*"/>
+                <data android:pathPattern=".*\\.xps"/>
+                <data android:host="*"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="file"/>
+                <data android:mimeType="*/*"/>
+                <data android:pathPattern=".*\\.pdf"/>
+                <data android:host="*"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="file"/>
+                <data android:mimeType="*/*"/>
+                <data android:pathPattern=".*\\.cbz"/>
+                <data android:host="*"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.mocoo.hang.rtprinter.pdf.OutlineActivity"
+            android:theme="@android:style/Theme.Light.NoTitleBar.Fullscreen"
+            android:label="@string/outline_title">
+        </activity>
+
+        <activity
+            android:name="com.artifex.mupdfdemo.PrintDialogActivity"
+            android:theme="@android:style/Theme.Light.NoTitleBar.Fullscreen"
+            android:label="@string/print">
+        </activity>
 
         <provider
             android:name="android.support.v4.content.FileProvider"

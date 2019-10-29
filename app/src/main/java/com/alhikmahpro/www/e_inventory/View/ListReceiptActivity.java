@@ -31,6 +31,7 @@ import com.alhikmahpro.www.e_inventory.AppUtils;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.ReceiptModel;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
+import com.alhikmahpro.www.e_inventory.FileUtils;
 import com.alhikmahpro.www.e_inventory.Interface.OnListAdapterClickListener;
 import com.alhikmahpro.www.e_inventory.R;
 import com.itextpdf.text.BaseColor;
@@ -39,6 +40,7 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.BaseFont;
@@ -364,18 +366,25 @@ public class ListReceiptActivity extends AppCompatActivity {
         String mDate = AppUtils.getFormattedDate();
         Document document = new Document();
         File pdfFile;
-        File dir;
+        //File dir;
         try {
+            String appPath= FileUtils.getAppPath(getApplicationContext());
 
+            File dir = new File(appPath+File.separator+"Sample");
 
-            //create directory/PriceChecker/Receipts
-            String directoryPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/PriceChecker/Receipts";
-            dir = new File(directoryPath);
             if (!dir.exists()) {
                 dir.mkdir();
             }
 
-            fileName = receiptNo + "-" + mDate + ".pdf";
+
+            //create directory/PriceChecker/Receipts
+//            String directoryPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/PriceChecker/Receipts";
+//            dir = new File(directoryPath);
+//            if (!dir.exists()) {
+//                dir.mkdir();
+//            }
+
+            fileName ="sampleeee.pdf";
             pdfFile = new File(dir, fileName);
 
             //PdfWriter.getInstance(document,new FileOutputStream(mFilePath));
@@ -406,6 +415,8 @@ public class ListReceiptActivity extends AppCompatActivity {
 
             Font heading = new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD, new BaseColor(0, 0, 0));
             Font normal = new Font(Font.FontFamily.TIMES_ROMAN, 12);
+
+            Font arabic = FontFactory.getFont("assets/brandon_medium.otf", BaseFont.IDENTITY_H, 16, Font.BOLDITALIC);
 
             // LINE SEPARATOR
             LineSeparator lineSeparator = new LineSeparator();
