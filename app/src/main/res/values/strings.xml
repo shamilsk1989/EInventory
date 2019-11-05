@@ -24,6 +24,7 @@
     <string name="nav_receipt">Receipts</string>
     <string name="action_print">print</string>
     <string name="action_share">share</string>
+    <string name="action_clear">Clear All</string>
 
 
     <!--Spinner -->

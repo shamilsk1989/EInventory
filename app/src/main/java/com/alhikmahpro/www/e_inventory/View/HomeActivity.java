@@ -37,6 +37,7 @@ import android.widget.Toast;
 
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
@@ -100,8 +101,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
         //Initiate worker class
 
-        final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(SalesWorker.class).build();
-        WorkManager.getInstance().enqueue(workRequest);
+//        final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(SalesWorker.class).build();
+//        WorkManager.getInstance().enqueue(workRequest);
 
 //        final PeriodicWorkRequest periodicWorkRequest
 //                = new PeriodicWorkRequest.Builder(MyWorker.class, 10, TimeUnit.HOURS)
@@ -111,14 +112,14 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 //        Constraints constraints = new Constraints.Builder()
 //                .setRequiresCharging(true) // you can add as many constraints as you want
 //                .build();
-        WorkManager.getInstance().getWorkInfoByIdLiveData(workRequest.getId())
-                .observe(this, new Observer<WorkInfo>() {
-                    @Override
-                    public void onChanged(@Nullable WorkInfo workInfo) {
-                        Log.d(TAG, "onChanged: "+workInfo.getState().name());
-
-                    }
-                });
+//        WorkManager.getInstance().getWorkInfoByIdLiveData(workRequest.getId())
+//                .observe(this, new Observer<WorkInfo>() {
+//                    @Override
+//                    public void onChanged(@Nullable WorkInfo workInfo) {
+//                        Log.d(TAG, "onChanged: "+workInfo.getState().name());
+//
+//                    }
+//                });
 
 
 
@@ -302,9 +303,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_print:
                 startActivity(new Intent(HomeActivity.this, PrinterSettingsActivity.class));
                 break;
-            case R.id.nav_clear:
-                startActivity(new Intent(HomeActivity.this, ClearDataActivity.class));
-                break;
+//            case R.id.nav_clear:
+//                startActivity(new Intent(HomeActivity.this, ClearDataActivity.class));
+//                break;
             default:
 //                fragment = new CheckerFragment();
 //                bundle.putString("ScanData",scanData);

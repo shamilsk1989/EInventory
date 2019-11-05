@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.res.Configuration
 import android.support.multidex.MultiDexApplication
 import android.util.Log
-
 import com.mocoo.hang.rtprinter.main.RTApplication
 
 

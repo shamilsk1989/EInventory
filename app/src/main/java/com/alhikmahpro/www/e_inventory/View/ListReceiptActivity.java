@@ -23,11 +23,14 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
 import com.alhikmahpro.www.e_inventory.Adapter.ReceiptAdapter;
 import com.alhikmahpro.www.e_inventory.AppUtils;
+import com.alhikmahpro.www.e_inventory.Data.ClearData;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.ReceiptModel;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
@@ -86,6 +89,8 @@ public class ListReceiptActivity extends AppCompatActivity {
     AlertDialog alertDialog;
     AlertDialog.Builder builder;
     private static final int PERMISSION_CODE = 100;
+
+    MenuItem itemShare,itemClear,itemPrint,itemSync;
 
 
     @Override
@@ -566,4 +571,47 @@ public class ListReceiptActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.tool_bar,menu);
+        itemPrint = menu.findItem(R.id.action_print);
+        itemSync = menu.findItem(R.id.action_sync);
+        itemShare = menu.findItem(R.id.action_share);
+        itemClear = menu.findItem(R.id.action_clear);
+
+        itemSync.setVisible(false);
+        itemPrint.setVisible(false);
+        itemShare.setVisible(false);
+
+
+
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+
+        int id=item.getItemId();
+        if(id==R.id.action_clear){
+            alertDialog();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void alertDialog() {
+        new android.app.AlertDialog.Builder(ListReceiptActivity.this)
+                .setTitle("Warning")
+                .setMessage("Do you want to delete all items!")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    clearReceipt();
+                })
+                .setNegativeButton("No", (dialog, which) -> dialog.cancel()).create().show();
+    }
+
+    private void clearReceipt() {
+
+        ClearData clearData=new ClearData(ListReceiptActivity.this);
+        clearData.execute("rec");
+    }
 }

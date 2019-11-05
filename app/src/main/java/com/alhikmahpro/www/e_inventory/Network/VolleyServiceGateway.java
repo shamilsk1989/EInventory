@@ -179,7 +179,7 @@ public class VolleyServiceGateway {
             Log.d("Volley", "Network timeout: ");
         } else if (error instanceof NoConnectionError) {
 
-            Log.d(TAG, "HandlingVolleyError: " + error.getMessage());
+            Log.d(TAG, "NoConnectionError: " + error.getMessage());
 
         } else if (error instanceof AuthFailureError) {
             Log.d("Volley", "AuthFailureError: ");

@@ -2,6 +2,7 @@ package com.alhikmahpro.www.e_inventory.View
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -29,6 +30,7 @@ import com.itextpdf.text.pdf.*
 
 import com.shockwave.pdfium.PdfiumCore
 import kotlinx.android.synthetic.main.activity_view_pdf.*
+import java.io.ByteArrayOutputStream
 
 class ViewPdfActivity : AppCompatActivity() {
 
@@ -38,6 +40,7 @@ class ViewPdfActivity : AppCompatActivity() {
     lateinit var itemPrint: MenuItem
     lateinit var itemSync: MenuItem
     lateinit var itemShare: MenuItem
+    lateinit var itemClear: MenuItem
     lateinit var customerName: String
     lateinit var receiptNo: String
     lateinit var receiptDate: String
@@ -147,7 +150,10 @@ class ViewPdfActivity : AppCompatActivity() {
         itemPrint = menu.findItem(R.id.action_print)
         itemSync = menu.findItem(R.id.action_sync)
         itemShare = menu.findItem(R.id.action_share)
+        itemClear = menu.findItem(R.id.action_clear)
         itemSync.isVisible = false
+        itemClear.isVisible=false
+
         return true
     }
 
@@ -294,20 +300,20 @@ class ViewPdfActivity : AppCompatActivity() {
 
 
             // add logo
-//            try {
-//                bmp = BitmapFactory.decodeByteArray(img, 0, img!!.size)
-//
-//                val scaledBitmap = scaleDown(bmp, 80f, true)
-//                val stream = ByteArrayOutputStream()
-//                scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-//                val image = Image.getInstance(stream.toByteArray())
-//                image.alignment = Image.ALIGN_TOP or Image.ALIGN_CENTER
-//                document.add(image)
-//
-//
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//            }
+            try {
+                bmp = BitmapFactory.decodeByteArray(img, 0, img!!.size)
+
+                val scaledBitmap = scaleDown(bmp, 80f, true)
+                val stream = ByteArrayOutputStream()
+                scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                val image = Image.getInstance(stream.toByteArray())
+                image.alignment = Image.ALIGN_TOP or Image.ALIGN_CENTER
+                document.add(image)
+
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
 
 
             // Column with a writer

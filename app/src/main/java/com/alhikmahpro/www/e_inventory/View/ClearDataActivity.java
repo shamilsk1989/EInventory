@@ -37,8 +37,7 @@ public class ClearDataActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_clear_data);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+//
         toolbar.setTitle("Clear Data");
         ButterKnife.bind(this);
     }

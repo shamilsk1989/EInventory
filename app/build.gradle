@@ -1,4 +1,4 @@
-apply plugin: 'com.android.application'
+ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 
@@ -51,6 +51,7 @@ dependencies {
 //    implementation 'me.dm7.barcodescanner:zxing:1.9'
 
     //Zxing core (using intentIntegtrator)
+
     implementation 'com.journeyapps:zxing-android-embedded:3.0.2@aar'
 //    implementation 'com.google.zxing:core:3.3.0'
     //butter knife
@@ -68,6 +69,7 @@ dependencies {
     implementation files('libs/intermecarabic.jar')
 
     implementation project(':rongta')
+    //implementation project(':zxing-android-embedded')
 
     //Runtime permission library
     implementation 'com.karumi:dexter:4.2.0'
@@ -77,6 +79,9 @@ dependencies {
 
     //kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation project(path: ':swipeback')
+
+
 
 }
 repositories {
