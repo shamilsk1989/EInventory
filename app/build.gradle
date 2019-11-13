@@ -1,4 +1,4 @@
- apply plugin: 'com.android.application'
+apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 
@@ -64,9 +64,7 @@ dependencies {
     implementation 'com.github.barteksc:android-pdf-viewer:2.8.2'
     // work manager
     implementation 'android.arch.work:work-runtime:1.0.0-alpha11'
-    //Bluetooth printing
-    implementation files('libs/printer_library_ap02.jar')
-    implementation files('libs/intermecarabic.jar')
+
 
     implementation project(':rongta')
     //implementation project(':zxing-android-embedded')
@@ -80,7 +78,6 @@ dependencies {
     //kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation project(path: ':swipeback')
-
 
 
 }

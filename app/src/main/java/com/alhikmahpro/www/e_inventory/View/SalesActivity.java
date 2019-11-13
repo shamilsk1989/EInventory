@@ -1,6 +1,8 @@
 package com.alhikmahpro.www.e_inventory.View;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,6 +12,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
@@ -20,7 +24,11 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -37,6 +45,7 @@ import android.widget.Toast;
 import com.alhikmahpro.www.e_inventory.AppUtils;
 import com.alhikmahpro.www.e_inventory.Data.Cart;
 import com.alhikmahpro.www.e_inventory.Data.CartModel;
+import com.alhikmahpro.www.e_inventory.Data.Converter;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
@@ -82,16 +91,19 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     EditText editTextProductCode;
     @BindView(R.id.spinner)
     Spinner spinner;
+    //    @BindView(R.id.spinner2)
+//    Spinner spinner2;
     @BindView(R.id.editTextQuantity)
     EditText editTextQuantity;
+
     @BindView(R.id.editTextRate)
     EditText editTextRate;
     @BindView(R.id.editTextDiscount)
     EditText editTextDiscount;
-    //    @BindView(R.id.editTextCost)
-//    EditText editTextCost;
-//    @BindView(R.id.editTextSale)
-//    EditText editTextSale;
+    @BindView(R.id.editTextTotal)
+    EditText editTextTotal;
+    @BindView(R.id.editTextDiscountPercentage)
+    EditText editTextDiscountPercentage;
     @BindView(R.id.editTextStock)
     EditText editTextStock;
     @BindView(R.id.editTextNet)
@@ -126,11 +138,13 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
 
-    double price1 = 0, price2 = 0, price3 = 0, cost = 0, costPrice = 0, salePrice = 0, quantity, discount = 0, rate = 0;
+    double price1 = 0, price2 = 0, price3 = 0, cost = 0, costPrice = 0, salePrice = 0, quantity;
+    double discount = 0, discountPercentage = 0, discountAmount = 0;
     int unit1Qty, unit2Qty, unit3Qty, unitIndex;
     String barCode, productCode, productName, saleType, selectedUnit, unit1, unit2, unit3, packing1, packing2, packing3, invoiceDate, invoiceNo;
     ArrayList<String> list;
-    boolean is_first;
+    private static int cart_count = 0;
+    MenuItem itemCart, itemDelete;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,7 +155,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        toolbar.setTitle("New Sales");
+        getSupportActionBar().setTitle("New Sales");
         list = new ArrayList<>();
         initView();
         initVolleyCallBack();
@@ -155,7 +169,6 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
                     Log.d(TAG, "onTextChanged:  enter key pressed");
                     clearView();
                     getDataFromVolley();
-
                 }
             }
 
@@ -170,76 +183,89 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
             }
         });
 
-        editTextQuantity.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//        editTextQuantity.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable editable) {
+//                //String qty=editTextQuantity.getText().toString();
+//                Log.d(TAG, "Quantity afterTextChanged: ");
+//                calculateNetValue();
+//            }
+//        });
 
+
+//        editTextDiscount.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable editable) {
+//                Log.d(TAG, "Discount afterTextChanged: ");
+//                calculateNetValue();
+//            }
+//        });
+
+        editTextQuantity.setFocusable(false);
+        editTextQuantity.setClickable(true);
+        editTextDiscount.setFocusable(false);
+        editTextDiscount.setClickable(true);
+        editTextDiscountPercentage.setFocusable(false);
+        editTextDiscountPercentage.setClickable(true);
+
+        editTextQuantity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: ");
+                quantityCustomDialog(editTextQuantity.getText().toString());
             }
-
+        });
+        editTextDiscount.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+            public void onClick(View view) {
+                discountAmountCustomDialog(editTextDiscount.getText().toString());
             }
-
+        });
+        editTextDiscountPercentage.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void afterTextChanged(Editable editable) {
-                //String qty=editTextQuantity.getText().toString();
-                calculateNetValue();
+            public void onClick(View view) {
+                discountPercentageCustomDialog(editTextDiscountPercentage.getText().toString());
             }
         });
 
-        editTextRate.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                calculateNetValue();
-            }
-        });
-        editTextDiscount.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-                calculateNetValue();
-            }
-        });
     }
 
+
     private void calculateNetValue() {
-        double net, rate;
+        Log.d(TAG, "calculateNetValue: ");
         int saleValue = 1;
         if (saleType.equals("Return"))
             saleValue = -1;
         else if (saleType.equals("Free"))
             saleValue = 0;
-        quantity = ParseDouble(editTextQuantity.getText().toString());
-        discount = ParseDouble(editTextDiscount.getText().toString());
-        rate = ParseDouble(editTextRate.getText().toString());
-        Log.d(TAG, "calculateNetValue: " + quantity + "rate :" + rate + "discount :" + discount);
 
-        net = (quantity * rate) - (quantity * discount);
+
+        double net = (ParseDouble(editTextTotal.getText().toString())- ParseDouble(editTextDiscount.getText().toString()));
         //set free, sale, return
         net = net * saleValue;
         editTextNet.setText(String.valueOf(net));
     }
+
 
     private void clearView() {
 
@@ -247,18 +273,25 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         radioButton.setChecked(true);
         textViewProductName.setText("");
         editTextProductCode.setText("");
-        editTextQuantity.setText("");
+        editTextQuantity.setText("0");
         //editTextFreeQuantity.setText("0");
-        editTextRate.setText("");
+        editTextRate.setText("0.0");
         editTextDiscount.setText("");
+        editTextDiscountPercentage.setText("");
+
         //editTextCost.setText("");
         editTextStock.setText("");
         //editTextStock.setText("");
-        editTextNet.setText("");
+        editTextNet.setText("0.0");
+
+        editTextStock.setEnabled(false);
+        editTextQuantity.setEnabled(false);
+        editTextDiscount.setEnabled(false);
         list.clear();
         setSpinner();
 
     }
+
 
     private void initVolleyCallBack() {
         mVolleyListener = new volleyListener() {
@@ -266,8 +299,8 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
             public void notifySuccess(String requestType, JSONObject response) {
                 hideProgressBar();
                 if (response.length() > 0) {
-                    editTextQuantity.setFocusableInTouchMode(true);
-                    editTextQuantity.requestFocus();
+//                    editTextQuantity.setFocusableInTouchMode(true);
+//                    editTextQuantity.requestFocus();
                     setValues(response);
                 } else
                     showAlert("Not Found");
@@ -298,7 +331,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         radioButton = findViewById(radioId);
         saleType = radioButton.getText().toString();
         //Toast.makeText(this, "selected radio button" + radioButton.getText(), Toast.LENGTH_SHORT).show();
-        calculateNetValue();
+        //calculateNetValue();
     }
 
 
@@ -392,8 +425,15 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         editTextBarcode.setFocusableInTouchMode(true);
         editTextBarcode.requestFocus();
 
+        //set badge count
+        cart_count++;
+        invalidateOptionsMenu();
+//        Snackbar.make((CoordinatorLayout)findViewById(R.id.parentlayout), "Removed from cart !!", Snackbar.LENGTH_LONG)
+//                .setAction("Action", null).show();
+
 
     }
+
 
     void getDataFromVolley() {
         View view = this.getCurrentFocus();
@@ -423,9 +463,11 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         try {
             Log.d(TAG, "setValues: " + response);
 
-            //set default values
-            editTextQuantity.setText("0");
-            editTextDiscount.setText("0");
+            //enable editing
+
+            editTextDiscount.setEnabled(true);
+            editTextQuantity.setEnabled(true);
+
 
             productCode = response.getString("ProductCode");
             productName = response.getString("ProductName");
@@ -478,6 +520,17 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         spinner.setAdapter(arrayAdapter);
         spinner.setSelection(unitIndex);
         spinner.setOnItemSelectedListener(this);
+
+
+        //set discount type spinner
+
+//        ArrayAdapter<String> arrayAdapter1 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, discountType);
+//        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//
+//        arrayAdapter.notifyDataSetChanged();
+//        spinner2.setAdapter(arrayAdapter1);
+//        spinner2.setSelection(0);
+//        spinner2.setOnItemSelectedListener(this);
     }
 
 
@@ -559,24 +612,33 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-        selectedUnit = parent.getItemAtPosition(position).toString();
-        if (position == 0) {
-            salePrice = price1;
-            costPrice = cost;
-        } else if (position == 1) {
-            salePrice = price2;
-            costPrice = cost * unit2Qty;
-        } else if (position == 2) {
-            salePrice = price3;
-            costPrice = cost * unit2Qty * unit3Qty;
+        Log.d(TAG, "onItemSelected called");
+        Spinner spin = (Spinner) parent;
+        //Spinner spin2 = (Spinner) parent;
+        if (spin.getId() == R.id.spinner) {
+            selectedUnit = parent.getItemAtPosition(position).toString();
+            if (position == 0) {
+                salePrice = price1;
+                costPrice = cost;
+            } else if (position == 1) {
+                salePrice = price2;
+                costPrice = cost * unit2Qty;
+            } else if (position == 2) {
+                salePrice = price3;
+                costPrice = cost * unit2Qty * unit3Qty;
+            }
+            Log.d(TAG, "onItemSelected: Rate " + salePrice);
+            DecimalFormat format = new DecimalFormat("#,###,##0.00");
+            editTextRate.setText(String.valueOf(salePrice));
         }
-        Log.d(TAG, "onItemSelected: Rate " + salePrice);
-        DecimalFormat format = new DecimalFormat("#,###,##0.00");
-//        editTextSale.setText(format.format(salePrice));
-//        editTextCost.setText(format.format(costPrice));
 
-        editTextRate.setText(String.valueOf(salePrice));
+//        } else if (spin2.getId() == R.id.spinner2) {
+//            Log.d(TAG, "onItemSelected: dis type" + parent.getItemAtPosition(position).toString());
+//            discountCode = parent.getItemAtPosition(position).toString();
+//        }
         calculateNetValue();
+
+
     }
 
     @Override
@@ -608,6 +670,9 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         editTextStock.setEnabled(false);
         editTextNet.setEnabled(false);
         editTextRate.setEnabled(false);
+        editTextQuantity.setEnabled(false);
+        editTextDiscount.setEnabled(false);
+        //editTextDiscountPer.setEnabled(false);
         editTextBarcode.setFocusableInTouchMode(true);
         editTextBarcode.requestFocus();
 
@@ -634,8 +699,6 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         textViewInvoice.setText(invoiceNo);
         textViewCustomer.setText(customerName);
         textViewSalesman.setText(salesmanId);
-
-
     }
 
     @OnClick(R.id.imgBarcode)
@@ -686,14 +749,14 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         if (TextUtils.isEmpty(editTextProductCode.getText())) {
             editTextProductCode.setError("Invalid Item");
         } else {
+            editTextProductCode.setError(null);
             double qty = ParseDouble(editTextQuantity.getText().toString());
             if (qty < 1) {
                 editTextQuantity.setError("invalid quantity");
             } else {
+                editTextQuantity.setError(null);
                 addToCart();
             }
-
-
         }
     }
 
@@ -707,19 +770,17 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
         clearView();
         txtAddedBarcode.setText("");
-        txtAddedPrice.setText("");
-        txtAddedQuantity.setText("");
+        txtAddedPrice.setText("0.0");
+        txtAddedQuantity.setText("0");
 
         Intent intent = new Intent(SalesActivity.this, ViewCartActivity.class);
-        intent.putExtra("ACTION", "NEW");
+        intent.putExtra("ACTION", DataContract.ACTION_NEW);
         intent.putExtra("CUS_NAME", customerName);
         intent.putExtra("CUS_CODE", customerCode);
         intent.putExtra("SALESMAN_ID", salesmanId);
         intent.putExtra("DOC_NO", invoiceNo);
         intent.putExtra("DOC_DATE", invoiceDate);
         startActivity(intent);
-
-
     }
 
     @Override
@@ -731,6 +792,157 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     protected void onResume() {
         super.onResume();
         hideProgressBar();
+        cart_count=Cart.mCart.size();
+        Log.d(TAG, "onResume: "+cart_count);
+        invalidateOptionsMenu();
     }
 
+    private void quantityCustomDialog(String value) {
+
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View dialogView = layoutInflater.inflate(R.layout.custom_dialog, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+
+        final EditText editTextUserInput = (EditText) dialogView.findViewById(R.id.editTextDialogUserInput);
+        final TextView textView = (TextView) dialogView.findViewById(R.id.textViewTitle);
+        editTextUserInput.setText(value);
+        editTextUserInput.setSelection(editTextUserInput.getText().length());
+        textView.setText("Enter the quantity");
+
+        builder.setCancelable(false)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
+                        editTextQuantity.setText(editTextUserInput.getText().toString());
+                        //calculate total
+                        double total=(ParseDouble(editTextQuantity.getText().toString()) * ParseDouble(editTextRate.getText().toString()));
+                        editTextTotal.setText(String.valueOf(total));
+                        calculateNetValue(); }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
+                        dialog.cancel();
+
+
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+
+    }
+
+    private void discountAmountCustomDialog(String value) {
+
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View dialogView = layoutInflater.inflate(R.layout.custom_dialog, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+
+        final EditText editTextUserInput = (EditText) dialogView.findViewById(R.id.editTextDialogUserInput);
+        final TextView textView = (TextView) dialogView.findViewById(R.id.textViewTitle);
+        editTextUserInput.setText(value);
+        editTextUserInput.setSelection(editTextUserInput.getText().length());
+        textView.setText("Discount amount");
+
+        builder.setCancelable(false)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
+                        editTextDiscount.setText(editTextUserInput.getText().toString());
+                        double total = ParseDouble(editTextTotal.getText().toString());
+                        double discountPercentage = ParseDouble(editTextUserInput.getText().toString()) / total * 100;
+                        editTextDiscountPercentage.setText(String.valueOf(Math.round(discountPercentage)));
+                        calculateNetValue();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
+                        dialog.cancel();
+
+
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+
+    }
+
+    private void discountPercentageCustomDialog(String value) {
+
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View dialogView = layoutInflater.inflate(R.layout.custom_dialog, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+
+        final EditText editTextUserInput = (EditText) dialogView.findViewById(R.id.editTextDialogUserInput);
+        final TextView textView = (TextView) dialogView.findViewById(R.id.textViewTitle);
+        editTextUserInput.setText(value);
+        editTextUserInput.setSelection(editTextUserInput.getText().length());
+        textView.setText("Discount percentage");
+
+        builder.setCancelable(false)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
+
+                        editTextDiscountPercentage.setText(editTextUserInput.getText().toString());
+                        discountPercentage = ParseDouble(editTextUserInput.getText().toString());
+                        double percentageDecimal = discountPercentage / 100;
+                        double discountAmount = percentageDecimal * ParseDouble(editTextTotal.getText().toString());
+                        editTextDiscount.setText(String.valueOf(Math.round(discountAmount)));
+                        calculateNetValue();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
+                        dialog.cancel();
+
+
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.cart_toolbar, menu);
+        MenuItem menuItem = menu.findItem(R.id.action_cart);
+        Log.d(TAG, "onCreateOptionsMenu: "+Converter.convertLayoutToImage(SalesActivity.this,cart_count,R.drawable.ic_shopping_cart));
+        menuItem.setIcon(Converter.convertLayoutToImage(SalesActivity.this,cart_count,R.drawable.ic_shopping_cart));
+        MenuItem menuItem2 = menu.findItem(R.id.action_delete);
+        menuItem2.setVisible(false);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+
+        int id = item.getItemId();
+
+        return super.onOptionsItemSelected(item);
+    }
 }

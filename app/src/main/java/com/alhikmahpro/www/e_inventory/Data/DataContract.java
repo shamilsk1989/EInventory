@@ -16,6 +16,9 @@ public class DataContract {
     public static final int REC_OFF=0;
     public static final String DIR_RECEIPT="Receipt";
     public static final String DIR_INVOICE="Invoice";
+    public static final String ACTION_EDIT="Edit";
+    public static final String ACTION_NEW="New";
+
 
     public static class Settings{
 

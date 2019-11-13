@@ -19,6 +19,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -118,7 +119,7 @@ public class ReceiptActivity extends AppCompatActivity {
 //    Button btnPdf;
     String mDate, mDoc;
 
-    String type, paymentType;
+    String action, paymentType;
     String customerName, customerCode,salesmanId;
     double balanceAmount, receivedAmount;
     RadioButton radioButton;
@@ -126,27 +127,15 @@ public class ReceiptActivity extends AppCompatActivity {
     @BindView(R.id.toolbar)
     Toolbar toolbar;
 
-    private ProgressDialog dialog;
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
-    BluetoothAdapter bluetoothAdapter;
-    BluetoothSocket bluetoothSocket;
-    BluetoothDevice bluetoothDevice;
+    AlertDialog alertDialog;
+    AlertDialog.Builder builder;
 
-    OutputStream outputStream;
-    InputStream inputStream;
-    Thread thread;
-
-    byte[] readBuffer;
-    int readBufferPosition;
-    volatile boolean stopWorker;
-    private static final int REQUEST_CODE_ENABLING_BT = 1;
-    String mDeviceAddress, mDeviceName;
-    private UUID applicationUUID = UUID
-            .fromString("00001101-0000-1000-8000-00805F9B34FB");
-    BluetoothDevice mBluetoothDevice;
     boolean billStatus;
     Context mContext;
+
+
 
     String companyName = "xxxxx", companyAddress = "xxxx", companyPhone = "xxxxx", footer = "xxxxxx", fileName;
     private static final String TAG = "ReceiptActivity";
@@ -159,11 +148,11 @@ public class ReceiptActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        toolbar.setTitle("New Receipts");
+
 
         editTextBalance.setEnabled(false);
         Intent intent = getIntent();
-        type = intent.getStringExtra("TYPE");
+        action = intent.getStringExtra("ACTION");
         customerName = intent.getStringExtra("CUS_NAME");
         customerCode = intent.getStringExtra("CUS_CODE");
         balanceAmount = intent.getDoubleExtra("BALANCE_AMOUNT", 0);
@@ -172,7 +161,11 @@ public class ReceiptActivity extends AppCompatActivity {
         billStatus = false;
         mContext = getApplicationContext();
 
-        Log.d(TAG, "onCreate: balance :" + balanceAmount);
+        if (action.equals(DataContract.ACTION_EDIT)) {
+            getSupportActionBar().setTitle("New Receipt");
+        }else{
+            getSupportActionBar().setTitle("Edit Receipt");
+        }
         myCalendar = Calendar.getInstance();
         initView();
         initVolleyCallBack();
@@ -209,7 +202,7 @@ public class ReceiptActivity extends AppCompatActivity {
         }
 
 
-        if (type != null && type.equals("NEW")) {
+        if (action != null && action.equals(DataContract.ACTION_NEW)) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
             dbHelper helper = new dbHelper(this);
             mDate = sdf.format(new Date());
@@ -228,8 +221,6 @@ public class ReceiptActivity extends AppCompatActivity {
             editTextChequeDate.setText(intent.getStringExtra("CHEQUE_DATE"));
             editTextChequeNumber.setText(intent.getStringExtra("CHEQUE_NUMBER"));
             editTextRemark.setText(intent.getStringExtra("REMARK"));
-
-
         }
 
         //double balAmount = ParseDouble(balanceAmount);
@@ -247,42 +238,15 @@ public class ReceiptActivity extends AppCompatActivity {
                 new DatePickerDialog(this, date, myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH), myCalendar.get(Calendar.DAY_OF_MONTH)).show();
                 break;
             case R.id.btnPrint:
-                gotoNext();
+                //saveToDatabase(DataContract.SYNC_STATUS_OK);
+                sendToServer();
                 break;
             case R.id.btnNew:
                 clearActivity();
                 break;
         }
-
     }
 
-    private void gotoNext() {
-        Intent view_pdf = new Intent(this, ViewPdfActivity.class);
-        view_pdf.putExtra("TYPE","New");
-        view_pdf.putExtra("CUSTOMER_NAME",customerName);
-        view_pdf.putExtra("CUSTOMER_CODE",customerCode);
-        view_pdf.putExtra("SALESMAN_ID",salesmanId);
-        view_pdf.putExtra("RECEIPT_NO",txtReceipt.getText().toString());
-        view_pdf.putExtra("RECEIPT_DATE",mDate);
-        view_pdf.putExtra("BAL_AMOUNT",balanceAmount);
-        view_pdf.putExtra("REC_AMOUNT",receivedAmount);
-        view_pdf.putExtra("PAY_TYPE",paymentType);
-        view_pdf.putExtra("CHQ_NUMBER",editTextChequeNumber.getText().toString());
-        view_pdf.putExtra("CHQ_DATE",editTextChequeDate.getText().toString());
-        view_pdf.putExtra("REMARK",editTextRemark.getText().toString());
-        startActivity(view_pdf);
-
-    }
-
-
-
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        clearActivity();
-        finish();
-    }
 
     private void sendToServer() {
         String url = "PriceChecker/Receipt_voucher.php";
@@ -301,7 +265,6 @@ public class ReceiptActivity extends AppCompatActivity {
             receiptObject.put(DataContract.Receipts.COL_REMARK, editTextRemark.getText().toString());
             receiptObject.put("receipt_type", paymentType);
             receiptArray.put(receiptObject);
-
             result.put("Receipt", receiptArray);
 
 
@@ -311,7 +274,6 @@ public class ReceiptActivity extends AppCompatActivity {
 
         if (result.length() > 0) {
 
-
             //send to volley
             View view = this.getCurrentFocus();
             AppUtils.hideKeyboard(this, view);
@@ -319,10 +281,11 @@ public class ReceiptActivity extends AppCompatActivity {
             if (!AppUtils.isNetworkAvailable(this)) {
                 Toast.makeText(this, "No Internet ", Toast.LENGTH_SHORT).show();
                 // no internet save to local db directly
-                saveToDatabase(DataContract.SYNC_STATUS_FAILED);
+                //saveToDatabase(DataContract.SYNC_STATUS_FAILED);
 
             } else {
                 // if internet available send to server
+               // ShowProgressDialog();
                 serviceGateway = new VolleyServiceGateway(mVolleyListener, this);
                 serviceGateway.postDataVolley("POSTCALL", url, result);
             }
@@ -339,31 +302,35 @@ public class ReceiptActivity extends AppCompatActivity {
             public void notifySuccess(String requestType, JSONObject response) {
                 String result = "Sync Failed !";
                 int syncStatus = DataContract.SYNC_STATUS_FAILED;
-
                 try {
                     String res = response.getString("Status");
                     if (res.equals("success")) {
                         syncStatus = DataContract.SYNC_STATUS_OK;
                         result = "Sync Successful";
+                        saveToDatabase(syncStatus);
+                    }else{
+                        Toast.makeText(ReceiptActivity.this, result, Toast.LENGTH_SHORT).show();
                     }
 
                 } catch (JSONException e) {
                     result = "Sync Error";
                     e.printStackTrace();
-                } finally {
-
-                    // save to local database
-                    Toast.makeText(ReceiptActivity.this, result, Toast.LENGTH_SHORT).show();
-                    saveToDatabase(syncStatus);
-
                 }
+//                finally {
+//
+//                    // save to local database
+//                    Toast.makeText(ReceiptActivity.this, result, Toast.LENGTH_SHORT).show();
+//                    saveToDatabase(syncStatus);
+//
+//
+//                }
             }
 
             @Override
             public void notifyError(String requestType, VolleyError error) {
                 Log.d(TAG, "notifyError: " + error);
                 Toast.makeText(ReceiptActivity.this, "Connection Error !", Toast.LENGTH_SHORT).show();
-                saveToDatabase(DataContract.SYNC_STATUS_FAILED);
+                //saveToDatabase(DataContract.SYNC_STATUS_FAILED);
 
             }
         };
@@ -374,14 +341,14 @@ public class ReceiptActivity extends AppCompatActivity {
     private void saveToDatabase(int sync) {
         Log.d(TAG, "saveToDatabase: " + sync);
         // save data to local data base
-        double receivedAmount = ParseDouble(editTextAmount.getText().toString());
+        receivedAmount = ParseDouble(editTextAmount.getText().toString());
         dbHelper helper = new dbHelper(this);
-        if (type.equals("EDIT")) {
+        if (action.equals(DataContract.ACTION_EDIT)) {
             if (helper.updateReceipt(txtReceipt.getText().toString(), mDate, salesmanId, customerCode, customerName, balanceAmount, receivedAmount,
                     paymentType, editTextChequeDate.getText().toString(), editTextChequeNumber.getText().toString(), editTextRemark.getText().toString(), sync)) {
                 Log.d(TAG, "saveToDatabase: updated");
-                billStatus = true;
-                printingJob();
+                //HideProgressDialog();
+                gotoPdfView();
             }
 
         } else {
@@ -389,14 +356,35 @@ public class ReceiptActivity extends AppCompatActivity {
                     paymentType, editTextChequeDate.getText().toString(), editTextChequeNumber.getText().toString(), editTextRemark.getText().toString(), sync)) {
                 Log.d(TAG, "saveToDatabase: Saved");
                 billStatus = true;
-                printingJob();
+                //HideProgressDialog();
+                gotoPdfView();
             } else {
+                //HideProgressDialog();
                 Toast.makeText(this, "Saving Failed", Toast.LENGTH_SHORT).show();
             }
         }
 
     }
 
+
+    private void gotoPdfView() {
+        Log.d(TAG, "gotoNext: re amount"+customerName);
+        Intent view_pdf = new Intent(this, ReceiptPdfViewActivity.class);
+
+        view_pdf.putExtra("CUSTOMER_NAME",customerName);
+        //view_pdf.putExtra("CUSTOMER_CODE",customerCode);
+        view_pdf.putExtra("SALESMAN_ID",salesmanId);
+        view_pdf.putExtra("RECEIPT_NO",txtReceipt.getText().toString());
+        view_pdf.putExtra("RECEIPT_DATE",mDate);
+      //  view_pdf.putExtra("BAL_AMOUNT",balanceAmount);
+        view_pdf.putExtra("REC_AMOUNT",receivedAmount);
+       // view_pdf.putExtra("PAY_TYPE",paymentType);
+//        view_pdf.putExtra("CHQ_NUMBER",editTextChequeNumber.getText().toString());
+//        view_pdf.putExtra("CHQ_DATE",editTextChequeDate.getText().toString());
+//        view_pdf.putExtra("REMARK",editTextRemark.getText().toString());
+        startActivity(view_pdf);
+
+    }
     public void onRadioButtonClicked(View view) {
         int radioId = radioGroup.getCheckedRadioButtonId();
         Log.d(TAG, "onRadioButtonClicked: " + radioId);
@@ -430,381 +418,21 @@ public class ReceiptActivity extends AppCompatActivity {
             }
         } else return 0;
     }
-
-
-    private void closePrinter() {
-        try {
-            stopWorker = true;
-            if (outputStream != null && inputStream != null && bluetoothSocket != null) {
-                outputStream.close();
-                inputStream.close();
-                bluetoothSocket.close();
-                Log.d(TAG, "Printer Disconnected.");
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-
-    private void printingJob() {
-        dbHelper helper = new dbHelper(this);
-        SQLiteDatabase database = helper.getReadableDatabase();
-        Cursor cursor = helper.getPaperSettings(database);
-
-        if (cursor.moveToFirst()) {
-            companyName = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_NAME));
-            companyAddress = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_ADDRESS));
-            companyPhone = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_PHONE));
-            footer = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_FOOTER));
-        }
-
-        try {
-            // close if any connection exists
-            closePrinter();
-            FindBluetoothDevice();
-            // openBluetoothPrinter();
-            printData();
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-//        else {
-//            Toast.makeText(this, "Setup header and footer before printing..", Toast.LENGTH_SHORT).show();
-//        }
-        Log.d(TAG, "initView: " + companyName);
-        cursor.close();
-        database.close();
-    }
-
-
     private void clearActivity() {
-        closePrinter();
-
         // finish all activity and go to home activity
         Intent intent = new Intent(getApplicationContext(), ListReceiptActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
 
-    private void FindBluetoothDevice() {
-        try {
-            String spDeviceAddress = SessionHandler.getInstance(this).getPrinterName();
-            Log.d(TAG, "spDeviceAddress" + spDeviceAddress);
-
-            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            if (bluetoothAdapter == null) {
-                Log.d(TAG, "Bluetooth Adapter not found");
-            }
-            if (!bluetoothAdapter.isEnabled()) {
-                Intent enableBT = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBT, REQUEST_CODE_ENABLING_BT);
-            }
-
-            Set<BluetoothDevice> pairedDevice = bluetoothAdapter.getBondedDevices();
-
-            if (pairedDevice.size() > 0) {
-                for (BluetoothDevice pairedDev : pairedDevice) {
-
-                    Log.d(TAG, "printer name:" + pairedDev.getName());
-                    Log.d(TAG, "printer address:" + pairedDev.getAddress());
-                    if (pairedDev.getAddress().equals(spDeviceAddress)) {
-                        bluetoothDevice = pairedDev;
-                        Log.d(TAG, "Printer Found " + pairedDev.getName());
-                        openBluetoothPrinter();
-                        break;
-                    } else {
-                        Toast.makeText(this, "Printer not found", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            } else {
-                Toast.makeText(this, "Printer not paired", Toast.LENGTH_SHORT).show();
-            }
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-    }
-
-    void openBluetoothPrinter() throws IOException {
-        try {
-
-            //Standard uuid from string //
-            UUID uuidSting = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
-            bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuidSting);
-            bluetoothSocket.connect();
-            outputStream = bluetoothSocket.getOutputStream();
-            inputStream = bluetoothSocket.getInputStream();
-            Log.d(TAG, "printer connected:");
-            beginListenData();
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-
-        }
-    }
-
-    void beginListenData() {
-        try {
-
-            final byte delimiter = 10;
-            stopWorker = false;
-            readBufferPosition = 0;
-            readBuffer = new byte[1024];
-
-            thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-
-                    while (!Thread.currentThread().isInterrupted() && !stopWorker) {
-                        try {
-                            int byteAvailable = inputStream.available();
-                            if (byteAvailable > 0) {
-                                byte[] packetByte = new byte[byteAvailable];
-                                inputStream.read(packetByte);
-
-                                for (int i = 0; i < byteAvailable; i++) {
-                                    byte b = packetByte[i];
-                                    if (b == delimiter) {
-                                        byte[] encodedByte = new byte[readBufferPosition];
-                                        System.arraycopy(
-                                                readBuffer, 0,
-                                                encodedByte, 0,
-                                                encodedByte.length
-                                        );
-                                        final String data = new String(encodedByte, "US-ASCII");
-                                        readBufferPosition = 0;
-                                    } else {
-                                        readBuffer[readBufferPosition++] = b;
-                                    }
-                                }
-                            }
-                        } catch (Exception ex) {
-                            stopWorker = true;
-                        }
-                    }
-
-                }
-            });
-
-            thread.start();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    private void printData() {
-
-        final DecimalFormat decimalFormat = new DecimalFormat("0.00");
-        Log.d(TAG, "printBill");
-        // Thread thread = new Thread() {
-
-        //public void run() {
-
-        try {
-            // byte[] printformat = new byte[]{0x1B, 0x21, 0x03};
-            // byte[] printformat = new byte[]{30,35,0};
-            //outputStream.write(printformat);
-
-            printCustom(companyName, 2, 1);
-            printCustom(companyAddress, 1, 1);
-            printCustom("Tel:" + companyPhone, 1, 1);
-            printNewLine();
-
-
-            printCustom("Receipt #" + txtReceipt.getText().toString(), 1, 0);
-            printCustom("Date :" + mDate, 1, 0);
-            printCustom("Received from :" + customerName, 1, 0);
-            //printCustom("Salesman :" + salesmanId, 1, 0);
-            printCustom(new String(new char[32]).replace("\0", "."), 1, 1);
-            double recAmount = ParseDouble(editTextAmount.getText().toString());
-
-            leftRightAlignLarge("Amount", decimalFormat.format(recAmount));//currencyFormatter(recAmount)
-            printNewLine();
-            // leftRightAlignLarge("      ", convertToArabic(editTextAmount.getText().toString()));
-            printNewLine();
-            printCustom(new String(new char[32]).replace("\0", " "), 1, 1);
-
-            printCustom(new String(new char[32]).replace("\0", "."), 1, 1);
-            printCustom("فاشىن غخع", 1, 1);
-            // printArabic("فاشىن غخع");
-            printNewLine();
-            printNewLine();
-            outputStream.flush();
-
-        } catch (Exception e) {
-            Log.e(TAG, "Exe ", e);
-        } finally {
-            clearActivity();
-        }
-
-        //}
-        // };
-        //thread.start();
-    }
-
-    private String convertToArabic(String str) {
-        Log.d(TAG, "convertToArabic: ");
-
-        char[] arabicChars = {'٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'};
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < str.length(); i++) {
-            if (Character.isDigit(str.charAt(i))) {
-                builder.append(arabicChars[(int) (str.charAt(i)) - 48]);
-            } else {
-                builder.append(str.charAt(i));
-            }
-        }
-        Log.d(TAG, "Number in English : " + str);
-        Log.d(TAG, "Number In Arabic :" + builder.toString());
-        return builder.toString();
-    }
-
-    private void printArabic(String msg) {
-        // String print2 = "قيمت واحد" ;
-        // byte[] bytes23 = Utils.getBytes(print2,"windows-1256");
-        //outputStream.write(bytes23);
-        try {
-
-            Arabic864 arabic = new Arabic864();
-            byte[] arabicArr = arabic.Convert("للغة العربية", false);
-//
-//            outputStream.write(msg.getBytes());
-//            outputStream.write(arabicArr);
-            byte[] arab = new String("للغة العربية").getBytes("ISO-8859-1");
-            byte[] cc = new byte[]{0x1B, 0x21, 0x03};
-//            String str = new String(msg.getBytes(), "UTF-8");
-//            outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
-            outputStream.write(cc);
-            outputStream.write(arabicArr);
-            outputStream.write(PrinterCommands.LF);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    private void printCustom(String msg, int size, int align) {
-        //Print config "mode"
-        byte[] cc = new byte[]{0x1B, 0x21, 0x03};  // 0- normal size text
-        //byte[] cc1 = new byte[]{0x1B,0x21,0x00};  // 0- normal size text
-        byte[] bb = new byte[]{0x1B, 0x21, 0x08};  // 1- only bold text
-        byte[] bb2 = new byte[]{0x1B, 0x21, 0x20}; // 2- bold with medium text
-        byte[] bb3 = new byte[]{0x1B, 0x21, 0x10}; // 3- bold with large text
-        try {
-            switch (size) {
-                case 0:
-                    outputStream.write(cc);
-                    break;
-                case 1:
-                    outputStream.write(bb);
-                    break;
-                case 2:
-                    outputStream.write(bb2);
-                    break;
-                case 3:
-                    outputStream.write(bb3);
-                    break;
-            }
-
-            switch (align) {
-                case 0:
-                    //left align
-                    outputStream.write(PrinterCommands.ESC_ALIGN_LEFT);
-                    break;
-                case 1:
-                    //center align
-                    outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
-                    break;
-                case 2:
-                    //right align
-                    outputStream.write(PrinterCommands.ESC_ALIGN_RIGHT);
-                    break;
-            }
-            outputStream.write(msg.getBytes());
-            outputStream.write(PrinterCommands.LF);
-            //outputStream.write(cc);
-            //printNewLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    String addspace(int i) {
-        String temp = " ";
-        StringBuilder str1 = new StringBuilder();
-        for (int j = 0; j < i; j++) {
-            str1.append(" ");
-        }
-        //  str1.append(temp);
-        return str1.toString();
-    }
-
-
-    //print new line
-    private void printNewLine() {
-        try {
-            outputStream.write(PrinterCommands.FEED_LINE);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private void leftRightAlignLarge(String str1, String str2) {
-
-        byte[] bb3 = new byte[]{0x1B, 0x21, 0x10};
-
-
-        Log.d(TAG, "leftRightAlign called");
-        if (str1.length() > 12) {
-            str1 = str1.substring(0, Math.min(str1.length(), 12));
-        } else {
-
-            int no_space = 12 - str1.length();
-            String space = addspace(no_space);
-            str1 = str1 + space;
-
-        }
-        Log.d(TAG, "first str with space:" + str1 + "#");
-        Log.d(TAG, "first str with space count:" + str1.length());
-        if (str2.length() < 8) {
-            int no_space = 7 - str2.length();
-            String space = addspace(no_space);
-            str2 = space + str2;
-
-        }
-        Log.d(TAG, "second str with space:" + str2);
-        Log.d(TAG, "second str with space count:" + str2.length());
-        String ans = str1 + str2;
-        Log.d(TAG, "final:" + ans);
-
-        if (ans.length() < 33) {
-            int n = (32 - (str1.length() + str2.length()));
-            Log.d(TAG, "n count:" + n);
-            ans = str1 + new String(new char[n]).replace("\0", " ") + str2;
-            Log.d(TAG, "final str with space count:" + ans.length());
-        }
-
-
-        try {
-            outputStream.write(bb3);
-            outputStream.write(ans.getBytes());
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
     }
+
+
+
 
 
 

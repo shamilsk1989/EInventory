@@ -280,7 +280,7 @@
             android:layout_marginTop="10dp"
             android:layout_marginRight="16dp"
             android:background="@android:color/holo_green_dark"
-            android:text="Save And Print"
+            android:text="Save"
             android:textColor="@android:color/white" />
 
         <Button

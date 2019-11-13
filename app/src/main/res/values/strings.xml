@@ -25,6 +25,44 @@
     <string name="action_print">print</string>
     <string name="action_share">share</string>
     <string name="action_clear">Clear All</string>
+    <string name="action_cart">Cart</string>
+    <string name="action_delete">Delete</string>
+
+    <string name="default_server_url">www.dev.alhikmahpro.com</string>
+    <string name="title_server">Server Configuration</string>
+    <string name="key_server_url">key_server_url</string>
+
+    <string name="key_module_sales">key_module_sales</string>
+    <string name="key_module_inventory">key_module_inventory</string>
+    <string name="key_module_goods">key_module_goods</string>
+    <string name="key_module_receipts">key_module_receipts</string>
+    <string name="title_module_sales">Sales</string>
+    <string name="title_module_receipts">Receipts</string>
+    <string name="title_module_goods">Goods</string>
+    <string name="title_module_inventory">Inventory</string>
+    <string name="title_printer_settings">Printer Settings</string>
+    <string name="summery_printer_settings">Printer Configuration</string>
+
+    <string name="default_header_1">encorn.com</string>
+    <string name="title_header_1">Print header</string>
+    <string name="summery_header_1">set print header message</string>
+    <string name="key_header_1">key_header_1</string>
+
+    <string name="default_header_2">+974 012345</string>
+    <string name="title_header_2">Print header line2</string>
+    <string name="summery_header_2">set print header line2</string>
+    <string name="key_header_2">key_header_2</string>
+
+    <string name="default_header_3">email@encorn.com</string>
+    <string name="title_header_3">Print header line3</string>
+    <string name="summery_header_3">set print header line3</string>
+    <string name="key_header_3">key_header_3</string>
+
+    <string name="default_footer">Thank you</string>
+    <string name="title_footer">Print footer</string>
+    <string name="summery_footer">set print footer</string>
+    <string name="key_footer">key_footer</string>
+    <string name="key_printer">key_printer</string>
 
 
     <!--Spinner -->

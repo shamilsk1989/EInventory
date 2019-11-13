@@ -58,6 +58,8 @@ public class PaymentActivity extends AppCompatActivity {
     TextView textViewSalesman;
     @BindView(R.id.editTextDiscount)
     EditText editTextDiscount;
+    @BindView(R.id.editTextDiscountPercentage)
+    EditText editTextDiscountPercentage;
     @BindView(R.id.textViewNet)
     TextView textViewNet;
     @BindView(R.id.btn_pay)
@@ -93,7 +95,7 @@ public class PaymentActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        toolbar.setTitle("Payment");
+        getSupportActionBar().setTitle("Payment");
         Intent intent = getIntent();
         Action = intent.getStringExtra("ACTION");
         type = intent.getStringExtra("TYPE");
@@ -130,32 +132,69 @@ public class PaymentActivity extends AppCompatActivity {
         //mDate = sdf.format(new Date());
         mDate = AppUtils.getDateAndTime();
         helper = new dbHelper(this);
+        editTextDiscount.addTextChangedListener(amountWatcher);
+        editTextDiscountPercentage.addTextChangedListener(percentageWatcher);
 
-        editTextDiscount.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-            }
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-//                if (editTextDiscount.getText().toString().isEmpty()) {
-//                    editTextDiscount.setText("0");
-//                }
-
-                calculateNetValue();
-
-            }
-        });
         initVolleyCallBack();
 
     }
+
+    TextWatcher amountWatcher=new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int i, int i1, int i2) {
+            editTextDiscountPercentage.removeTextChangedListener(percentageWatcher);
+            if (!s.toString().equals("")) {
+                double discountPercentage = Math.round(Double.parseDouble(s.toString()) / base_total * 100);
+
+                editTextDiscountPercentage.setText(String.valueOf(discountPercentage));
+            }else{
+                editTextDiscountPercentage.setText("");
+            }
+            editTextDiscountPercentage.addTextChangedListener(percentageWatcher);
+            calculateNetValue();
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+
+        }
+    };
+    TextWatcher percentageWatcher=new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int i, int i1, int i2) {
+            editTextDiscount.removeTextChangedListener(amountWatcher);
+            if (!s.toString().equals("")) {
+
+                double discountPercentage = Double.parseDouble(s.toString());
+                double percentageDecimal = discountPercentage / 100;
+                double discountAmount = percentageDecimal * base_total;
+                editTextDiscount.setText(String.valueOf(discountAmount));
+            }else {
+                editTextDiscount.setText("");
+            }
+            editTextDiscount.addTextChangedListener(amountWatcher);
+            calculateNetValue();
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+
+        }
+    };
 
     private void initVolleyCallBack() {
 
@@ -164,47 +203,35 @@ public class PaymentActivity extends AppCompatActivity {
         mVolleyListener = new volleyListener() {
             @Override
             public void notifySuccess(String requestType, JSONObject response) {
-                String result = "";
-                int syncStatus = DataContract.SYNC_STATUS_FAILED;
                 try {
                     String res = response.getString("Status");
                     if (res.equals("success")) {
-                        syncStatus = DataContract.SYNC_STATUS_OK;
-                        result = "Sync Successful";
+                        if (type.equals("GDS")) {
+                            saveGoods(DataContract.SYNC_STATUS_OK);
+                        } else {
+                            saveSales(DataContract.SYNC_STATUS_OK);
+                        }
                     } else {
-                        syncStatus = DataContract.SYNC_STATUS_FAILED;
-                        result = "Sync Failed !";
+                        Toast.makeText(PaymentActivity.this, res, Toast.LENGTH_SHORT).show();
                     }
 
                 } catch (JSONException e) {
-                    syncStatus = DataContract.SYNC_STATUS_FAILED;
-                    result = "Sync Error";
                     e.printStackTrace();
-                } finally {
-
-                    // save to local database
-                    Toast.makeText(PaymentActivity.this, result, Toast.LENGTH_SHORT).show();
-                    if (type.equals("GDS")) {
-                        saveGoods(syncStatus);
-                    } else {
-                        saveSales(syncStatus);
-                    }
-
                 }
             }
 
             @Override
             public void notifyError(String requestType, VolleyError error) {
                 Log.d(TAG, "notifyError: " + error);
-                Toast.makeText(PaymentActivity.this, "Connection Error !", Toast.LENGTH_SHORT).show();
-                if (type.equals("GDS")) {
-                    // save goods receive sync failed
-                    saveGoods(DataContract.SYNC_STATUS_FAILED);
-
-                } else {
-                    // save invoice syn failed
-                    saveSales(DataContract.SYNC_STATUS_FAILED);
-                }
+                Toast.makeText(PaymentActivity.this, "Connection Error try again !", Toast.LENGTH_SHORT).show();
+//                if (type.equals("GDS")) {
+//                    // save goods receive sync failed
+//                    saveGoods(DataContract.SYNC_STATUS_FAILED);
+//
+//                } else {
+//                    // save invoice syn failed
+//                    saveSales(DataContract.SYNC_STATUS_FAILED);
+//                }
 
 
             }
@@ -355,8 +382,8 @@ public class PaymentActivity extends AppCompatActivity {
     private void gotoNext() {
         Log.d(TAG, "gotoNext: " + type);
         if (type.equals("SAL")) {
-            Intent intent_print = new Intent(PaymentActivity.this, PrintViewActivity.class);
-            intent_print.putExtra("TYPE", "new");
+            Intent intent_print = new Intent(PaymentActivity.this, ViewPdfActivity.class);
+            intent_print.putExtra("ACTION", DataContract.ACTION_NEW);
             intent_print.putExtra("CUS_NAME", customerName);
             intent_print.putExtra("CUS_CODE", customerCode);
             intent_print.putExtra("DISCOUNT", disc);
@@ -505,6 +532,7 @@ public class PaymentActivity extends AppCompatActivity {
 
     @OnClick(R.id.btn_pay)
     public void onBtnPayClicked() {
+        //saveSales(DataContract.SYNC_STATUS_OK);
 
         JSONObject resultObject = new JSONObject();
         String url = "";
@@ -523,15 +551,7 @@ public class PaymentActivity extends AppCompatActivity {
 
             if (!AppUtils.isNetworkAvailable(this)) {
                 Toast.makeText(this, "No Internet ", Toast.LENGTH_SHORT).show();
-                // no internet save to local db directly
-                if (type.equals("GDS")) {
-                    // save goods receive sync failed
-                    saveGoods(DataContract.SYNC_STATUS_FAILED);
 
-                } else {
-                    // save invoice syn failed
-                    saveSales(DataContract.SYNC_STATUS_FAILED);
-                }
             } else {
                 // if internet available send to server
                 serviceGateway = new VolleyServiceGateway(mVolleyListener, this);
@@ -540,6 +560,5 @@ public class PaymentActivity extends AppCompatActivity {
 
         }
     }
-
 
 }

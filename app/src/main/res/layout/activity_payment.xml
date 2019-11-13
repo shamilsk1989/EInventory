@@ -159,10 +159,23 @@
                 android:id="@+id/editTextDiscount"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:text="0"
+                android:layout_weight="1"
+                android:hint="amount"
+                android:inputType="numberDecimal"
+                android:background="@drawable/border_line"
+                android:textColor="@android:color/black" />
+
+            <EditText
+                android:id="@+id/editTextDiscountPercentage"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="%"
+                android:layout_marginLeft="5dp"
+                android:background="@drawable/border_line"
                 android:inputType="numberDecimal"
                 android:textColor="@android:color/black" />
+
 
 
         </LinearLayout>

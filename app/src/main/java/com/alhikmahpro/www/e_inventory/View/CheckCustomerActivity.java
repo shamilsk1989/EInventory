@@ -101,9 +101,10 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        toolbar.setTitle("Check Customer");
+        getSupportActionBar().setTitle("Check Customer");
         Intent intent = getIntent();
-        type = intent.getStringExtra("Type");
+        type = intent.getStringExtra("TYPE");
+        Log.d(TAG, "onCreate:type "+type);
 
         //disable edit text
 
@@ -328,11 +329,14 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
 
     @OnClick(R.id.btnInvoice)
     public void onBtnInvoiceClicked() {
-        if (type != null && type.equals("REC")) {
-            loadReceiptActivity();
-        } else if (type != null & type.equals("SAL")) {
-            loadSalesActivity();
+        if(type!=null){
+            if (type.equals("REC"))
+                loadReceiptActivity();
+            else
+                loadSalesActivity();
+
         }
+
 
     }
 //    @OnClick(R.id.btnReceipt)
@@ -384,7 +388,7 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
             sqLiteDatabase.close();
             clearView();
             Intent intent_rec = new Intent(CheckCustomerActivity.this, ReceiptActivity.class);
-            intent_rec.putExtra("TYPE", "NEW");
+            intent_rec.putExtra("ACTION", DataContract.ACTION_NEW);
             intent_rec.putExtra("PAYMENT_TYPE", "Cash");///default value set to cash
             intent_rec.putExtra("CUS_NAME", customerName);
             intent_rec.putExtra("CUS_CODE", customerCode);

@@ -127,7 +127,7 @@ public class PrintViewActivity extends AppCompatActivity {
     RecyclerView.LayoutManager layoutManager;
     PrintViewAdapter adapter;
     private static final String TAG = "PrintViewActivity";
-    String customerName, invoiceNo, total, invoiceDate, salesmanId, customerCode, paymentMode, Type;
+    String customerName, invoiceNo, total, invoiceDate, salesmanId, customerCode, paymentMode, Action;
     String companyName = "", companyAddress = "", companyPhone = "", footer = "";
     double netAmount, discountAmount, base_total;
     Bitmap thumbnail;
@@ -150,7 +150,7 @@ public class PrintViewActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setTitle("Payment");
         Intent intent = getIntent();
-        Type = intent.getStringExtra("TYPE");
+        Action = intent.getStringExtra("ACTION");
         customerName = intent.getStringExtra("CUS_NAME");
         customerCode = intent.getStringExtra("CUS_CODE");
         salesmanId = intent.getStringExtra("SALESMAN_ID");
@@ -237,6 +237,20 @@ public class PrintViewActivity extends AppCompatActivity {
             ex.printStackTrace();
         }
 
+    }
+    private void gotoPdfView(){
+        Intent intent_print = new Intent(PrintViewActivity.this,ViewPdfActivity.class);
+        intent_print.putExtra("ACTION", DataContract.ACTION_NEW);
+        intent_print.putExtra("CUS_NAME", customerName);
+        intent_print.putExtra("CUS_CODE", customerCode);
+        intent_print.putExtra("DISCOUNT", discountAmount);
+        intent_print.putExtra("SALESMAN_ID", salesmanId);
+        intent_print.putExtra("DOC_NO", invoiceNo);
+        intent_print.putExtra("DOC_DATE", invoiceDate);
+        intent_print.putExtra("TOTAL", base_total);
+        intent_print.putExtra("NET", netAmount);
+        intent_print.putExtra("PAY_MOD", paymentMode);
+        startActivity(intent_print);
     }
 
 

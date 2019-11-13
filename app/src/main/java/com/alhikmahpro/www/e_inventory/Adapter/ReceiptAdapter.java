@@ -69,6 +69,7 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ViewHold
             viewHolder.rvImgEdit.setImageResource(R.drawable.ic_edit);
         }
 
+
         viewHolder.rvImgEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

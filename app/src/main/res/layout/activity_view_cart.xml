@@ -28,73 +28,7 @@
             android:layout_marginTop="16dp"
             android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/layout1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/editext_border"
-                android:orientation="horizontal"
-                android:weightSum="2">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center|left"
-                    android:padding="10dp"
-                    android:text="Total Count:"
-                    android:textColor="@android:color/black"
-                    android:textSize="18sp" />
-
-                <TextView
-                    android:id="@+id/txtTotalCount"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center|left"
-                    android:padding="10dp"
-                    android:textColor="@android:color/black"
-                    android:textSize="18sp">
-
-                </TextView>
-
-            </LinearLayout>
-
-
-            <LinearLayout
-                android:id="@+id/layout2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/layout1"
-                android:layout_marginTop="5dp"
-                android:background="@drawable/editext_border"
-                android:orientation="horizontal"
-                android:weightSum="2">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center|left"
-                    android:padding="10dp"
-                    android:text="Total Amount:"
-                    android:textColor="@android:color/black"
-                    android:textSize="18sp" />
-
-                <TextView
-                    android:id="@+id/txtTotal"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center|left"
-                    android:padding="10dp"
-                    android:textColor="@android:color/black"
-                    android:textSize="18sp">
-                </TextView>
-            </LinearLayout>
-
             <TextView
-
                 android:id="@+id/txtEmpty"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -113,18 +47,15 @@
 
             </android.support.v7.widget.RecyclerView>
 
-
             <Button
                 android:id="@+id/btnNext"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="10dp"
+                android:layout_marginEnd ="0dp"
                 android:background="@android:color/holo_green_dark"
-                android:text="Next"
-                android:textColor="@android:color/white"
-
-                />
+                android:textColor="@android:color/white" />
 
         </LinearLayout>
 

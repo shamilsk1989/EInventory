@@ -172,6 +172,7 @@ public class SalesWorker extends Worker {
 
         String BASE_URL = SessionHandler.getInstance(getApplicationContext()).getHost();
         Log.d(TAG, "syncData: Base url :"+BASE_URL);
+        Log.d(TAG, "syncData:posting  "+jsonObject);
         String Url="http://"+BASE_URL+"/PriceChecker/sync_data.php";//BASE_URL+"/PriceChecker/sync_data.php";
 
         JsonObjectRequest request=new JsonObjectRequest(Request.Method.POST, Url, jsonObject, new Response.Listener<JSONObject>() {

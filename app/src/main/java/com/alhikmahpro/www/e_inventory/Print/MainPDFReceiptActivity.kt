@@ -1,4 +1,4 @@
-//
+
 //package com.mycodlabs.pos.pdf.ui
 //
 //import android.content.Context
@@ -58,15 +58,15 @@
 //import java.io.UnsupportedEncodingException
 //import java.math.BigDecimal
 //import java.text.DecimalFormat
-//
-//
+
+
 //class MainPDFReceiptActivity : AppCompatActivity() {
 //    override fun locationupdate(location: Location) {
 //
 //    }
 //
 //    var mContext: Context? = null
-//     var checker: PermissionsChecker? = null
+    // var checker: PermissionsChecker? = null
 //     var register: Register? = null
 //     var paragraph: Paragraph? = null
 //     var table: PdfPTable? = null

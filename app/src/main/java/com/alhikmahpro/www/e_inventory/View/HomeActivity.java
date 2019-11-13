@@ -35,6 +35,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
@@ -52,6 +53,8 @@ import com.alhikmahpro.www.e_inventory.worker.SalesWorker;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.CaptureActivity;
+
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 
@@ -101,27 +104,29 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
         //Initiate worker class
 
+        //one time worker class
 //        final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(SalesWorker.class).build();
 //        WorkManager.getInstance().enqueue(workRequest);
 
+        // periodic worker class
+
 //        final PeriodicWorkRequest periodicWorkRequest
-//                = new PeriodicWorkRequest.Builder(MyWorker.class, 10, TimeUnit.HOURS)
+//                = new PeriodicWorkRequest.Builder(SalesWorker.class, 10, TimeUnit.HOURS)
 //                .build();
 
         //creating constraints
 //        Constraints constraints = new Constraints.Builder()
-//                .setRequiresCharging(true) // you can add as many constraints as you want
+//                .setRequiresCharging(true)
+//                // you can add as many constraints as you want
 //                .build();
 //        WorkManager.getInstance().getWorkInfoByIdLiveData(workRequest.getId())
 //                .observe(this, new Observer<WorkInfo>() {
 //                    @Override
 //                    public void onChanged(@Nullable WorkInfo workInfo) {
-//                        Log.d(TAG, "onChanged: "+workInfo.getState().name());
+//                        Log.d(TAG, "onChanged: " + workInfo.getState().name());
 //
 //                    }
 //                });
-
-
 
 
         if (findViewById(R.id.fragment_container) != null) {
@@ -144,7 +149,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
 
     private void initView() {
-
 
 
         dbHelper helper = new dbHelper(this);
@@ -299,6 +303,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
             case R.id.nav_setup:
                 startActivity(new Intent(HomeActivity.this, SettingsActivity.class));
+                //startActivity(new Intent(HomeActivity.this, PrefSettingsActivity.class));
                 break;
             case R.id.nav_print:
                 startActivity(new Intent(HomeActivity.this, PrinterSettingsActivity.class));

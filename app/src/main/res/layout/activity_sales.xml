@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -14,22 +13,21 @@
     </include>
 
 
-
     <ProgressBar
+        android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:indeterminate="true"
-        android:id="@+id/progressBar"
         android:layout_gravity="center"
+        android:indeterminate="true"
         android:theme="@style/progressBarTheme" />
 
     <ScrollView
         android:id="@+id/scrollView"
-        android:layout_below="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -123,12 +121,14 @@
                     android:layout_height="40dp"
                     android:layout_weight=".5"
                     android:src="@drawable/ic_barcode" />
+
                 <ImageView
                     android:id="@+id/imgSearch"
                     android:layout_width="0dp"
                     android:layout_height="40dp"
                     android:layout_weight=".5"
                     android:src="@drawable/ic_search" />
+
                 <ImageView
                     android:id="@+id/imgSubmit"
                     android:layout_width="0dp"
@@ -148,43 +148,40 @@
                 android:background="@drawable/border_line"
                 android:textColor="@android:color/black"
                 android:textSize="18sp" />
+
             <RadioGroup
+                android:id="@+id/radioGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/radioGroup"
-                android:orientation="horizontal"
                 android:layout_below="@+id/textViewProductName"
                 android:layout_marginTop="8dp"
-                android:weightSum="3"
-                >
+                android:orientation="horizontal"
+                android:weightSum="3">
 
                 <RadioButton
                     android:id="@+id/radioSale"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Sale"
                     android:checked="true"
                     android:onClick="onRadioButtonClicked"
-                    />
+                    android:text="Sale" />
 
                 <RadioButton
                     android:id="@+id/radioReturn"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Return"
                     android:onClick="onRadioButtonClicked"
-                    />
+                    android:text="Return" />
 
                 <RadioButton
                     android:id="@+id/radioFree"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Free"
                     android:onClick="onRadioButtonClicked"
-                    />
+                    android:text="Free" />
             </RadioGroup>
 
 
@@ -237,6 +234,14 @@
                         android:text="Rate"
                         android:textColor="@android:color/black"
                         android:textSize="18sp" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="20dp"
+                        android:gravity="center|left"
+                        android:text="Total"
+                        android:textColor="@android:color/black"
+                        android:textSize="18sp" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -247,32 +252,15 @@
                         android:textColor="@android:color/black"
                         android:textSize="18sp" />
 
-                    <!--<TextView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="40dp"-->
-                        <!--android:layout_marginTop="20dp"-->
-                        <!--android:gravity="center|left"-->
-                        <!--android:text="Cost Price"-->
-                        <!--android:textColor="@android:color/black"-->
-                        <!--android:textSize="18sp" />-->
-
-                    <!--<TextView-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="40dp"-->
-                        <!--android:layout_marginTop="20dp"-->
-                        <!--android:gravity="center|left"-->
-                        <!--android:text="Sale Price "-->
-                        <!--android:textColor="@android:color/black"-->
-                        <!--android:textSize="18sp" />-->
-
                     <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="20dp"
-                    android:gravity="center|left"
-                    android:text="Stock "
-                    android:textColor="@android:color/black"
-                    android:textSize="18sp" />
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="20dp"
+                        android:gravity="center|left"
+                        android:text="Stock "
+                        android:textColor="@android:color/black"
+                        android:textSize="18sp" />
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
@@ -318,10 +306,13 @@
                         android:layout_marginTop="20dp"
                         android:background="@drawable/border_line"
                         android:gravity="center|left"
-                        android:inputType="numberDecimal"
+                        android:inputType="none"
                         android:padding="5dp"
+                        android:text="0"
                         android:textColor="@android:color/black"
-                        android:textSize="18sp" />
+                        android:textSize="18sp"
+
+                        />
 
 
                     <EditText
@@ -334,48 +325,64 @@
                         android:gravity="center|left"
                         android:inputType="numberDecimal"
                         android:padding="5dp"
+                        android:text="0.0"
                         android:textColor="@android:color/black"
                         android:textSize="18sp" />
 
-
                     <EditText
 
-                        android:id="@+id/editTextDiscount"
+                        android:id="@+id/editTextTotal"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
                         android:layout_marginTop="20dp"
                         android:background="@drawable/border_line"
                         android:gravity="center|left"
-                        android:inputType="numberDecimal"
+                        android:inputType="none"
                         android:padding="5dp"
+                        android:text="0.0"
                         android:textColor="@android:color/black"
                         android:textSize="18sp" />
 
-                    <!--<EditText-->
 
-                        <!--android:id="@+id/editTextCost"-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="40dp"-->
-                        <!--android:layout_marginTop="20dp"-->
-                        <!--android:background="@drawable/border_line"-->
-                        <!--android:gravity="center|left"-->
-                        <!--android:inputType="text"-->
-                        <!--android:padding="5dp"-->
-                        <!--android:textColor="@android:color/black"-->
-                        <!--android:textSize="18sp" />-->
 
-                    <!--<EditText-->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
 
-                        <!--android:id="@+id/editTextSale"-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="40dp"-->
-                        <!--android:layout_marginTop="20dp"-->
-                        <!--android:background="@drawable/border_line"-->
-                        <!--android:gravity="center|left"-->
-                        <!--android:inputType="text"-->
-                        <!--android:padding="5dp"-->
-                        <!--android:textColor="@android:color/black"-->
-                        <!--android:textSize="18sp" />-->
+                        <EditText
+                            android:id="@+id/editTextDiscount"
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:layout_marginTop="20dp"
+                            android:background="@drawable/border_line"
+                            android:gravity="center|left"
+                            android:padding="5dp"
+                            android:hint="amount"
+                            android:textColor="@android:color/black"
+                            android:textSize="18sp"
+                            android:inputType="none" />
+                        <EditText
+                            android:id="@+id/editTextDiscountPercentage"
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:layout_marginTop="20dp"
+                            android:background="@drawable/border_line"
+                            android:gravity="center|left"
+                            android:padding="5dp"
+                            android:layout_marginLeft="5dp"
+                            android:hint="%"
+                            android:textColor="@android:color/black"
+                            android:textSize="18sp"
+                            android:inputType="none"
+                            />
+
+                    </LinearLayout>
+
+
 
                     <EditText
 
@@ -387,6 +394,7 @@
                         android:gravity="center|left"
                         android:inputType="text"
                         android:padding="5dp"
+                        android:text="0"
                         android:textColor="@android:color/black"
                         android:textSize="18sp" />
 
@@ -398,8 +406,8 @@
                         android:layout_marginTop="20dp"
                         android:background="@drawable/border_line"
                         android:gravity="center|left"
-                        android:inputType="text"
                         android:padding="5dp"
+                        android:text="0.0"
                         android:textColor="@android:color/black"
                         android:textSize="18sp" />
 
@@ -416,7 +424,6 @@
                 android:background="@android:color/holo_green_dark"
                 android:text="Add To Cart"
                 android:textColor="@android:color/white" />
-
 
 
             <LinearLayout

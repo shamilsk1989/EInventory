@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="General">
+        <EditTextPreference
+            android:defaultValue="@string/default_server_url"
+            android:key="@string/key_server_url"
+            android:summary="@string/default_server_url"
+            android:title="@string/title_server" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Modules">
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/key_module_goods"
+            android:title="@string/title_module_goods" />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/key_module_inventory"
+            android:title="@string/title_module_inventory" />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/key_module_sales"
+            android:title="@string/title_module_sales" />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/key_module_receipts"
+            android:title="@string/title_module_receipts" />
+
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Print">
+
+
+        <Preference
+            android:summary="@string/summery_printer_settings"
+            android:title="@string/title_printer_settings"
+            android:key="@string/key_printer"
+            />
+
+        <EditTextPreference
+            android:title="@string/title_header_1"
+            android:key="@string/key_header_1"
+            android:defaultValue="@string/default_header_1"
+            android:summary="@string/summery_header_1"/>
+        <EditTextPreference
+            android:title="@string/title_header_2"
+            android:key="@string/key_header_2"
+            android:defaultValue="@string/default_header_2"
+            android:summary="@string/summery_header_2"/>
+        <EditTextPreference
+            android:title="@string/title_header_3"
+            android:key="@string/key_header_3"
+            android:defaultValue="@string/default_header_3"
+            android:summary="@string/summery_header_3"/>
+        <EditTextPreference
+            android:title="@string/title_footer"
+            android:key="@string/key_footer"
+            android:defaultValue="@string/default_footer"
+            android:summary="@string/summery_footer"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

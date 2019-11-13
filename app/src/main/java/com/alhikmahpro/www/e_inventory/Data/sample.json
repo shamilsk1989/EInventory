@@ -1,36 +1,45 @@
 {
   "Invoice": [
     {
-      "invoice_number": "INV-6",
-      "invoice_date": "10-10-2019",
-      "customer_code": "C0002",
-      "customer_name": "WAKRA BOOK SHOP",
+      "invoice_number": "INV-1",
+      "invoice_date": "10-11-2019",
+      "customer_code": "C1000",
+      "customer_name": "SAMA RENEWABLE ENERGY",
       "salesman_id": "S001",
-      "total_amount": 150,
-      "discount_amount": 0,
-      "net_amount": 150,
+      "total_amount": "250",
+      "discount_amount": "0",
+      "net_amount": "250",
       "payment_type": "Cash"
     }
   ],
   "Details": [
     {
       "serial_no": 1,
-      "invoice_number": "INV-6",
-      "bar_code": "5136910",
-      "product_code": "513691",
-      "product_name": "3+1ST ACTIVITY BOOK ENGLISH",
-      "quantity": 10,
-      "unit1": "EA",
-      "unit2": "DOZ",
-      "unit3": "",
-      "selected_unit": "EA",
-      "un_qty1": 1,
-      "un_qty2": 12,
+      "invoice_number": "INV-1",
+      "bar_code": "123456822",
+      "product_code": "P1010 ",
+      "product_name": "Pen",
+      "quantity": 5,
+      "selected_unit": "DOZ x 10 x 4",
+      "un_qty1": 0,
+      "un_qty2": 0,
       "un_qty3": 0,
-      "rate": 15,
-      "discount": 0,
-      "net_amount": 150,
+      "rate": 50,
+      "discount": 5,
+      "net_amount": 250,
       "sale_type": "Sale"
+    }
+  ],
+  "Receipts": [
+    {
+      "receipts_number": "1",
+      "receipts_date": "12-11-2019",
+      "customer_code": "C1000",
+      "customer_name": "SAMA RENEWABLE ENERGY",
+      "received_amount": "500",
+      "cheque_number": "",
+      "cheque_date": "",
+      "remark": ""
     }
   ]
 }

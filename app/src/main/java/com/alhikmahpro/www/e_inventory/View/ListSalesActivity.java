@@ -67,7 +67,7 @@ public class ListSalesActivity extends AppCompatActivity {
     String invoiceNo = "";
     @BindView(R.id.toolbar)
     Toolbar toolbar;
-    MenuItem itemShare,itemClear,itemPrint,itemSync;
+    MenuItem itemShare, itemClear, itemPrint, itemSync;
 
 
     @Override
@@ -80,7 +80,7 @@ public class ListSalesActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 //        Intent intent = getIntent();
 //        type= intent.getStringExtra("Type");
-        toolbar.setTitle("SALES");
+        getSupportActionBar().setTitle("Sales");
         populateRecycler();
     }
 
@@ -168,6 +168,7 @@ public class ListSalesActivity extends AppCompatActivity {
         CreatePdf createPdf = new CreatePdf(this, invoiceNo);
         createPdf.execute();
 
+
     }
 
     private void goToNext(int position) {
@@ -184,24 +185,26 @@ public class ListSalesActivity extends AppCompatActivity {
         Intent intent;
 
         // syc successfully then goto PrintViewActivity
-        if (itemModel.getIs_sync() == DataContract.SYNC_STATUS_OK) {
-            intent = new Intent(ListSalesActivity.this, PrintViewActivity.class);
-        } else {
+        if (itemModel.getIs_sync() == DataContract.SYNC_STATUS_FAILED) {
             intent = new Intent(ListSalesActivity.this, ViewCartActivity.class);
-        }
 
-        intent.putExtra("ACTION", "EDIT");
-        intent.putExtra("TYPE", "SAL");
-        intent.putExtra("CUS_NAME", itemModel.getCustomerName());
-        intent.putExtra("CUS_CODE", itemModel.getCustomerCode());
-        intent.putExtra("DISCOUNT", itemModel.getDiscount());
-        intent.putExtra("SALESMAN_ID", itemModel.getStaffName());
-        intent.putExtra("DOC_NO", itemModel.getInvoiceNo());
-        intent.putExtra("DOC_DATE", itemModel.getInvoiceDate());
-        intent.putExtra("TOTAL", itemModel.getTotal());
-        intent.putExtra("NET", itemModel.getNet());
-        intent.putExtra("PAY_MOD", itemModel.getPaymentType());
-        startActivity(intent);
+//        else {
+//            intent = new Intent(ListSalesActivity.this, ViewCartActivity.class);
+//        }
+
+            intent.putExtra("ACTION", DataContract.ACTION_EDIT);
+            intent.putExtra("TYPE", "SAL");
+            intent.putExtra("CUS_NAME", itemModel.getCustomerName());
+            intent.putExtra("CUS_CODE", itemModel.getCustomerCode());
+            intent.putExtra("DISCOUNT", itemModel.getDiscount());
+            intent.putExtra("SALESMAN_ID", itemModel.getStaffName());
+            intent.putExtra("DOC_NO", itemModel.getInvoiceNo());
+            intent.putExtra("DOC_DATE", itemModel.getInvoiceDate());
+            intent.putExtra("TOTAL", itemModel.getTotal());
+            intent.putExtra("NET", itemModel.getNet());
+            intent.putExtra("PAY_MOD", itemModel.getPaymentType());
+            startActivity(intent);
+        }
     }
 
     private void requestStoragePermission() {
@@ -280,7 +283,7 @@ public class ListSalesActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        getMenuInflater().inflate(R.menu.tool_bar,menu);
+        getMenuInflater().inflate(R.menu.tool_bar, menu);
         itemPrint = menu.findItem(R.id.action_print);
         itemSync = menu.findItem(R.id.action_sync);
         itemShare = menu.findItem(R.id.action_share);
@@ -291,15 +294,15 @@ public class ListSalesActivity extends AppCompatActivity {
         itemShare.setVisible(false);
 
 
-
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
 
-        int id=item.getItemId();
-        if(id==R.id.action_clear){
+        int id = item.getItemId();
+        if (id == R.id.action_clear) {
             alertDialog();
         }
         return super.onOptionsItemSelected(item);
@@ -317,8 +320,10 @@ public class ListSalesActivity extends AppCompatActivity {
 
     private void clearSales() {
 
-        ClearData clearData=new ClearData(ListSalesActivity.this);
+        ClearData clearData = new ClearData(ListSalesActivity.this);
         clearData.execute("inv");
+        populateRecycler();
+
     }
 
     @Override
@@ -337,13 +342,9 @@ public class ListSalesActivity extends AppCompatActivity {
     @OnClick(R.id.fab)
     public void onViewClicked() {
         Intent intent = new Intent(ListSalesActivity.this, CheckCustomerActivity.class);
-        intent.putExtra("Type", "SAL");
+        intent.putExtra("TYPE", "SAL");
         startActivity(intent);
     }
-
-
-
-
 
 
 }
