@@ -638,13 +638,18 @@ class ViewPdfActivity : AppCompatActivity() {
         Log.d("share","clicked");
         val path = FileUtils.getSubDirPath(mContext, DataContract.DIR_INVOICE) + invoiceNo + ".pdf"
         val outputFile = File(path)
-        // Uri uri = Uri.fromFile(outputFile);
-        val uri = FileProvider.getUriForFile(mContext, mContext.packageName + ".provider", outputFile)
-        val share = Intent()
-        share.action = Intent.ACTION_SEND
-        share.type = "application/pdf"
-        share.putExtra(Intent.EXTRA_STREAM, uri)
-        mContext.startActivity(Intent.createChooser(share, "Share to :"))
+        if(outputFile.exists()){
+            // Uri uri = Uri.fromFile(outputFile);
+            val uri = FileProvider.getUriForFile(mContext, mContext.packageName + ".provider", outputFile)
+            val share = Intent()
+            share.action = Intent.ACTION_SEND
+            share.type = "application/pdf"
+            share.putExtra(Intent.EXTRA_STREAM, uri)
+            mContext.startActivity(Intent.createChooser(share, "Share to :"))
+        }
+        else
+            Toast.makeText(this,"File not found",Toast.LENGTH_LONG).show()
+
 
     }
 
