@@ -107,6 +107,7 @@ public class dbHelper extends SQLiteOpenHelper {
             DataContract.Invoice.COL_CUSTOMER_NAME + " TEXT ," +
             DataContract.Invoice.COL_TOTAL_AMOUNT + " REAL ," +
             DataContract.Invoice.COL_DISCOUNT_AMOUNT + " REAL ," +
+            DataContract.Invoice.COL_DISCOUNT_PERCENTAGE + " REAL ," +
             DataContract.Invoice.COL_PAYMENT_TYPE + " TEXT ," +
             DataContract.Invoice.COL_NET_AMOUNT + " REAL ," +
             DataContract.Invoice.COL_DATE_TIME + " TEXT ," +
@@ -130,6 +131,7 @@ public class dbHelper extends SQLiteOpenHelper {
             DataContract.InvoiceDetails.COL_UN_QTY3 + " INTEGER ," +
             DataContract.InvoiceDetails.COL_RATE + " REAL ," +
             DataContract.InvoiceDetails.COL_DISCOUNT + " REAL ," +
+            DataContract.InvoiceDetails.COL_DISCOUNT_PERCENTAGE + " REAL ," +
             DataContract.InvoiceDetails.COL_NET_AMOUNT + " REAL ," +
             DataContract.InvoiceDetails.COL_SALE_TYPE + " TEXT ," +
             DataContract.InvoiceDetails.COL_IS_SYNC + " INTEGER DEFAULT 0 " + ");";
@@ -640,7 +642,7 @@ public class dbHelper extends SQLiteOpenHelper {
     /******************************* invoice table***********************************/
 
     public boolean saveInvoice(String invoiceNo, String invoiceDate, String salesmanId, String customerCode, String customerName,
-                               double total, double discount, double net, String paymentMode, String date, int status) {
+                               double total, double discount,double dis_per, double net, String paymentMode, String date, int status) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -652,6 +654,7 @@ public class dbHelper extends SQLiteOpenHelper {
             contentValues.put(DataContract.Invoice.COL_CUSTOMER_NAME, customerName);
             contentValues.put(DataContract.Invoice.COL_TOTAL_AMOUNT, total);
             contentValues.put(DataContract.Invoice.COL_DISCOUNT_AMOUNT, discount);
+            contentValues.put(DataContract.Invoice.COL_DISCOUNT_PERCENTAGE, discount);
             contentValues.put(DataContract.Invoice.COL_NET_AMOUNT, net);
             contentValues.put(DataContract.Invoice.COL_PAYMENT_TYPE, paymentMode);
             contentValues.put(DataContract.Invoice.COL_DATE_TIME, date);

@@ -183,43 +183,6 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
             }
         });
 
-//        editTextQuantity.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-//
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-//
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable editable) {
-//                //String qty=editTextQuantity.getText().toString();
-//                Log.d(TAG, "Quantity afterTextChanged: ");
-//                calculateNetValue();
-//            }
-//        });
-
-
-//        editTextDiscount.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-//
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-//
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable editable) {
-//                Log.d(TAG, "Discount afterTextChanged: ");
-//                calculateNetValue();
-//            }
-//        });
 
         editTextQuantity.setFocusable(false);
         editTextQuantity.setClickable(true);
@@ -383,12 +346,13 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         productCode = editTextProductCode.getText().toString();
         productName = textViewProductName.getText().toString();
         saleType = radioButton.getText().toString();
-        double qty, rate, disc, net, free_qty, old_qty = 0;
+        double qty, rate, disc, net, free_qty, old_qty = 0,discPercentage;
         int position;
         qty = ParseDouble(editTextQuantity.getText().toString());
         rate = ParseDouble(editTextRate.getText().toString());
         disc = ParseDouble(editTextDiscount.getText().toString());
         net = ParseDouble(editTextNet.getText().toString());
+        discPercentage=ParseDouble(editTextDiscountPercentage.getText().toString());
 
         // add to added items view
         txtAddedBarcode.setText(barCode);
@@ -412,6 +376,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         cartModel.setUnit2Qty(unit2Qty);
         cartModel.setUnit3Qty(unit3Qty);
         cartModel.setRate(rate);
+        cartModel.setItemDiscount(discPercentage);
         cartModel.setDiscount(disc);
         cartModel.setNet(net);
         Cart.mCart.add(cartModel);
@@ -728,10 +693,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
             ListItemFragment listItemFragment = new ListItemFragment();
             listItemFragment.setArguments(bundle);
             listItemFragment.show(fragmentManager, "Items");
-
         }
-
-
     }
 
     double ParseDouble(String strNumber) {

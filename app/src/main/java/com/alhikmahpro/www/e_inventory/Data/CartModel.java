@@ -5,8 +5,16 @@ public class CartModel {
     //used for invoice details
     private String barcode,productCode,productName;
     private String saleType,selectedUnit,unit1,unit2,unit3;
-    private double qty,net,rate,discount;
+    private double qty,net,rate,discount,discPercentage;
     int unit1Qty,unit2Qty,unit3Qty,unitIndex;
+
+    public double getItemDiscount() {
+        return discPercentage;
+    }
+
+    public void setItemDiscount(double itemDiscount) {
+        this.discPercentage = itemDiscount;
+    }
 
     public String getUnit1() {
         return unit1;

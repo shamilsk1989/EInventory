@@ -133,6 +133,7 @@ public class DataContract {
         public static final String COL_CUSTOMER_NAME="customer_name";
         public static final String COL_TOTAL_AMOUNT="total_amount";
         public static final String COL_DISCOUNT_AMOUNT="discount_amount";
+        public static final String COL_DISCOUNT_PERCENTAGE="discount_percentage";
         public static final String COL_NET_AMOUNT="net_amount";
         public static final String COL_PAYMENT_TYPE="payment_type";
         public static final String COL_DATE_TIME="date_time";
@@ -158,6 +159,7 @@ public class DataContract {
         public static final String COL_UN_QTY3="un_qty3";
         public static final String COL_RATE="rate";
         public static final String COL_DISCOUNT="discount";
+        public static final String COL_DISCOUNT_PERCENTAGE="discount_percentage";
         public static final String COL_NET_AMOUNT="net_amount";
         public static final String COL_SALE_TYPE="sale_type";
         public static final String COL_IS_SYNC="is_sync";

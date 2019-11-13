@@ -34,6 +34,7 @@ public class SaveSales extends AsyncTask<SaleData, Void, String> {
         String salesmanId = data[0].salesmanId;
         double base_total = data[0].base_total;
         double disc = data[0].disc;
+        double disc_per = data[0].discPer;
         double netAmount = data[0].netAmount;
         String paymentMode = data[0].paymentMode;
         String mDate = data[0].mDate;
@@ -48,7 +49,7 @@ public class SaveSales extends AsyncTask<SaleData, Void, String> {
 
         } else {
             database.close();
-            dbHelper.saveInvoice(invoiceNo, invoiceDate, salesmanId, customerCode, customerName, base_total, disc, netAmount, paymentMode, mDate, syncStatus);
+            dbHelper.saveInvoice(invoiceNo, invoiceDate, salesmanId, customerCode, customerName, base_total, disc,disc_per,netAmount, paymentMode, mDate, syncStatus);
             dbHelper.saveInvoiceDetails(invoiceNo, syncStatus);
 
             return "Saved";

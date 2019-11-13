@@ -585,7 +585,6 @@ class ViewPdfActivity : AppCompatActivity() {
 
             document.add(table)
 
-
             val separatorr = DottedLineSeparator()
 
             cell = PdfPCell(Phrase(Chunk(separator1)))
@@ -610,9 +609,7 @@ class ViewPdfActivity : AppCompatActivity() {
 
         } catch (e: Exception) {
             e.printStackTrace()
-
         }
-
     }
     private fun getBitmapFromAssets(fileName: String): Bitmap {
         val assetManager = assets
@@ -649,8 +646,6 @@ class ViewPdfActivity : AppCompatActivity() {
         }
         else
             Toast.makeText(this,"File not found",Toast.LENGTH_LONG).show()
-
-
     }
 
     override fun onBackPressed() {

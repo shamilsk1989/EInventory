@@ -73,7 +73,7 @@ public class PaymentActivity extends AppCompatActivity {
 
     String customerName, invoiceNo, total, invoiceDate, salesmanId, mDate, customerCode, type, orderNo, Action;
     int docNo;
-    double disc, netAmount, base_total;
+    double disc, netAmount, base_total,disc_per;
 
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
@@ -350,6 +350,7 @@ public class PaymentActivity extends AppCompatActivity {
                 jsonObject.put("free_quantity", model.getFreeQty());
                 jsonObject.put("rate", model.getRate());
                 jsonObject.put("discount", model.getDiscount());
+                //jsonObject.put("discount_percentage", model.getD
                 jsonObject.put("net_value", model.getNet());
                 jsonObject.put("um1", model.getUnit1());
                 jsonObject.put("um2", model.getUnit2());
@@ -427,8 +428,14 @@ public class PaymentActivity extends AppCompatActivity {
 
 
     public void saveSales(int sync) {
+        try {
+            disc_per = Double.valueOf(editTextDiscountPercentage.getText().toString());
+        } catch (NumberFormatException e) {
+            disc_per = 0;
 
-        SaleData saleData = new SaleData(invoiceNo, customerCode, customerName, invoiceDate, salesmanId, base_total, disc, netAmount, paymentMode, mDate, sync);
+        }
+
+        SaleData saleData = new SaleData(invoiceNo, customerCode, customerName, invoiceDate, salesmanId, base_total, disc,disc_per,netAmount, paymentMode, mDate, sync);
         SaveSales.TaskListener listener = new SaveSales.TaskListener() {
             @Override
             public void onFinished(String result) {
