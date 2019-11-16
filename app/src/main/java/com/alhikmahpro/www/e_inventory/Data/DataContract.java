@@ -86,6 +86,7 @@ public class DataContract {
         public static final String COL_STAFF_NAME="staff_name";
         public static final String COL_TOTAL="total";
         public static final String COL_DISCOUNT_AMOUNT="discount_amount";
+        public static final String COL_DISCOUNT_PERCENTAGE="discount_percentage";
         public static final String COL_NET_AMOUNT="net_amount";
         public static final String COL_PAYMENT_TYPE="payment_type";
         public static final String COL_DATE_TIME="date_time";
@@ -101,12 +102,14 @@ public class DataContract {
         public static final String COL_BAR_CODE="bar_code";
         public static final String COL_PRODUCT_CODE="product_code";
         public static final String COL_PRODUCT_NAME="product_name";
+        public static final String COL_PRODUCT_NAME_AR="product_name_ar";
         public static final String COL_UNIT="unit";
         public static final String COL_FREE_UNIT="free_unit";
         public static final String COL_QUANTITY="quantity";
         public static final String COL_FREE_QUANTITY="free_quantity";
         public static final String COL_RATE="rate";
         public static final String COL_DISCOUNT="discount";
+        public static final String COL_DISCOUNT_PERCENTAGE="discount_percentage";
         public static final String COL_SALES_PRICE="sales_price";
         public static final String COL_COST_PRICE="cost_price";
         public static final String COL_STOCK="stock";
@@ -149,6 +152,7 @@ public class DataContract {
         public static final String COL_BAR_CODE="bar_code";
         public static final String COL_PRODUCT_CODE="product_code";
         public static final String COL_PRODUCT_NAME="product_name";
+        public static final String COL_PRODUCT_NAME_AR="product_name_ar";
         public static final String COL_UNIT="selected_unit";
         public static final String COL_QUANTITY="quantity";
         public static final String COL_UNIT1="unit1";

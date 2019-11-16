@@ -15,12 +15,15 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.alhikmahpro.www.e_inventory.Adapter.CartAdapter;
 import com.alhikmahpro.www.e_inventory.Data.Cart;
+import com.alhikmahpro.www.e_inventory.Data.Converter;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.ItemModel;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
@@ -29,6 +32,8 @@ import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
 import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
 import com.alhikmahpro.www.e_inventory.R;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,10 +43,6 @@ import butterknife.OnClick;
 
 public class GoodsItemListActivity extends AppCompatActivity {
 
-    @BindView(R.id.txtTotalCount)
-    TextView txtTotalCount;
-    @BindView(R.id.txtTotal)
-    TextView txtTotal;
     @BindView(R.id.item_list_rv)
     RecyclerView itemListRv;
     @BindView(R.id.txtEmpty)
@@ -63,6 +64,7 @@ public class GoodsItemListActivity extends AppCompatActivity {
     VolleyServiceGateway serviceGateway;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+    private static int cart_count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,6 +133,7 @@ public class GoodsItemListActivity extends AppCompatActivity {
 
         }
         loadRecycler();
+        calculateNet();
     }
 
 
@@ -138,18 +141,7 @@ public class GoodsItemListActivity extends AppCompatActivity {
 
         if (Cart.gCart.size() > 0) {
             //if cart not empty hide empty textView
-
             txtEmpty.setVisibility(View.GONE);
-            // set total count and total amount in cart
-            txtTotalCount.setText(String.valueOf(Cart.gCart.size()));
-            totalAmount = 0;
-            for (ItemModel itemModel : Cart.gCart) {
-                Log.d(TAG, "initView: cart amount " + itemModel.getNet());
-                totalAmount = totalAmount + itemModel.getNet();
-                Log.d(TAG, "initView: cart amount " + totalAmount);
-
-            }
-            txtTotal.setText(String.valueOf(totalAmount));
             //Load recycler view
 
             layoutManager = new LinearLayoutManager(this);
@@ -182,7 +174,7 @@ public class GoodsItemListActivity extends AppCompatActivity {
                                     adapter.notifyDataSetChanged();
                                     adapter.notifyItemRemoved(position);
                                     adapter.notifyItemRangeChanged(position, Cart.gCart.size());
-                                    calculateNet(amount);
+                                    calculateNet();
 
                                 }
                             })
@@ -199,19 +191,34 @@ public class GoodsItemListActivity extends AppCompatActivity {
             });
             itemListRv.setAdapter(adapter);
         } else {
-            txtTotal.setVisibility(View.GONE);
-            txtTotalCount.setVisibility(View.GONE);
+            //txtTotal.setVisibility(View.GONE);
+            //txtTotalCount.setVisibility(View.GONE);
+            btnSave.setVisibility(View.GONE);
         }
 
 
     }
 
     //Calculate total number of items and total amount of cart
-    private void calculateNet(double amount) {
+    private void calculateNet() {
+        // set total count and total amount in cart
+        totalAmount = 0;
+        for (ItemModel itemModel : Cart.gCart) {
+            Log.d(TAG, "initView: cart amount " + itemModel.getNet());
+            totalAmount = totalAmount + itemModel.getNet();
+            Log.d(TAG, "initView: cart amount " + totalAmount);
+        }
+        cart_count=Cart.gCart.size();
+        if(Cart.gCart.size()>0){
+            btnSave.setText("Pay QR:"+currencyFormatter(totalAmount));
+        }else {
+            txtEmpty.setVisibility(View.VISIBLE);
+            btnSave.setVisibility(View.GONE);
+        }
+        invalidateOptionsMenu();
+        //txtTotal.setText(String.valueOf(totalAmount));
 
-        txtTotalCount.setText(String.valueOf(Cart.gCart.size()));
-        totalAmount = totalAmount - amount;
-        txtTotal.setText(String.valueOf(totalAmount));
+
     }
 
     @OnClick(R.id.btnSave)
@@ -239,5 +246,38 @@ public class GoodsItemListActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.cart_toolbar, menu);
+        MenuItem menuItem = menu.findItem(R.id.action_cart);
+        Log.d(TAG, "onCreateOptionsMenu: "+ Converter.convertLayoutToImage(GoodsItemListActivity.this,cart_count,R.drawable.ic_shopping_cart));
+        menuItem.setIcon(Converter.convertLayoutToImage(GoodsItemListActivity.this,cart_count,R.drawable.ic_shopping_cart));
+        MenuItem itemDelete = menu.findItem(R.id.action_delete);
+        itemDelete.setVisible(false);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+
+        int id = item.getItemId();
+        if(id==R.id.action_delete){
+            //deleteCart();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+    public String currencyFormatter(double val) {
+
+        NumberFormat format = NumberFormat.getCurrencyInstance();
+        String pattern = ((DecimalFormat) format).toPattern();
+        String newPattern = pattern.replace("\u00A4", "").trim();
+        NumberFormat newFormat = new DecimalFormat(newPattern);
+        return String.valueOf(newFormat.format(val));
+
     }
 }

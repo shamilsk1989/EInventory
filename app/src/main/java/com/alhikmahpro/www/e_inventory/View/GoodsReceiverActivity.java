@@ -23,7 +23,11 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -36,6 +40,7 @@ import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.AppUtils;
 import com.alhikmahpro.www.e_inventory.Data.Cart;
+import com.alhikmahpro.www.e_inventory.Data.Converter;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.ItemModel;
 import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
@@ -98,7 +103,10 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     EditText editTextRate;
     @BindView(R.id.editTextDiscount)
     EditText editTextDiscount;
-
+    @BindView(R.id.editTextDiscountPercentage)
+    EditText editTextDiscountPercentage;
+    @BindView(R.id.editTextTotal)
+    EditText editTextTotal;
     @BindView(R.id.editTextCost)
     EditText editTextCost;
     @BindView(R.id.editTextSale)
@@ -115,6 +123,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     EditText txtAddedPrice;
     @BindView(R.id.txtAddedQuantity)
     EditText txtAddedQuantity;
+
 
 
     @BindView(R.id.btnNext)
@@ -135,8 +144,9 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     private ConnectivityManager connectivityManager;
     String supplierName, supplierCode, invoiceNo, invoiceDate, User, orderNo;
     boolean is_first;
+    private static int cart_count=0;
 
-    double price1 = 0, price2 = 0, price3 = 0, cost = 0, costPrice = 0, salePrice = 0, discount = 0, rate = 0;
+    double price1 = 0, price2 = 0, price3 = 0, cost = 0, costPrice = 0, salePrice = 0, discount = 0, rate = 0,discountPercentage=0;
     int unit1Qty, unit2Qty, unit3Qty, unitIndex, mDoc;
     String barCode, selectedUnit, selectedFreeUnit, unit1, unit2, unit3, packing1, packing2, packing3, mDate;
     ArrayList<String> list;
@@ -172,61 +182,12 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         list = new ArrayList<>();
         list2 = new ArrayList<>();
 
+
+
+
         setDoc();
         initView();
         initVolleyCallBack();
-
-        editTextQuantity.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                calculateNetValue();
-            }
-        });
-
-
-        editTextRate.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                calculateNetValue();
-
-            }
-        });
-        editTextDiscount.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                calculateNetValue();
-            }
-        });
 
         editTextBarcode.addTextChangedListener(new TextWatcher() {
             @Override
@@ -251,6 +212,38 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
             }
         });
+
+        editTextQuantity.setFocusable(false);
+        editTextQuantity.setClickable(true);
+
+        editTextFreeQuantity.setFocusable(false);
+        editTextFreeQuantity.setClickable(true);
+        editTextDiscount.setFocusable(false);
+        editTextDiscount.setClickable(true);
+        editTextDiscountPercentage.setFocusable(false);
+        editTextDiscountPercentage.setClickable(true);
+
+
+        editTextQuantity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: ");
+                quantityCustomDialog(editTextQuantity.getText().toString());
+            }
+        });
+        editTextDiscount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                discountAmountCustomDialog(editTextDiscount.getText().toString());
+            }
+        });
+        editTextDiscountPercentage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                discountPercentageCustomDialog(editTextDiscountPercentage.getText().toString());
+            }
+        });
+        editTextFreeQuantity.setOnClickListener(view -> freeQuantityCustomDialog(editTextFreeQuantity.getText().toString()));
     }
 
 
@@ -260,13 +253,11 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
             public void notifySuccess(String requestType, JSONObject response) {
 
                 if (response.length() > 0) {
-                    editTextQuantity.setFocusableInTouchMode(true);
-                    editTextQuantity.requestFocus();
+
                     setValues(response);
 
                 } else {
                     showAlert("Not Found..");
-
                 }
 
             }
@@ -295,15 +286,19 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     }
 
     private void calculateNetValue() {
-        double net, rate, quantity;
+        double net, rate, quantity,total,discountAmount;
 
-        quantity = ParseDouble(editTextQuantity.getText().toString());
-        rate = ParseDouble(editTextRate.getText().toString());
-        discount = ParseDouble(editTextDiscount.getText().toString());
+        total=ParseDouble(editTextTotal.getText().toString());
+        discountAmount=ParseDouble(editTextDiscount.getText().toString());
+        net=total-discountAmount;
 
-        Log.d(TAG, "calculateNetValue: " + quantity + "rate :" + rate + "discount :" + discount);
 
-        net = (quantity * rate) - (quantity * discount);
+//        quantity = ParseDouble(editTextQuantity.getText().toString());
+//        rate = ParseDouble(editTextRate.getText().toString());
+//        discount = ParseDouble(editTextDiscount.getText().toString());
+//
+//        Log.d(TAG, "calculateNetValue: " + quantity + "rate :" + rate + "discount :" + discount);
+//        net = (quantity * rate) - (quantity * discount);
         editTextNet.setText(String.valueOf(net));
 
     }
@@ -388,7 +383,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     }
 
     private void addToCart() {
-        double qty = 0, rate = 0, disc = 0, net = 0, free_qty, old_qty = 0;
+        double qty = 0, rate = 0, disc = 0, net = 0, free_qty, old_qty = 0,discPercentage;
         String stock;
         qty = Double.valueOf(editTextQuantity.getText().toString());
         free_qty = Double.valueOf(editTextFreeQuantity.getText().toString());
@@ -396,6 +391,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         disc = Double.valueOf(editTextDiscount.getText().toString());
         stock = editTextStock.getText().toString();
         net = Double.valueOf(editTextNet.getText().toString());
+        discPercentage=ParseDouble(editTextDiscountPercentage.getText().toString());
 
         Log.d(TAG, "addToCart: net amount " + net);
 
@@ -408,77 +404,6 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
         // add items in to the cart...........................
 
-        //check cart empty or not
-//        if (Cart.gCart.size() > 0) {
-//            boolean isFound = false;
-//            int position;
-//
-//            //check item already added into the cart
-//            for (position = 0; position < Cart.gCart.size(); position++) {
-//                ItemModel itemModel = Cart.gCart.get(position);
-//                if (itemModel.getProductCode().equals(editTextProductCode.getText().toString())) {
-//                    old_qty = itemModel.getQty();
-//                    isFound = true;
-//                    break;
-//                }
-//            }
-//
-//            //if item found then update cart
-//
-//            if (isFound) {
-//                ItemModel itemModel = new ItemModel();
-//                Cart.gCart.remove(position);
-//
-//                itemModel.setDocNo(mDoc);
-//                itemModel.setBarCode(barCode);
-//                itemModel.setProductCode(editTextProductCode.getText().toString());
-//                itemModel.setProductName(editTextProductName.getText().toString());
-//                itemModel.setQty(qty + old_qty);
-//                itemModel.setFreeQty(free_qty);
-//                itemModel.setSelectedPackage(selectedUnit);
-//                itemModel.setSelectedFreePackage(selectedFreeUnit);
-//                itemModel.setRate(rate);
-//                itemModel.setDiscount(discount);
-//                itemModel.setCostPrice(costPrice);
-//                itemModel.setSalePrice(salePrice);
-//                itemModel.setStock(stock);
-//                itemModel.setUnit1(unit1);
-//                itemModel.setUnit2(unit2);
-//                itemModel.setUnit3(unit3);
-//                itemModel.setUnit1Qty(unit1Qty);
-//                itemModel.setUnit2Qty(unit2Qty);
-//                itemModel.setUnit3Qty(unit3Qty);
-//                itemModel.setNet(net);
-//                Cart.gCart.add(position, itemModel);
-//
-//            }//item not found in cart add to cart
-//            else {
-//                ItemModel itemModel = new ItemModel();
-//                itemModel.setDocNo(mDoc);
-//                itemModel.setBarCode(barCode);
-//                itemModel.setProductCode(editTextProductCode.getText().toString());
-//                itemModel.setProductName(editTextProductName.getText().toString());
-//                itemModel.setQty(qty);
-//                itemModel.setFreeQty(free_qty);
-//                itemModel.setSelectedPackage(selectedUnit);
-//                itemModel.setSelectedFreePackage(selectedFreeUnit);
-//                itemModel.setRate(rate);
-//                itemModel.setDiscount(discount);
-//                itemModel.setCostPrice(costPrice);
-//                itemModel.setSalePrice(salePrice);
-//                itemModel.setStock(stock);
-//                itemModel.setUnit1(unit1);
-//                itemModel.setUnit2(unit2);
-//                itemModel.setUnit3(unit3);
-//                itemModel.setUnit1Qty(unit1Qty);
-//                itemModel.setUnit2Qty(unit2Qty);
-//                itemModel.setUnit3Qty(unit3Qty);
-//                itemModel.setNet(net);
-//                Cart.gCart.add(itemModel);
-//            }
-//
-//        } // Cart is empty add new items
-//        else {
 
         ItemModel itemModel = new ItemModel();
         itemModel.setDocNo(mDoc);
@@ -491,6 +416,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         itemModel.setSelectedFreePackage(selectedFreeUnit);
         itemModel.setRate(rate);
         itemModel.setDiscount(discount);
+        itemModel.setDiscountPercentage(discountPercentage);
         itemModel.setCostPrice(costPrice);
         itemModel.setSalePrice(salePrice);
         itemModel.setStock(stock);
@@ -502,6 +428,8 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         itemModel.setUnit3Qty(unit3Qty);
         itemModel.setNet(net);
         Cart.gCart.add(itemModel);
+        cart_count++;
+        invalidateOptionsMenu();
         // }
 
 
@@ -534,7 +462,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         editTextQuantity.setText("0");
         editTextFreeQuantity.setText("0");
         editTextRate.setText("");
-        editTextDiscount.setText("0");
+        editTextTotal.setText("0.0");
         editTextCost.setText("");
         editTextSale.setText("");
         editTextStock.setText("");
@@ -651,8 +579,13 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     private void setValues(JSONObject response) {
 
         try {
-            Log.d(TAG, "setValues: " + response);
 
+            editTextDiscount.setEnabled(true);
+            editTextQuantity.setEnabled(true);
+            editTextFreeQuantity.setEnabled(true);
+            editTextDiscountPercentage.setEnabled(true);
+
+            Log.d(TAG, "setValues: " + response);
             String productCode = response.getString("ProductCode");
             String productName = response.getString("ProductName");
 
@@ -727,6 +660,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
 
     private void initView() {
+
         txtAddedPrice.setEnabled(false);
         txtAddedBarcode.setEnabled(false);
         txtAddedQuantity.setEnabled(false);
@@ -738,6 +672,12 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         editTextSale.setEnabled(false);
         editTextRate.setEnabled(false);
         editTextStock.setEnabled(false);
+        editTextQuantity.setEnabled(false);
+        editTextDiscount.setEnabled(false);
+        editTextTotal.setEnabled(false);
+        editTextDiscountPercentage.setEnabled(false);
+        editTextFreeQuantity.setEnabled(false);
+
         editTextBarcode.setFocusableInTouchMode(true);
         editTextBarcode.requestFocus();
 
@@ -845,5 +785,195 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     @Override
     public void onComplete(String code) {
         editTextBarcode.setText(code);
+    }
+
+
+    private void quantityCustomDialog(String value) {
+
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View dialogView = layoutInflater.inflate(R.layout.custom_dialog, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+
+        final EditText editTextUserInput = (EditText) dialogView.findViewById(R.id.editTextDialogUserInput);
+        final TextView textView = (TextView) dialogView.findViewById(R.id.textViewTitle);
+        editTextUserInput.setText(value);
+        editTextUserInput.setSelection(editTextUserInput.getText().length());
+        textView.setText("Enter the quantity");
+
+        builder.setCancelable(false)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
+                        editTextQuantity.setText(editTextUserInput.getText().toString());
+                        //calculate total
+                        double total=(ParseDouble(editTextQuantity.getText().toString()) * ParseDouble(editTextRate.getText().toString()));
+                        editTextTotal.setText(String.valueOf(total));
+                        calculateNetValue(); }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
+                        dialog.cancel();
+
+
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+
+    }
+    private void freeQuantityCustomDialog(String value) {
+
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View dialogView = layoutInflater.inflate(R.layout.custom_dialog, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+
+        final EditText editTextUserInput = (EditText) dialogView.findViewById(R.id.editTextDialogUserInput);
+        final TextView textView = (TextView) dialogView.findViewById(R.id.textViewTitle);
+        editTextUserInput.setText(value);
+        editTextUserInput.setSelection(editTextUserInput.getText().length());
+        textView.setText("Enter free quantity");
+
+        builder.setCancelable(false)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
+                        editTextFreeQuantity.setText(editTextUserInput.getText().toString());
+                        //calculate total
+                        double total=(ParseDouble(editTextQuantity.getText().toString()) * ParseDouble(editTextRate.getText().toString()));
+                        editTextTotal.setText(String.valueOf(total));
+                        calculateNetValue(); }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
+                        dialog.cancel();
+
+
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+
+    }
+
+    private void discountAmountCustomDialog(String value) {
+
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View dialogView = layoutInflater.inflate(R.layout.custom_dialog, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+
+        final EditText editTextUserInput = (EditText) dialogView.findViewById(R.id.editTextDialogUserInput);
+        final TextView textView = (TextView) dialogView.findViewById(R.id.textViewTitle);
+        editTextUserInput.setText(value);
+        editTextUserInput.setSelection(editTextUserInput.getText().length());
+        textView.setText("Discount amount");
+
+        builder.setCancelable(false)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
+                        editTextDiscount.setText(editTextUserInput.getText().toString());
+                        double total = ParseDouble(editTextTotal.getText().toString());
+                        double discountPercentage = ParseDouble(editTextUserInput.getText().toString()) / total * 100;
+                        editTextDiscountPercentage.setText(String.format("%.2f",discountPercentage));
+                        calculateNetValue();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
+                        dialog.cancel();
+
+
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+
+    }
+
+    private void discountPercentageCustomDialog(String value) {
+
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View dialogView = layoutInflater.inflate(R.layout.custom_dialog, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+
+        final EditText editTextUserInput = (EditText) dialogView.findViewById(R.id.editTextDialogUserInput);
+        final TextView textView = (TextView) dialogView.findViewById(R.id.textViewTitle);
+        editTextUserInput.setText(value);
+        editTextUserInput.setSelection(editTextUserInput.getText().length());
+        textView.setText("Discount percentage");
+
+        builder.setCancelable(false)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
+
+                        editTextDiscountPercentage.setText(editTextUserInput.getText().toString());
+                        discountPercentage = ParseDouble(editTextUserInput.getText().toString());
+                        double percentageDecimal = discountPercentage / 100;
+                        double discountAmount = percentageDecimal * ParseDouble(editTextTotal.getText().toString());
+                        editTextDiscount.setText(String.format("%.2f",discountAmount));
+                        calculateNetValue();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
+                        dialog.cancel();
+
+
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.cart_toolbar, menu);
+        MenuItem menuItem = menu.findItem(R.id.action_cart);
+        Log.d(TAG, "onCreateOptionsMenu: "+ Converter.convertLayoutToImage(GoodsReceiverActivity.this,cart_count,R.drawable.ic_shopping_cart));
+        menuItem.setIcon(Converter.convertLayoutToImage(GoodsReceiverActivity.this,cart_count,R.drawable.ic_shopping_cart));
+        MenuItem menuItem2 = menu.findItem(R.id.action_delete);
+        menuItem2.setVisible(false);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+
+        int id = item.getItemId();
+
+        return super.onOptionsItemSelected(item);
     }
 }

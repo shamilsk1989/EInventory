@@ -9,6 +9,7 @@ import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
+import android.preference.PreferenceManager
 import android.provider.Settings
 import android.support.v4.content.FileProvider
 import android.support.v7.app.AlertDialog
@@ -51,6 +52,10 @@ class ReceiptPdfViewActivity : AppCompatActivity() {
     lateinit var salesmanId: String
     lateinit var action: String
     internal var amount: Double = 0.toDouble()
+    var PREF_KEY_HEADER1 = "key_header_1"
+    var PREF_KEY_HEADER2 = "key_header_2"
+    var PREF_KEY_HEADER3 = "key_header_3"
+    var PREF_KEY_FOOTER = "key_footer"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -290,7 +295,7 @@ class ReceiptPdfViewActivity : AppCompatActivity() {
             share.action = Intent.ACTION_SEND
             share.type = "application/pdf"
             share.putExtra(Intent.EXTRA_STREAM, uri)
-            mContext.startActivity(Intent.createChooser(share, "Share to :"))
+            startActivity(Intent.createChooser(share, "Share to :"))
         }else{
             Toast.makeText(this,"File not found",Toast.LENGTH_LONG).show()
         }
@@ -312,46 +317,50 @@ class ReceiptPdfViewActivity : AppCompatActivity() {
         val helper = dbHelper(this)
         val database = helper.readableDatabase
         val cursor = helper.getPaperSettings(database)
-        var companyName = "ecorn.com"
-        var companyAddress = "+974 123456"
-        var companyPhone = "mail@encorn.com"
-        var footer = "Thank you"
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        var header1 =sharedPreferences.getString(PREF_KEY_HEADER1, "0")
+        var header2 = sharedPreferences.getString(PREF_KEY_HEADER2, "0")
+        var header3 = sharedPreferences.getString(PREF_KEY_HEADER3, "0")
+        var footer = sharedPreferences.getString(PREF_KEY_FOOTER, "0")
 
-        val bmp: Bitmap
-        var img: ByteArray? = null
 
-        if (cursor.moveToFirst()) {
-            companyName = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_NAME))
-            companyAddress = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_ADDRESS))
-            companyPhone = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_PHONE))
-            footer = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_FOOTER))
-            img = cursor.getBlob(cursor.getColumnIndex(DataContract.PaperSettings.COL_LOGO))
-            //Log.d(ViewPdfActivity.TAG, "image : " + img!!)
+//        val bmp: Bitmap
+//        var img: ByteArray? = null
+//
+//        if (cursor.moveToFirst()) {
+//            companyName = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_NAME))
+//            companyAddress = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_ADDRESS))
+//            companyPhone = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_PHONE))
+//            Log.d(TAG,"name arabic"+companyAddress)
+//            footer = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_FOOTER))
+//            img = cursor.getBlob(cursor.getColumnIndex(DataContract.PaperSettings.COL_LOGO))
+//            //Log.d(ViewPdfActivity.TAG, "image : " + img!!)
+//
+//        }
+//
+//        cursor.close()
+//        database.close()
 
-        }
-        cursor.close()
-        database.close()
+
 
         try {
 
             val width = 480f
-            var max = 400f;
-            var fontSmall = 28f;
-            var fontBig = 45f;
-            var fontMediam = 28f;
-            val printNormal = BaseFont.createFont("assets/brandon_bold.otf", "UTF-8", BaseFont.EMBEDDED)//BaseFont.createFont("assets/cour.ttf", "UTF-8", BaseFont.EMBEDDED)
-            val printBold = BaseFont.createFont("assets/brandon_bold.otf", "UTF-8", BaseFont.EMBEDDED)
-            val printArabic = BaseFont.createFont("assets/fonts/Arial.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED)
-            //BaseFont.createFont("assets/LateefRegOT.ttf", "UTF-8", BaseFont.EMBEDDED)
+            var max = 220f;
+            val fontSmall = 30f;
+            val fontMed = 36f;
+            val fontBig = 40f;
 
-            val urName = BaseFont.createFont("assets/fonts/mll.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED)
-            val mArabicFont = Font(urName, fontSmall, Font.NORMAL, BaseColor.BLACK)
+            val baseFont = BaseFont.createFont("assets/brandon_bold.otf", "UTF-8", BaseFont.EMBEDDED)
+            val baseFontArial = BaseFont.createFont("assets/fonts/Arial.ttf", "UTF-8", BaseFont.EMBEDDED)
+            val arabicBaseFont = BaseFont.createFont("assets/fonts/mll.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED)
 
-            val mPrintNormal = Font(printNormal, fontSmall, Font.NORMAL, BaseColor.BLACK)
-            val mPrintBoldMediam = Font(printBold, fontMediam, Font.NORMAL, BaseColor.BLACK)
-            val mPrintBoldBig = Font(printBold, fontBig, Font.NORMAL, BaseColor.BLACK)
-            //val mPrintArabic = Font(printArabic, fontMediam, Font.NORMAL, BaseColor.BLACK)
-            // val mOrderIdFont = Font(urName, mHeadingFontSize, Font.NORMAL, BaseColor.BLACK)
+
+            val mArabicFont = Font(arabicBaseFont, fontSmall, Font.NORMAL, BaseColor.BLACK)
+            val mPrintNormal = Font(baseFontArial, fontSmall, Font.NORMAL, BaseColor.BLACK)
+            val mPrintMedium = Font(baseFontArial, fontMed, Font.NORMAL, BaseColor.BLACK)
+            val mPrintBoldBig = Font(baseFontArial, fontBig, Font.NORMAL, BaseColor.BLACK)
+
             if (docsize != 0f) {
                 max = docsize
             }
@@ -363,7 +372,7 @@ class ReceiptPdfViewActivity : AppCompatActivity() {
             document.open()
             // add logo
             try {
-                bmp = getBitmapFromAssets("icon.png")
+                val bmp = getBitmapFromAssets("icon.png")
                 val scaledBitmap = ViewPdfActivity.scaleDown(bmp, 80f, true)
                 val stream = ByteArrayOutputStream()
                 scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
@@ -374,50 +383,63 @@ class ReceiptPdfViewActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
 
-            paragraph=Paragraph("المجموع",mArabicFont)
-            paragraph.alignment = Element.ALIGN_CENTER
-            document.add(paragraph)
+            val table2: PdfPTable
+            val columnWidths2 = floatArrayOf(width - 20)
+            table2 = PdfPTable(columnWidths2)
+            table2.totalWidth = width - 20
+            table2.isLockedWidth = true
+            table2.horizontalAlignment = Element.ALIGN_LEFT
 
-            paragraph = Paragraph(companyName, mPrintBoldBig)
-            paragraph.alignment = Element.ALIGN_CENTER
-            document.add(paragraph)
+            var phraseh1 = Phrase(
+                    header1, mArabicFont)
+            cell = PdfPCell(phraseh1)
+            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+            cell.horizontalAlignment = Element.ALIGN_CENTER
+            cell.border = Rectangle.NO_BORDER
+            table2.addCell(cell)
 
+            var phraseh2 = Phrase(
+                    header2,mPrintNormal)
+            cell = PdfPCell(phraseh2)
+            cell.horizontalAlignment = Element.ALIGN_CENTER
+            cell.border = Rectangle.NO_BORDER
+            table2.addCell(cell)
 
-            paragraph = Paragraph(companyAddress, mPrintBoldMediam)
-            paragraph.alignment = Element.ALIGN_CENTER
-            document.add(paragraph)
+//            var phraseh3 = Phrase(
+//                    companyAddress, mPrintNormal)
+//            cell = PdfPCell(phraseh3)
+//            cell.horizontalAlignment = Element.ALIGN_CENTER
+//            cell.border = Rectangle.NO_BORDER
+//            table2.addCell(cell)
 
-            paragraph = Paragraph(companyPhone, mPrintBoldMediam)
-            paragraph.alignment = Element.ALIGN_CENTER
-            document.add(paragraph)
+            var phraseh4 = Phrase(
+                    header3, mPrintNormal)
+            cell = PdfPCell(phraseh4)
+            cell.horizontalAlignment = Element.ALIGN_CENTER
+            cell.border = Rectangle.NO_BORDER
+            table2.addCell(cell)
+            document.add(table2)
+           // document.add( Chunk.NEWLINE )
+
 
             val separator = DashedSeparator()
             separator.percentage = 59500f / 523f
             val linebreak = Chunk(separator)
 
-
-            paragraph = Paragraph("Receipt# " + salesmanId+"/"+receiptNo, mPrintBoldMediam)
-            paragraph.alignment = Element.ALIGN_LEFT
-            document.add(paragraph)
-            paragraph = Paragraph(customerName, mPrintBoldMediam)
-            paragraph.alignment = Element.ALIGN_LEFT
-            document.add(paragraph)
-
-//            paragraph = Paragraph("QR", mPrintBoldMediam)
-//            paragraph.alignment = Element.ALIGN_LEFT
-//            document.add(paragraph)
-
-            paragraph = Paragraph("Date " + receiptDate, mPrintBoldMediam)
+            //paragraph = Paragraph("Receipt# " + salesmanId+"/"+receiptNo, mPrintNormal)
+            var res=salesmanId+"/"+receiptNo
+            paragraph = Paragraph("ReceiptNo:"+res, mPrintNormal)
             paragraph.alignment = Element.ALIGN_LEFT
             document.add(paragraph)
 
+            paragraph = Paragraph(customerName, mPrintNormal)
+            paragraph.alignment = Element.ALIGN_LEFT
+            document.add(paragraph)
+
+            paragraph = Paragraph("Date " + receiptDate, mPrintNormal)
+            paragraph.alignment = Element.ALIGN_LEFT
+            document.add(paragraph)
             document.add(linebreak)
-
-
-//            document.add(linebreak)
-//            paragraph = Paragraph("Received Amount  " + amount, mPrintBoldMediam)
-//            paragraph.alignment = Element.ALIGN_LEFT
-//            document.add(paragraph)
 
             val snWidth = 0f
             val p = (width - 10) / 3
@@ -430,41 +452,37 @@ class ReceiptPdfViewActivity : AppCompatActivity() {
             table.totalWidth = width - 10
             table.isLockedWidth = true
             table.horizontalAlignment = Element.ALIGN_LEFT
+//
+//            cell = PdfPCell(Phrase(Chunk("Item", mPrintNormal)))
+//            cell.horizontalAlignment = Element.ALIGN_LEFT
+//            cell.border = Rectangle.NO_BORDER
+//            table.addCell(cell)
+//
+//            cell = PdfPCell(Phrase(Chunk("", mPrintNormal)))
+//            cell.horizontalAlignment = Element.ALIGN_RIGHT
+//            cell.border = Rectangle.NO_BORDER
+//            table.addCell(cell)
+//
+//            cell = PdfPCell(Phrase(Chunk("", mPrintNormal)))
+//            cell.horizontalAlignment = Element.ALIGN_CENTER
+//            cell.border = Rectangle.NO_BORDER
+//            table.addCell(cell)
+//
+//            cell = PdfPCell(Phrase(Chunk("", mPrintNormal)))
+//            cell.horizontalAlignment = Element.ALIGN_RIGHT
+//            cell.border = Rectangle.NO_BORDER
+//            table.addCell(cell)
+//
+//            val separato = DashedSeparator()
+//            separato.percentage = 59500f / 523f
+//            cell = PdfPCell(Phrase(Chunk(separato)))
+//            cell.colspan = 5
+//            cell.horizontalAlignment = Element.ALIGN_RIGHT
+//            cell.border = Rectangle.NO_BORDER
+//            table.addCell(cell)
+//            table.headerRows = 1
 
-            cell = PdfPCell(Phrase(Chunk("Item", mPrintNormal)))
-            cell.horizontalAlignment = Element.ALIGN_LEFT
-            cell.border = Rectangle.NO_BORDER
-            table.addCell(cell)
 
-            cell = PdfPCell(Phrase(Chunk("", mPrintNormal)))
-            cell.horizontalAlignment = Element.ALIGN_RIGHT
-            cell.border = Rectangle.NO_BORDER
-            table.addCell(cell)
-
-            cell = PdfPCell(Phrase(Chunk("", mPrintNormal)))
-            cell.horizontalAlignment = Element.ALIGN_CENTER
-            cell.border = Rectangle.NO_BORDER
-            table.addCell(cell)
-
-            cell = PdfPCell(Phrase(Chunk("", mPrintNormal)))
-            cell.horizontalAlignment = Element.ALIGN_RIGHT
-            cell.border = Rectangle.NO_BORDER
-            table.addCell(cell)
-
-            val separato = DashedSeparator()
-            separato.percentage = 59500f / 523f
-            cell = PdfPCell(Phrase(Chunk(separato)))
-            cell.colspan = 5
-            cell.horizontalAlignment = Element.ALIGN_RIGHT
-            cell.border = Rectangle.NO_BORDER
-            table.addCell(cell)
-            table.headerRows = 1
-
-
-            var i = 0
-
-            // for (recod in 1..1) {
-            i++;
 
             cell = PdfPCell(Paragraph("Received Amount", mPrintNormal))
             cell.horizontalAlignment = Element.ALIGN_LEFT
@@ -489,28 +507,28 @@ class ReceiptPdfViewActivity : AppCompatActivity() {
 
             // arabic
 
-            val phrase = Phrase("المجموع الصافي ", mArabicFont)
-            cell = PdfPCell(phrase)
-            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-            cell.horizontalAlignment = Element.ALIGN_RIGHT
-            cell.border = Rectangle.NO_BORDER
-            table.addCell(cell)
-
-
-            cell = PdfPCell(Phrase(Chunk("", mPrintNormal)))
-            cell.horizontalAlignment = Element.ALIGN_RIGHT
-            cell.border = Rectangle.NO_BORDER
-            table.addCell(cell)
-
-            cell = PdfPCell(Phrase(Chunk("", mPrintNormal)))
-            cell.horizontalAlignment = Element.ALIGN_CENTER
-            cell.border = Rectangle.NO_BORDER
-            table.addCell(cell)
-
-            cell = PdfPCell(Phrase(Chunk(" ", mPrintNormal)))
-            cell.horizontalAlignment = Element.ALIGN_RIGHT
-            cell.border = Rectangle.NO_BORDER
-            table.addCell(cell)
+//            val phrase = Phrase("المجموع الصافي ", mArabicFont)
+//            cell = PdfPCell(phrase)
+//            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+//            cell.horizontalAlignment = Element.ALIGN_RIGHT
+//            cell.border = Rectangle.NO_BORDER
+//            table.addCell(cell)
+//
+//
+//            cell = PdfPCell(Phrase(Chunk("", mPrintNormal)))
+//            cell.horizontalAlignment = Element.ALIGN_RIGHT
+//            cell.border = Rectangle.NO_BORDER
+//            table.addCell(cell)
+//
+//            cell = PdfPCell(Phrase(Chunk("", mPrintNormal)))
+//            cell.horizontalAlignment = Element.ALIGN_CENTER
+//            cell.border = Rectangle.NO_BORDER
+//            table.addCell(cell)
+//
+//            cell = PdfPCell(Phrase(Chunk(" ", mPrintNormal)))
+//            cell.horizontalAlignment = Element.ALIGN_RIGHT
+//            cell.border = Rectangle.NO_BORDER
+//            table.addCell(cell)
             // }
 
             val separator1 = DashedSeparator()
@@ -543,26 +561,26 @@ class ReceiptPdfViewActivity : AppCompatActivity() {
 //            table.addCell(cell)
 
 
-            cell = PdfPCell(Phrase("Total", mPrintBoldMediam))
+            cell = PdfPCell(Phrase("Total", mPrintNormal))
             cell.colspan = 2
             cell.horizontalAlignment = Element.ALIGN_LEFT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
-            cell = PdfPCell(Phrase((currencyFormatter(amount) ?: "00.00"), mPrintBoldMediam))
+            cell = PdfPCell(Phrase((currencyFormatter(amount) ?: "00.00"), mPrintNormal))
             cell.colspan = 2
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
-            cell = PdfPCell(Phrase("Discount", mPrintBoldMediam))
+            cell = PdfPCell(Phrase("Discount", mPrintNormal))
             cell.colspan = 2
             cell.horizontalAlignment = Element.ALIGN_LEFT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
             cell = PdfPCell(Phrase((currencyFormatter(0.0)
-                    ?: "0"), mPrintBoldMediam))
+                    ?: "0"), mPrintNormal))
             cell.colspan = 2
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
@@ -575,13 +593,13 @@ class ReceiptPdfViewActivity : AppCompatActivity() {
             table.addCell(cell)
 
 
-            cell = PdfPCell(Phrase("Net Total", mPrintBoldMediam))
+            cell = PdfPCell(Phrase("Net Total", mPrintNormal))
             cell.colspan = 2
             cell.horizontalAlignment = Element.ALIGN_LEFT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
-            cell = PdfPCell(Phrase((currencyFormatter(amount) ?: "0"), mPrintBoldMediam))
+            cell = PdfPCell(Phrase((currencyFormatter(amount) ?: "0"), mPrintNormal))
             cell.colspan = 2
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
@@ -589,22 +607,22 @@ class ReceiptPdfViewActivity : AppCompatActivity() {
 
 
             //net total arabic
-            val phraseAr = Phrase(
-                    "المجموع الصافي ", mArabicFont)
-            cell = PdfPCell(phraseAr)
-            cell.colspan = 2
-            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-            cell.horizontalAlignment = Element.ALIGN_RIGHT
-            cell.border = Rectangle.NO_BORDER
-            table.addCell(cell)
-
-            // add empty sapce
-
-            cell = PdfPCell(Phrase("", mPrintBoldMediam))
-            cell.colspan = 2
-            cell.horizontalAlignment = Element.ALIGN_LEFT
-            cell.border = Rectangle.NO_BORDER
-            table.addCell(cell)
+//            val phraseAr = Phrase(
+//                    "المجموع الصافي ", mArabicFont)
+//            cell = PdfPCell(phraseAr)
+//            cell.colspan = 2
+//            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+//            cell.horizontalAlignment = Element.ALIGN_RIGHT
+//            cell.border = Rectangle.NO_BORDER
+//            table.addCell(cell)
+//
+//            // add empty sapce
+//
+//            cell = PdfPCell(Phrase("", mPrintBoldMediam))
+//            cell.colspan = 2
+//            cell.horizontalAlignment = Element.ALIGN_LEFT
+//            cell.border = Rectangle.NO_BORDER
+//            table.addCell(cell)
 
             document.add(table)
 
@@ -616,7 +634,7 @@ class ReceiptPdfViewActivity : AppCompatActivity() {
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
-            paragraph = Paragraph("Thank you", mPrintBoldBig)
+            paragraph = Paragraph(footer, mPrintNormal)
             paragraph.alignment = Element.ALIGN_CENTER
             document.add(paragraph)
 
@@ -626,9 +644,10 @@ class ReceiptPdfViewActivity : AppCompatActivity() {
             document.close()
 
             if (docsize == 0f) {
-                var pg = writer.pageNumber?.minus(1)
-                var size = (pg * (max?.minus(30f)))?.plus(y!!)
-                createPdf(dest, size)
+                var  tableHeightTotal =table?.totalHeight;
+                var pg = writer.pageNumber
+                //var remove=pg*50f
+                createPdf(dest, tableHeightTotal+900f)
             } else {
                 generateThump()
                 viewPdf()

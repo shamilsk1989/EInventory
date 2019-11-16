@@ -38,11 +38,11 @@ public class SaveSales extends AsyncTask<SaleData, Void, String> {
         double netAmount = data[0].netAmount;
         String paymentMode = data[0].paymentMode;
         String mDate = data[0].mDate;
-        Log.d(TAG, "doInBackground: "+invoiceDate);
+        Log.d(TAG, "doInBackground: "+disc_per);
         int syncStatus = data[0].syncStatus;
         if (dbHelper.checkInvoice(database, invoiceNo)) {
             database.close();
-            dbHelper.updateInvoice(invoiceNo, invoiceDate, salesmanId, customerCode, customerName, base_total, disc, netAmount, paymentMode, mDate, syncStatus);
+            dbHelper.updateInvoice(invoiceNo, invoiceDate, salesmanId, customerCode, customerName, base_total, disc,disc_per, netAmount, paymentMode, mDate, syncStatus);
             dbHelper.updateInvoiceDetails(invoiceNo, syncStatus);
 
             return "Saved";

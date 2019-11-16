@@ -1,31 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="General">
-        <EditTextPreference
-            android:defaultValue="@string/default_server_url"
-            android:key="@string/key_server_url"
-            android:summary="@string/default_server_url"
-            android:title="@string/title_server" />
+
+        <PreferenceScreen
+            android:title="@string/server_settings"
+            android:summary="@string/summery_server">
+
+            <EditTextPreference
+                android:defaultValue="@string/default_server_url"
+                android:key="@string/key_server_url"
+                android:summary="@string/default_server_url"
+                android:title="@string/title_server" />
+
+            <EditTextPreference
+                android:defaultValue="@string/default_company_name"
+                android:key="@string/key_company_name"
+                android:title="@string/title_company_name" />
+
+            <EditTextPreference
+                android:defaultValue="@string/default_company_name"
+                android:key="@string/key_company_code"
+                android:title="@string/title_company_code" />
+
+            <EditTextPreference
+                android:defaultValue="@string/default_company_name"
+                android:key="@string/key_branch_code"
+                android:title="@string/title_branch" />
+
+            <EditTextPreference
+                android:defaultValue="@string/default_company_name"
+                android:key="@string/key_location"
+                android:title="@string/title_location" />
+
+            <EditTextPreference
+                android:defaultValue="@string/default_company_name"
+                android:key="@string/key_period"
+                android:title="@string/title_period" />
+            <EditTextPreference
+                android:defaultValue="@string/default_company_name"
+                android:key="@string/key_employee"
+                android:title="@string/title_employee" />
+
+        </PreferenceScreen>
+
+
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Modules">
 
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="@string/key_module_goods"
-            android:title="@string/title_module_goods" />
-
-        <SwitchPreference
+        <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/key_module_inventory"
             android:title="@string/title_module_inventory" />
 
-        <SwitchPreference
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/key_module_goods"
+            android:title="@string/title_module_goods" />
+
+        <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/key_module_sales"
             android:title="@string/title_module_sales" />
 
-        <SwitchPreference
+        <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/key_module_receipts"
             android:title="@string/title_module_receipts" />
@@ -43,17 +82,17 @@
         <EditTextPreference
             android:title="@string/title_header_1"
             android:key="@string/key_header_1"
-            android:defaultValue="@string/default_header_1"
+            android:defaultValue="@string/default_header"
             android:summary="@string/summery_header_1"/>
         <EditTextPreference
             android:title="@string/title_header_2"
             android:key="@string/key_header_2"
-            android:defaultValue="@string/default_header_2"
+            android:defaultValue="@string/default_header"
             android:summary="@string/summery_header_2"/>
         <EditTextPreference
             android:title="@string/title_header_3"
             android:key="@string/key_header_3"
-            android:defaultValue="@string/default_header_3"
+            android:defaultValue="@string/default_header"
             android:summary="@string/summery_header_3"/>
         <EditTextPreference
             android:title="@string/title_footer"

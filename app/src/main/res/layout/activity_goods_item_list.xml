@@ -8,7 +8,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <include
-        android:id="@+id/toolbar"
+
         layout="@layout/toolbar_layout">
 
     </include>
@@ -24,71 +24,8 @@
             android:layout_marginRight="16dp"
             android:layout_marginLeft="16dp"
             android:layout_marginTop="16dp"
-
             android:orientation="vertical"
             >
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/layout1"
-                android:orientation="horizontal"
-                android:weightSum="2"
-                android:background="@drawable/editext_border">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Total Count:"
-                    android:gravity="center|left"
-                    android:textSize="18sp"
-                    android:padding="10dp"
-                    android:textColor="@android:color/black" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:id="@+id/txtTotalCount"
-                    android:gravity="center|left"
-                    android:textSize="18sp"
-                    android:padding="10dp"
-                    android:textColor="@android:color/black">
-                </TextView>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/layout2"
-                android:orientation="horizontal"
-                android:layout_marginTop="5dp"
-                android:weightSum="2"
-                android:background="@drawable/editext_border">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Total Amount:"
-                    android:gravity="center|left"
-                    android:textSize="18sp"
-                    android:padding="10dp"
-                    android:textColor="@android:color/black" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:id="@+id/txtTotal"
-                    android:gravity="center|left"
-                    android:textSize="18sp"
-                    android:padding="10dp"
-                    android:textColor="@android:color/black">
-                </TextView>
-            </LinearLayout>
 
 
             <TextView
@@ -113,13 +50,12 @@
             <Button
                 android:id="@+id/btnSave"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/button_height"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="10dp"
-                android:background="@color/colorPrimary"
-                android:text="NEXT"
+                android:layout_marginEnd ="0dp"
+                android:background="@android:color/holo_green_dark"
                 android:textColor="@android:color/white" />
-
         </LinearLayout>
     </ScrollView>
 

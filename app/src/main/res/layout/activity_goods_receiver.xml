@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <include
-        android:id="@+id/toolbar"
+
         layout="@layout/toolbar_layout">
 
     </include>
@@ -268,6 +268,14 @@
                         android:text="Discount"
                         android:textColor="@android:color/black"
                         android:textSize="18sp" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="20dp"
+                        android:gravity="center|left"
+                        android:text="Total"
+                        android:textColor="@android:color/black"
+                        android:textSize="18sp" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -345,10 +353,9 @@
                             android:layout_height="40dp"
                             android:layout_marginTop="20dp"
                             android:layout_weight="1"
-
                             android:background="@drawable/border_line"
                             android:gravity="center|left"
-                            android:inputType="numberDecimal|numberSigned"
+                            android:inputType="none"
                             android:padding="5dp"
                             android:text="0"
                             android:textColor="@android:color/black"
@@ -405,20 +412,56 @@
                         android:textSize="18sp" />
 
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <EditText
+                            android:id="@+id/editTextDiscount"
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:layout_marginTop="20dp"
+                            android:background="@drawable/border_line"
+                            android:gravity="center|left"
+                            android:padding="5dp"
+                            android:hint="amount"
+                            android:textColor="@android:color/black"
+                            android:textSize="18sp"
+                            android:inputType="none" />
+                        <EditText
+                            android:id="@+id/editTextDiscountPercentage"
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:layout_marginTop="20dp"
+                            android:background="@drawable/border_line"
+                            android:gravity="center|left"
+                            android:padding="5dp"
+                            android:layout_marginLeft="5dp"
+                            android:hint="%"
+                            android:textColor="@android:color/black"
+                            android:textSize="18sp"
+                            android:inputType="none"
+                            />
+
+                    </LinearLayout>
+
+
                     <EditText
 
-                        android:id="@+id/editTextDiscount"
+                        android:id="@+id/editTextTotal"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
                         android:layout_marginTop="20dp"
                         android:background="@drawable/border_line"
                         android:gravity="center|left"
-                        android:inputType="numberDecimal"
+                        android:inputType="text"
                         android:padding="5dp"
-                        android:text="0"
                         android:textColor="@android:color/black"
                         android:textSize="18sp" />
-
                     <EditText
 
                         android:id="@+id/editTextCost"

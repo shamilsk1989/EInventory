@@ -343,6 +343,7 @@ public class ListSalesActivity extends AppCompatActivity {
     public void onViewClicked() {
         Intent intent = new Intent(ListSalesActivity.this, CheckCustomerActivity.class);
         intent.putExtra("TYPE", "SAL");
+
         startActivity(intent);
     }
 

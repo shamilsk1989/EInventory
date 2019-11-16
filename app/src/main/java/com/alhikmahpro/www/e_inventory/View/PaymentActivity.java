@@ -134,9 +134,6 @@ public class PaymentActivity extends AppCompatActivity {
         helper = new dbHelper(this);
         editTextDiscount.addTextChangedListener(amountWatcher);
         editTextDiscountPercentage.addTextChangedListener(percentageWatcher);
-
-
-
         initVolleyCallBack();
 
     }
@@ -153,7 +150,7 @@ public class PaymentActivity extends AppCompatActivity {
             if (!s.toString().equals("")) {
                 double discountPercentage = Math.round(Double.parseDouble(s.toString()) / base_total * 100);
 
-                editTextDiscountPercentage.setText(String.valueOf(discountPercentage));
+                editTextDiscountPercentage.setText(String.format("%.2f",discountPercentage));
             }else{
                 editTextDiscountPercentage.setText("");
             }
@@ -181,7 +178,7 @@ public class PaymentActivity extends AppCompatActivity {
                 double discountPercentage = Double.parseDouble(s.toString());
                 double percentageDecimal = discountPercentage / 100;
                 double discountAmount = percentageDecimal * base_total;
-                editTextDiscount.setText(String.valueOf(discountAmount));
+                editTextDiscount.setText(String.format("%.2f",discountAmount));
             }else {
                 editTextDiscount.setText("");
             }
@@ -254,6 +251,7 @@ public class PaymentActivity extends AppCompatActivity {
             invoiceObject.put(DataContract.Invoice.COL_SALESMAN_ID, salesmanId);
             invoiceObject.put(DataContract.Invoice.COL_TOTAL_AMOUNT, base_total);
             invoiceObject.put(DataContract.Invoice.COL_DISCOUNT_AMOUNT, disc);
+            invoiceObject.put(DataContract.Invoice.COL_DISCOUNT_PERCENTAGE,disc_per);
             invoiceObject.put(DataContract.Invoice.COL_NET_AMOUNT, netAmount);
             invoiceObject.put(DataContract.Invoice.COL_PAYMENT_TYPE, paymentMode);
 
@@ -286,8 +284,7 @@ public class PaymentActivity extends AppCompatActivity {
                 detailsObject.put(DataContract.InvoiceDetails.COL_UN_QTY3, cartModel.getUnit3Qty());
                 detailsObject.put(DataContract.InvoiceDetails.COL_RATE, cartModel.getRate());
                 detailsObject.put(DataContract.InvoiceDetails.COL_DISCOUNT, cartModel.getDiscount());
-                detailsObject.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, cartModel.getNet());
-                detailsObject.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, cartModel.getNet());
+                detailsObject.put(DataContract.InvoiceDetails.COL_DISCOUNT_PERCENTAGE, cartModel.getDiscPercentage());
                 detailsObject.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, cartModel.getNet());
                 detailsObject.put(DataContract.InvoiceDetails.COL_SALE_TYPE, cartModel.getSaleType());
                 invoiceDetailsArray.put(detailsObject);
@@ -324,6 +321,7 @@ public class PaymentActivity extends AppCompatActivity {
             object.put(DataContract.GoodsReceive.COL_STAFF_NAME, salesmanId);
             object.put(DataContract.GoodsReceive.COL_TOTAL, base_total);
             object.put(DataContract.GoodsReceive.COL_DISCOUNT_AMOUNT, disc);
+            object.put(DataContract.GoodsReceive.COL_DISCOUNT_PERCENTAGE, disc_per);
             object.put(DataContract.GoodsReceive.COL_NET_AMOUNT, netAmount);
             object.put(DataContract.GoodsReceive.COL_PAYMENT_TYPE, paymentMode);
             object.put(DataContract.GoodsReceive.COL_DATE_TIME, mDate.substring(0, 10));
@@ -350,6 +348,7 @@ public class PaymentActivity extends AppCompatActivity {
                 jsonObject.put("free_quantity", model.getFreeQty());
                 jsonObject.put("rate", model.getRate());
                 jsonObject.put("discount", model.getDiscount());
+                jsonObject.put("discount_percentage", model.getDiscountPercentage());
                 //jsonObject.put("discount_percentage", model.getD
                 jsonObject.put("net_value", model.getNet());
                 jsonObject.put("um1", model.getUnit1());
@@ -428,13 +427,7 @@ public class PaymentActivity extends AppCompatActivity {
 
 
     public void saveSales(int sync) {
-        try {
-            disc_per = Double.valueOf(editTextDiscountPercentage.getText().toString());
-        } catch (NumberFormatException e) {
-            disc_per = 0;
-
-        }
-
+        Log.d(TAG, "saveSales: disc per "+disc_per);
         SaleData saleData = new SaleData(invoiceNo, customerCode, customerName, invoiceDate, salesmanId, base_total, disc,disc_per,netAmount, paymentMode, mDate, sync);
         SaveSales.TaskListener listener = new SaveSales.TaskListener() {
             @Override
@@ -540,6 +533,12 @@ public class PaymentActivity extends AppCompatActivity {
     @OnClick(R.id.btn_pay)
     public void onBtnPayClicked() {
         //saveSales(DataContract.SYNC_STATUS_OK);
+        try {
+            disc_per = Double.valueOf(editTextDiscountPercentage.getText().toString());
+        } catch (NumberFormatException e) {
+            disc_per = 0;
+
+        }
 
         JSONObject resultObject = new JSONObject();
         String url = "";

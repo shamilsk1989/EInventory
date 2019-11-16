@@ -82,7 +82,7 @@ class ViewPdfActivity : AppCompatActivity() {
         intent?.getStringExtra("CUS_NAME")?.let { customerName = it }
                 ?: kotlin.run { customerName = "customer name" }
         intent?.getStringExtra("DOC_NO")?.let { invoiceNo = it }
-                ?: kotlin.run { invoiceNo = "invoice no" }
+                ?: kotlin.run { invoiceNo = "invoice_no" }
         intent?.getStringExtra("DOC_DATE")?.let { invoiceDate = it }
                 ?: kotlin.run { invoiceDate = "invoice date" }
         intent?.getStringExtra("SALESMAN_ID")?.let { salesmanId = it }
@@ -286,8 +286,8 @@ class ViewPdfActivity : AppCompatActivity() {
         val database = helper.readableDatabase
         val cursor = helper.getPaperSettings(database)
         var companyName = "ecorn.com"
-        var companyAddress = "+974 123456"
-        var companyPhone = "mail@encorn.com"
+        var companyAddress = "برمجة الحكمة"
+        var companyPhone = "+9740123456"
         var footer = "Thank you"
 
         val bmp: Bitmap
@@ -311,22 +311,22 @@ class ViewPdfActivity : AppCompatActivity() {
 
             val width = 480f
             var max = 300f;
-            var fontSmall = 28f;
-            var fontBig = 45f;
-            var fontMediam = 28f;
-            val printNormal = BaseFont.createFont("assets/brandon_bold.otf", "UTF-8", BaseFont.EMBEDDED)//BaseFont.createFont("assets/cour.ttf", "UTF-8", BaseFont.EMBEDDED)
-            val printBold = BaseFont.createFont("assets/brandon_bold.otf", "UTF-8", BaseFont.EMBEDDED)
-            val printArabic =BaseFont.createFont("assets/fonts/Arial.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED)
-                    //BaseFont.createFont("assets/LateefRegOT.ttf", "UTF-8", BaseFont.EMBEDDED)
+            val fontSmall = 26f
+            val fontMed = 36f
+            val fontBig = 40f
 
-            val urName = BaseFont.createFont("assets/fonts/mll.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED)
-            val mArabicFont = Font(urName, fontSmall, Font.NORMAL, BaseColor.BLACK)
 
-            val mPrintNormal = Font(printNormal, fontSmall, Font.NORMAL, BaseColor.BLACK)
-            val mPrintBoldMediam = Font(printBold, fontMediam, Font.NORMAL, BaseColor.BLACK)
-            val mPrintBoldBig = Font(printBold, fontBig, Font.NORMAL, BaseColor.BLACK)
-            //val mPrintArabic = Font(printArabic, fontMediam, Font.NORMAL, BaseColor.BLACK)
-           // val mOrderIdFont = Font(urName, mHeadingFontSize, Font.NORMAL, BaseColor.BLACK)
+            val baseFont = BaseFont.createFont("assets/brandon_bold.otf", "UTF-8", BaseFont.EMBEDDED)
+            val baseFontArial = BaseFont.createFont("assets/fonts/Arial.ttf", "UTF-8", BaseFont.EMBEDDED)
+            val arabicBaseFont = BaseFont.createFont("assets/fonts/mll.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED)
+
+
+            val mArabicFont = Font(arabicBaseFont, fontSmall, Font.NORMAL, BaseColor.BLACK)
+            val mPrintNormal = Font(baseFontArial, fontSmall, Font.NORMAL, BaseColor.BLACK)
+            val mPrintMedium = Font(baseFontArial, fontMed, Font.NORMAL, BaseColor.BLACK)
+
+            val mPrintBoldBig = Font(baseFontArial, fontBig, Font.NORMAL, BaseColor.BLACK)
+
             val decimalFormat = DecimalFormat("0.00")
             if (docsize != 0f) {
                 max = docsize
@@ -357,38 +357,61 @@ class ViewPdfActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
 
+            val table2: PdfPTable
+            val columnWidths2 = floatArrayOf(width - 20)
+            table2 = PdfPTable(columnWidths2)
+            table2.totalWidth = width - 20
+            table2.isLockedWidth = true
+            table2.horizontalAlignment = Element.ALIGN_LEFT
 
-            // Column with a writer
-            paragraph = Paragraph(companyName, mPrintBoldBig)
-            paragraph.alignment = Element.ALIGN_CENTER
-            document.add(paragraph)
+            var phraseh1 = Phrase(
+                    companyAddress, mArabicFont)
+            cell = PdfPCell(phraseh1)
+            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+            cell.horizontalAlignment = Element.ALIGN_CENTER
+            cell.border = Rectangle.NO_BORDER
+            table2.addCell(cell)
 
-            paragraph = Paragraph(companyAddress, mPrintBoldMediam)
-            paragraph.alignment = Element.ALIGN_CENTER
-            document.add(paragraph)
+            var phraseh2 = Phrase(
+                    companyName,mPrintNormal)
+            cell = PdfPCell(phraseh2)
+            cell.horizontalAlignment = Element.ALIGN_CENTER
+            cell.border = Rectangle.NO_BORDER
+            table2.addCell(cell)
 
-            paragraph = Paragraph(companyPhone, mPrintBoldMediam)
-            paragraph.alignment = Element.ALIGN_CENTER
-            document.add(paragraph)
+//            var phraseh3 = Phrase(
+//                    companyAddress, mPrintNormal)
+//            cell = PdfPCell(phraseh3)
+//            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+//            cell.horizontalAlignment = Element.ALIGN_CENTER
+//            cell.border = Rectangle.NO_BORDER
+//            table2.addCell(cell)
+            var phraseh4 = Phrase(companyPhone, mPrintNormal)
+            cell = PdfPCell(phraseh4)
+            cell.horizontalAlignment = Element.ALIGN_CENTER
+            cell.border = Rectangle.NO_BORDER
+            table2.addCell(cell)
+            document.add(table2)
+
 
             val separator = DashedSeparator()
             separator.percentage = 59500f / 523f
             val linebreak = Chunk(separator)
 
 
-            paragraph = Paragraph("Receipt#" + invoiceNo, mPrintBoldMediam)
+            paragraph = Paragraph("InvoiceNo: " + salesmanId+"/"+ invoiceNo, mPrintNormal)
             paragraph.alignment = Element.ALIGN_LEFT
             document.add(paragraph)
 
-            paragraph = Paragraph("Salesman: "+salesmanId, mPrintBoldMediam)
+//            paragraph = Paragraph("Salesman: "+salesmanId, mPrintNormal)
+//            paragraph.alignment = Element.ALIGN_LEFT
+//            document.add(paragraph)
+
+            paragraph = Paragraph("Payment Mode:"+paymentMode, mPrintNormal)
             paragraph.alignment = Element.ALIGN_LEFT
             document.add(paragraph)
 
-            paragraph = Paragraph("Payment Mode:"+paymentMode, mPrintBoldMediam)
-            paragraph.alignment = Element.ALIGN_LEFT
-            document.add(paragraph)
-
-            paragraph = Paragraph("Date:" + invoiceDate, mPrintBoldMediam)
+            paragraph = Paragraph("Date:" + invoiceDate, mPrintNormal)
             paragraph.alignment = Element.ALIGN_LEFT
             document.add(paragraph)
 
@@ -401,7 +424,7 @@ class ViewPdfActivity : AppCompatActivity() {
 
             //  val rem = re / 3
 
-            val columnWidths = floatArrayOf(p, re, re, re)
+            val columnWidths = floatArrayOf(re,re, re, re,re)
             table = PdfPTable(columnWidths)
             table.totalWidth = width - 10
             table.isLockedWidth = true
@@ -422,6 +445,11 @@ class ViewPdfActivity : AppCompatActivity() {
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
+            cell = PdfPCell(Phrase(Chunk("Discount", mPrintNormal)))
+            cell.horizontalAlignment = Element.ALIGN_CENTER
+            cell.border = Rectangle.NO_BORDER
+            table.addCell(cell)
+
             cell = PdfPCell(Phrase(Chunk("Total", mPrintNormal)))
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
@@ -438,13 +466,15 @@ class ViewPdfActivity : AppCompatActivity() {
             table.headerRows = 1
             var i = 0
             for (mm in Cart.mCart) {
-                val item = mm.productName
+                val item = mm.productCode
+                val itemName=mm.productName
                 val qty = mm.qty.toString()
+                val dis=mm.discount.toString()
                 val price = decimalFormat.format(mm.rate).toString()
                 val sub_total = decimalFormat.format(mm.net).toString()
                 val item_format = price + " X " + mm.qty
 
-                cell = PdfPCell(Paragraph("item", mPrintNormal))
+                cell = PdfPCell(Paragraph(item, mPrintNormal))
                 cell.horizontalAlignment = Element.ALIGN_LEFT
                 cell.border = Rectangle.NO_BORDER
                 table.addCell(cell)
@@ -459,34 +489,48 @@ class ViewPdfActivity : AppCompatActivity() {
                 cell.border = Rectangle.NO_BORDER
                 table.addCell(cell)
 
+                cell = PdfPCell(Phrase(Chunk(dis, mPrintNormal)))
+                cell.horizontalAlignment = Element.ALIGN_CENTER
+                cell.border = Rectangle.NO_BORDER
+                table.addCell(cell)
+
                 cell = PdfPCell(Phrase(Chunk(sub_total, mPrintNormal)))
                 cell.horizontalAlignment = Element.ALIGN_RIGHT
                 cell.border = Rectangle.NO_BORDER
                 table.addCell(cell)
 
+                cell = PdfPCell(Phrase(Chunk(itemName, mPrintNormal)))
+                cell.horizontalAlignment = Element.ALIGN_LEFT
+                cell.colspan=5
+                cell.border = Rectangle.NO_BORDER
+                table.addCell(cell)
+
+
+
+
                 // arabic
 
-                val phrase = Phrase("المجموع الصافي ", mArabicFont)
-                cell = PdfPCell(phrase)
-                cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-                cell.horizontalAlignment = Element.ALIGN_RIGHT
-                cell.border = Rectangle.NO_BORDER
-                table.addCell(cell)
-
-                cell = PdfPCell(Phrase(Chunk("", mPrintNormal)))
-                cell.horizontalAlignment = Element.ALIGN_RIGHT
-                cell.border = Rectangle.NO_BORDER
-                table.addCell(cell)
-
-                cell = PdfPCell(Phrase(Chunk("", mPrintNormal)))
-                cell.horizontalAlignment = Element.ALIGN_CENTER
-                cell.border = Rectangle.NO_BORDER
-                table.addCell(cell)
-
-                cell = PdfPCell(Phrase(Chunk("", mPrintNormal)))
-                cell.horizontalAlignment = Element.ALIGN_RIGHT
-                cell.border = Rectangle.NO_BORDER
-                table.addCell(cell)
+//               val phrase = Phrase("المجموع الصافي ", mArabicFont)
+//                cell = PdfPCell(phrase)
+//                cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+//                cell.horizontalAlignment = Element.ALIGN_RIGHT
+//                cell.border = Rectangle.NO_BORDER
+//                table.addCell(cell)
+//
+//                cell = PdfPCell(Phrase(Chunk("", mPrintNormal)))
+//                cell.horizontalAlignment = Element.ALIGN_RIGHT
+//                cell.border = Rectangle.NO_BORDER
+//                table.addCell(cell)
+//
+//                cell = PdfPCell(Phrase(Chunk("", mPrintNormal)))
+//                cell.horizontalAlignment = Element.ALIGN_CENTER
+//                cell.border = Rectangle.NO_BORDER
+//                table.addCell(cell)
+//
+//                cell = PdfPCell(Phrase(Chunk("", mPrintNormal)))
+//                cell.horizontalAlignment = Element.ALIGN_RIGHT
+//                cell.border = Rectangle.NO_BORDER
+//                table.addCell(cell)
             }
 
 
@@ -495,93 +539,94 @@ class ViewPdfActivity : AppCompatActivity() {
             separator1.percentage = 59500f / 523f
 
             cell = PdfPCell(Phrase(Chunk(separator1)))
-            cell.colspan = 4
+            cell.colspan = 5
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
 
-            cell = PdfPCell(Phrase("Total Items", mPrintBoldMediam))
+            cell = PdfPCell(Phrase("Total Items", mPrintNormal))
             cell.colspan = 2
             cell.horizontalAlignment = Element.ALIGN_LEFT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
-            cell = PdfPCell(Phrase(Cart.mCart.size.toString(), mPrintBoldMediam))
-            cell.colspan = 2
+            cell = PdfPCell(Phrase(Cart.mCart.size.toString(), mPrintNormal))
+            cell.colspan = 3
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
             cell = PdfPCell(Phrase(Chunk(separator1)))
-            cell.colspan = 4
+            cell.colspan = 5
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
-            cell = PdfPCell(Phrase("Total", mPrintBoldMediam))
+            cell = PdfPCell(Phrase("Total", mPrintNormal))
             cell.colspan = 2
             cell.horizontalAlignment = Element.ALIGN_LEFT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
             cell = PdfPCell(Phrase((currencyFormatter(totalAmount)
-                    ?: "00.00"), mPrintBoldMediam))
-            cell.colspan = 2
+                    ?: "00.00"), mPrintNormal))
+            cell.colspan = 3
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
-            cell = PdfPCell(Phrase("Discount", mPrintBoldMediam))
+            cell = PdfPCell(Phrase("Dis", mPrintNormal))
             cell.colspan = 2
             cell.horizontalAlignment = Element.ALIGN_LEFT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
             cell = PdfPCell(Phrase((currencyFormatter(discountAmount)
-                    ?: "0"), mPrintBoldMediam))
-            cell.colspan = 2
+                    ?: "0"), mPrintNormal))
+            cell.colspan = 3
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
             cell = PdfPCell(Phrase(Chunk(separator1)))
-            cell.colspan = 4
+            cell.colspan = 5
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
 
-            cell = PdfPCell(Phrase("Net Total", mPrintBoldMediam))
+            cell = PdfPCell(Phrase("Net Total", mPrintNormal))
             cell.colspan = 2
             cell.horizontalAlignment = Element.ALIGN_LEFT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
-            cell = PdfPCell(Phrase((currencyFormatter(netAmount) ?: "0"), mPrintBoldMediam))
-            cell.colspan = 2
+            cell = PdfPCell(Phrase((currencyFormatter(netAmount) ?: "0"), mPrintNormal))
+            cell.colspan = 3
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
+
 
 
            //net total arabic
-            val phrase = Phrase(
-                    "المجموع الصافي ", mArabicFont)
-            cell = PdfPCell(phrase)
-            cell.colspan=2
-            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-            cell.horizontalAlignment = Element.ALIGN_RIGHT
-            cell.border = Rectangle.NO_BORDER
-            table.addCell(cell)
-
-            // add empty sapce
-
-            cell = PdfPCell(Phrase("", mPrintBoldMediam))
-            cell.colspan = 2
-            cell.horizontalAlignment = Element.ALIGN_LEFT
-            cell.border = Rectangle.NO_BORDER
-            table.addCell(cell)
+//            val phrase = Phrase(
+////                    "المجموع الصافي ", mArabicFont)
+////            cell = PdfPCell(phrase)
+////            cell.colspan=2
+////            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
+////            cell.horizontalAlignment = Element.ALIGN_RIGHT
+////            cell.border = Rectangle.NO_BORDER
+////            table.addCell(cell)
+////
+////            // add empty sapce
+////
+////            cell = PdfPCell(Phrase("", mPrintBoldMediam))
+////            cell.colspan = 2
+////            cell.horizontalAlignment = Element.ALIGN_LEFT
+////            cell.border = Rectangle.NO_BORDER
+////            table.addCell(cell)
 
             document.add(table)
 
@@ -592,16 +637,20 @@ class ViewPdfActivity : AppCompatActivity() {
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
-            paragraph = Paragraph(footer, mPrintBoldBig)
+            paragraph = Paragraph(footer, mPrintNormal)
             paragraph.alignment = Element.ALIGN_CENTER
             document.add(paragraph)
             var y = writer?.getVerticalPosition(true)
             document.close()
 
             if (docsize == 0f) {
-                var pg = writer.pageNumber?.minus(1)
-                var size = (pg * (max?.minus(30f)))?.plus(y!!)
-                createPdf(dest, size)
+//                var pg = writer.pageNumber?.minus(1)
+//                var size = (pg * (max?.minus(30f)))?.plus(y!!)
+//                createPdf(dest, size)
+                var  tableHeightTotal =table?.totalHeight;
+                var pg = writer.pageNumber
+                //var remove=pg*50f
+                createPdf(dest, tableHeightTotal+900f)
             } else {
 
                 viewPdf()
@@ -642,7 +691,7 @@ class ViewPdfActivity : AppCompatActivity() {
             share.action = Intent.ACTION_SEND
             share.type = "application/pdf"
             share.putExtra(Intent.EXTRA_STREAM, uri)
-            mContext.startActivity(Intent.createChooser(share, "Share to :"))
+            startActivity(Intent.createChooser(share, "Share to :"))
         }
         else
             Toast.makeText(this,"File not found",Toast.LENGTH_LONG).show()

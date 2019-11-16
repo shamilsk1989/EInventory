@@ -29,7 +29,7 @@
     <string name="action_delete">Delete</string>
 
     <string name="default_server_url">www.dev.alhikmahpro.com</string>
-    <string name="title_server">Server Configuration</string>
+    <string name="title_server">Base Url</string>
     <string name="key_server_url">key_server_url</string>
 
     <string name="key_module_sales">key_module_sales</string>
@@ -63,6 +63,23 @@
     <string name="summery_footer">set print footer</string>
     <string name="key_footer">key_footer</string>
     <string name="key_printer">key_printer</string>
+    <string name="server_settings">Server</string>
+    <string name="summery_server">Configure server</string>
+    <string name="default_company_name">Encorn.com</string>
+    <string name="key_company_name">key_company_name</string>
+    <string name="title_company_name">Company Name</string>
+    <string name="key_company_code">key_company_code</string>
+    <string name="default_company_code">Company Code</string>
+    <string name="key_location">key_location</string>
+    <string name="title_location">Location Code</string>
+    <string name="key_branch_code">key_branch_code</string>
+    <string name="title_branch">Branch Code</string>
+    <string name="key_period">key_period</string>
+    <string name="title_period">Period Code</string>
+    <string name="title_company_code">Company Code</string>
+    <string name="key_employee">Key_emp_id</string>
+    <string name="title_employee">Employee Id</string>
+    <string name="default_header">Header</string>
 
 
     <!--Spinner -->

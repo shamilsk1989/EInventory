@@ -5,12 +5,14 @@ import android.app.AlertDialog;
 import android.arch.lifecycle.Observer;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -75,6 +77,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     MenuItem admin, inventory, goods, sale, receipt;
     ImageView imgLogo;
 
+    public static String PREF_KEY_GOODS = "key_module_goods";
+    public static String PREF_KEY_SALE = "key_module_sales";
+    public static String PREF_KEY_RECEIPT = "key_module_receipts";
+    public static String PREF_KEY_INVENTORY = "key_module_inventory";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,6 +108,13 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         goods = navMenu.findItem(R.id.nav_goods_receive);
         sale = navMenu.findItem(R.id.nav_sale);
         receipt = navMenu.findItem(R.id.nav_receipt);
+
+        inventory.setVisible(false);
+        goods.setVisible(false);
+        sale.setVisible(false);
+        receipt.setVisible(false);
+
+        readSettings();
 
         //Initiate worker class
 
@@ -151,64 +165,64 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private void initView() {
 
 
-        dbHelper helper = new dbHelper(this);
-        SQLiteDatabase database = helper.getReadableDatabase();
-        Cursor cursor = helper.getSettings(database);
-        if (cursor.moveToFirst()) {
-            navShopName.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME)));
-
-            int is_inv = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_INV));
-            int is_gds = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_GDS));
-            int is_sale = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_SALE));
-            int is_rec = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_REC));
-            byte[] img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO));
-            Log.d(TAG, "inventory: " + is_inv);
-            Log.d(TAG, "goods: " + is_gds);
-            Log.d(TAG, "sales: " + is_sale);
-            Log.d(TAG, "receipt: " + is_rec);
-
-            if (is_inv == DataContract.INV_ON)
-                inventory.setVisible(true);
-            else
-                inventory.setVisible(false);
-
-            if (is_gds == DataContract.GDS_ON)
-                goods.setVisible(true);
-            else
-                goods.setVisible(false);
-
-            if (is_sale == DataContract.SALE_ON)
-                sale.setVisible(true);
-            else
-                sale.setVisible(false);
-            if (is_rec == DataContract.REC_ON)
-                receipt.setVisible(true);
-            else
-                receipt.setVisible(false);
-
-
-            if (SessionHandler.getInstance(this).getUser().equals("User")) {
-                admin.setVisible(false);
-
-            }
-
-            Log.d(TAG, "Logo" + img.toString());
-
-            try {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(img, 0, img.length);
-                imgLogo.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 60, 60, false));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            // if settings table have no data then hide menu
-            inventory.setVisible(false);
-            goods.setVisible(false);
-            sale.setVisible(false);
-            receipt.setVisible(false);
-        }
-        cursor.close();
-        database.close();
+//        dbHelper helper = new dbHelper(this);
+//        SQLiteDatabase database = helper.getReadableDatabase();
+//        Cursor cursor = helper.getSettings(database);
+//        if (cursor.moveToFirst()) {
+//            navShopName.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME)));
+//
+//            int is_inv = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_INV));
+//            int is_gds = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_GDS));
+//            int is_sale = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_SALE));
+//            int is_rec = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_IS_REC));
+//            byte[] img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO));
+//            Log.d(TAG, "inventory: " + is_inv);
+//            Log.d(TAG, "goods: " + is_gds);
+//            Log.d(TAG, "sales: " + is_sale);
+//            Log.d(TAG, "receipt: " + is_rec);
+//
+//            if (is_inv == DataContract.INV_ON)
+//                inventory.setVisible(true);
+//            else
+//                inventory.setVisible(false);
+//
+//            if (is_gds == DataContract.GDS_ON)
+//                goods.setVisible(true);
+//            else
+//                goods.setVisible(false);
+//
+//            if (is_sale == DataContract.SALE_ON)
+//                sale.setVisible(true);
+//            else
+//                sale.setVisible(false);
+//            if (is_rec == DataContract.REC_ON)
+//                receipt.setVisible(true);
+//            else
+//                receipt.setVisible(false);
+//
+//
+//            if (SessionHandler.getInstance(this).getUser().equals("User")) {
+//                admin.setVisible(false);
+//
+//            }
+//
+//            Log.d(TAG, "Logo" + img.toString());
+//
+//            try {
+//                Bitmap bitmap = BitmapFactory.decodeByteArray(img, 0, img.length);
+//                imgLogo.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 60, 60, false));
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        } else {
+//            // if settings table have no data then hide menu
+//            inventory.setVisible(false);
+//            goods.setVisible(false);
+//            sale.setVisible(false);
+//            receipt.setVisible(false);
+//        }
+//        cursor.close();
+//        database.close();
         user = SessionHandler.getInstance(HomeActivity.this).getUser();
         navUser.setText(user);
 
@@ -302,8 +316,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 break;
 
             case R.id.nav_setup:
-                startActivity(new Intent(HomeActivity.this, SettingsActivity.class));
-                //startActivity(new Intent(HomeActivity.this, PrefSettingsActivity.class));
+                // startActivity(new Intent(HomeActivity.this, SettingsActivity.class));
+                startActivity(new Intent(HomeActivity.this, PrefSettingsActivity.class));
                 break;
             case R.id.nav_print:
                 startActivity(new Intent(HomeActivity.this, PrinterSettingsActivity.class));
@@ -490,7 +504,30 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume: ");
-        initView();
+        readSettings();
 
+    }
+
+
+    private void readSettings() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        if (sharedPreferences.getBoolean(PREF_KEY_GOODS, false))
+            goods.setVisible(true);
+
+        else
+            goods.setVisible(false);
+        if(sharedPreferences.getBoolean(PREF_KEY_INVENTORY,false))
+            inventory.setVisible(true);
+        else
+            inventory.setVisible(false);
+        if(sharedPreferences.getBoolean(PREF_KEY_SALE,false))
+            sale.setVisible(true);
+        else
+            sale.setVisible(false);
+        if(sharedPreferences.getBoolean(PREF_KEY_RECEIPT,false))
+            receipt.setVisible(true);
+        else
+            receipt.setVisible(false);
     }
 }

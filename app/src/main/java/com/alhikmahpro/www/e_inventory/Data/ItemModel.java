@@ -15,7 +15,24 @@ public class ItemModel {
     private String customerName;
     private String customerCode;
     private String paymentType;
-    private double rate,discount,qty,freeQty,salePrice,costPrice,total,net;
+    private double rate;
+    private double discount;
+
+    public double getDiscountPercentage() {
+        return discountPercentage;
+    }
+
+    public void setDiscountPercentage(double discountPercentage) {
+        this.discountPercentage = discountPercentage;
+    }
+
+    private double discountPercentage;
+    private double qty;
+    private double freeQty;
+    private double salePrice;
+    private double costPrice;
+    private double total;
+    private double net;
     private int is_sync ,docNo,unit1Qty,unit2Qty,unit3Qty,unitIndex, _id;
 
     public String getSupplierName() {

@@ -246,6 +246,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         editTextStock.setText("");
         //editTextStock.setText("");
         editTextNet.setText("0.0");
+        editTextTotal.setText("0.0");
 
         editTextStock.setEnabled(false);
         editTextQuantity.setEnabled(false);
@@ -376,7 +377,8 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         cartModel.setUnit2Qty(unit2Qty);
         cartModel.setUnit3Qty(unit3Qty);
         cartModel.setRate(rate);
-        cartModel.setItemDiscount(discPercentage);
+        Log.d(TAG, "addToCart: "+discPercentage);
+        cartModel.setDiscPercentage(discPercentage);
         cartModel.setDiscount(disc);
         cartModel.setNet(net);
         Cart.mCart.add(cartModel);
@@ -637,6 +639,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         editTextRate.setEnabled(false);
         editTextQuantity.setEnabled(false);
         editTextDiscount.setEnabled(false);
+        editTextTotal.setEnabled(false);
         //editTextDiscountPer.setEnabled(false);
         editTextBarcode.setFocusableInTouchMode(true);
         editTextBarcode.requestFocus();
@@ -782,7 +785,8 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
                         //calculate total
                         double total=(ParseDouble(editTextQuantity.getText().toString()) * ParseDouble(editTextRate.getText().toString()));
                         editTextTotal.setText(String.valueOf(total));
-                        calculateNetValue(); }
+                        calculateNetValue();
+                    }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
@@ -822,7 +826,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
                         editTextDiscount.setText(editTextUserInput.getText().toString());
                         double total = ParseDouble(editTextTotal.getText().toString());
                         double discountPercentage = ParseDouble(editTextUserInput.getText().toString()) / total * 100;
-                        editTextDiscountPercentage.setText(String.valueOf(Math.round(discountPercentage)));
+                        editTextDiscountPercentage.setText(String.format("%.2f",discountPercentage));
                         calculateNetValue();
                     }
                 })
@@ -866,7 +870,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
                         discountPercentage = ParseDouble(editTextUserInput.getText().toString());
                         double percentageDecimal = discountPercentage / 100;
                         double discountAmount = percentageDecimal * ParseDouble(editTextTotal.getText().toString());
-                        editTextDiscount.setText(String.valueOf(Math.round(discountAmount)));
+                        editTextDiscount.setText(String.format("%.2f",discountAmount));
                         calculateNetValue();
                     }
                 })

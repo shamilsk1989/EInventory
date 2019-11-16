@@ -66,6 +66,7 @@ public class dbHelper extends SQLiteOpenHelper {
             DataContract.GoodsReceive.COL_STAFF_NAME + " TEXT ," +
             DataContract.GoodsReceive.COL_TOTAL + " REAL ," +
             DataContract.GoodsReceive.COL_DISCOUNT_AMOUNT + " REAL ," +
+            DataContract.GoodsReceive.COL_DISCOUNT_PERCENTAGE + " REAL ," +
             DataContract.GoodsReceive.COL_NET_AMOUNT + " REAL ," +
             DataContract.GoodsReceive.COL_PAYMENT_TYPE + " TEXT ," +
             DataContract.GoodsReceive.COL_DATE_TIME + " TEXT ," +
@@ -79,12 +80,14 @@ public class dbHelper extends SQLiteOpenHelper {
             DataContract.GoodsReceiveDetails.COL_BAR_CODE + " TEXT ," +
             DataContract.GoodsReceiveDetails.COL_PRODUCT_CODE + " TEXT ," +
             DataContract.GoodsReceiveDetails.COL_PRODUCT_NAME + " TEXT ," +
+            DataContract.GoodsReceiveDetails.COL_PRODUCT_NAME_AR + " TEXT ," +
             DataContract.GoodsReceiveDetails.COL_UNIT + " TEXT ," +
             DataContract.GoodsReceiveDetails.COL_FREE_UNIT + " TEXT ," +
             DataContract.GoodsReceiveDetails.COL_QUANTITY + " REAL ," +
             DataContract.GoodsReceiveDetails.COL_FREE_QUANTITY + " REAL ," +
             DataContract.GoodsReceiveDetails.COL_RATE + " REAL ," +
             DataContract.GoodsReceiveDetails.COL_DISCOUNT + " REAL ," +
+            DataContract.GoodsReceiveDetails.COL_DISCOUNT_PERCENTAGE + " REAL ," +
             DataContract.GoodsReceiveDetails.COL_SALES_PRICE + " REAL ," +
             DataContract.GoodsReceiveDetails.COL_COST_PRICE + " REAL ," +
             DataContract.GoodsReceiveDetails.COL_STOCK + " TEXT ," +
@@ -121,6 +124,7 @@ public class dbHelper extends SQLiteOpenHelper {
             DataContract.InvoiceDetails.COL_BAR_CODE + " TEXT ," +
             DataContract.InvoiceDetails.COL_PRODUCT_CODE + " TEXT ," +
             DataContract.InvoiceDetails.COL_PRODUCT_NAME + " TEXT ," +
+            DataContract.InvoiceDetails.COL_PRODUCT_NAME_AR + " TEXT ," +
             DataContract.InvoiceDetails.COL_UNIT + " TEXT ," +
             DataContract.InvoiceDetails.COL_QUANTITY + " REAL ," +
             DataContract.InvoiceDetails.COL_UNIT1 + " TEXT ," +
@@ -729,7 +733,7 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
     public boolean updateInvoice(String invoiceNo, String invoiceDate, String salesmanId, String customerCode, String customerName,
-                                 double total, double discount, double net, String paymentMode, String date, int status) {
+                                 double total, double discount,double dis_per, double net, String paymentMode, String date, int status) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -741,6 +745,7 @@ public class dbHelper extends SQLiteOpenHelper {
             contentValues.put(DataContract.Invoice.COL_CUSTOMER_NAME, customerName);
             contentValues.put(DataContract.Invoice.COL_TOTAL_AMOUNT, total);
             contentValues.put(DataContract.Invoice.COL_DISCOUNT_AMOUNT, discount);
+            contentValues.put(DataContract.Invoice.COL_DISCOUNT_PERCENTAGE,dis_per);
             contentValues.put(DataContract.Invoice.COL_NET_AMOUNT, net);
             contentValues.put(DataContract.Invoice.COL_PAYMENT_TYPE, paymentMode);
             contentValues.put(DataContract.Invoice.COL_DATE_TIME, date);

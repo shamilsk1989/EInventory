@@ -42,6 +42,8 @@ public class PrefSettingsActivity extends AppCompatActivity {
             }
         }
 
+        PreferenceManager.setDefaultValues(this,R.xml.pref_main,false);
+
 
     }
 }
