@@ -78,7 +78,7 @@ public class InvoiceActivity extends AppCompatActivity implements ListSupplierFr
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        toolbar.setTitle("Check Supplier");
+        getSupportActionBar().setTitle("Check Supplier");
 
         txtInvoiceDate.setEnabled(false);
 
@@ -198,8 +198,6 @@ public class InvoiceActivity extends AppCompatActivity implements ListSupplierFr
             editTextInvoiceNo.setError("Invalid Invoice");
             return false;
         }
-
-
         return true;
     }
 

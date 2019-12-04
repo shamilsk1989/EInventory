@@ -73,7 +73,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void gotoHome() {
-        startActivity(new Intent(SplashActivity.this, HomeActivity.class));
+        startActivity(new Intent(SplashActivity.this, DashBoardActivity.class));
     }
 
     private void gotoLoginScreen() {

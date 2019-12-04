@@ -3,6 +3,8 @@ package com.alhikmahpro.www.e_inventory.Data;
 public class DataContract {
     public DataContract() { }
 
+    public static final String ADMIN="admin";
+    public static final String USER="user";
 
     public static final int SYNC_STATUS_OK=1;
     public static final int SYNC_STATUS_FAILED=0;
@@ -16,6 +18,7 @@ public class DataContract {
     public static final int REC_OFF=0;
     public static final String DIR_RECEIPT="Receipt";
     public static final String DIR_INVOICE="Invoice";
+    public static final String DIR_REPORTS="Reports";
     public static final String ACTION_EDIT="Edit";
     public static final String ACTION_NEW="New";
 

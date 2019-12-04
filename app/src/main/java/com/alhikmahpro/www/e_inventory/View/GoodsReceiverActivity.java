@@ -72,9 +72,9 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     @BindView(R.id.txtDocNo)
     TextView txtDocNo;
     @BindView(R.id.editTextUser)
-    EditText editTextUser;
+    TextView editTextUser;
     @BindView(R.id.editTextSupplier)
-    EditText editTextSupplier;
+    TextView editTextSupplier;
     @BindView(R.id.txtInvoiceDate)
     TextView txtInvoiceDate;
     @BindView(R.id.txtInvoiceNo)
@@ -88,7 +88,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     @BindView(R.id.header_layout)
     LinearLayout headerLayout;
     @BindView(R.id.editTextProductName)
-    EditText editTextProductName;
+    TextView editTextProductName;
     @BindView(R.id.editTextProductCode)
     EditText editTextProductCode;
     @BindView(R.id.spinner)
@@ -119,10 +119,10 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     Button btnAdd;
     @BindView(R.id.txtAddedBarcode)
     EditText txtAddedBarcode;
-    @BindView(R.id.txtAddedPrice)
-    EditText txtAddedPrice;
-    @BindView(R.id.txtAddedQuantity)
-    EditText txtAddedQuantity;
+//    @BindView(R.id.txtAddedPrice)
+//    EditText txtAddedPrice;
+//    @BindView(R.id.txtAddedQuantity)
+//    EditText txtAddedQuantity;
 
 
 
@@ -130,8 +130,8 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     Button btnNext;
     private static final int CAMERA_PERMISSION_CODE = 101;
     private static final String TAG = "GoodsReceiverActivity";
-    @BindView(R.id.txtSupplierName)
-    TextView txtSupplierName;
+//    @BindView(R.id.txtSupplierName)
+//    TextView txtSupplierName;
     @BindView(R.id.content_layout)
     LinearLayout contentLayout;
     @BindView(R.id.imgSubmit)
@@ -167,7 +167,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        toolbar.setTitle("Goods Receive");
+
         Intent mIntent = getIntent();
         supplierCode = mIntent.getStringExtra("SupplierCode");
         supplierName = mIntent.getStringExtra("SupplierName");
@@ -175,6 +175,8 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         invoiceDate = mIntent.getStringExtra("Date");
         User = mIntent.getStringExtra("User");
         orderNo = mIntent.getStringExtra("OrderNo");
+
+        getSupportActionBar().setTitle(supplierName);
         Log.d(TAG, "onCreate: " + "supc:" + supplierCode + "supname:" + supplierName + "inv:" + invoiceNo + "date:" + invoiceDate);
         progressDialog = new ProgressDialog(this);
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -362,9 +364,9 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
                 //set added items view
 
-                txtAddedBarcode.setText(barCode);
-                txtAddedQuantity.setText(editTextQuantity.getText().toString());
-                txtAddedPrice.setText(editTextSale.getText().toString());
+                txtAddedBarcode.setText(barCode+ " X "+editTextQuantity.getText().toString()+" X "+editTextSale.getText().toString());
+//                txtAddedQuantity.setText(editTextQuantity.getText().toString());
+//                txtAddedPrice.setText(editTextSale.getText().toString());
 
                 // add items into the cart
                 addToCart();
@@ -388,19 +390,18 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         qty = Double.valueOf(editTextQuantity.getText().toString());
         free_qty = Double.valueOf(editTextFreeQuantity.getText().toString());
         rate = Double.valueOf(editTextRate.getText().toString());
-        disc = Double.valueOf(editTextDiscount.getText().toString());
+       // disc = Double.valueOf(editTextDiscount.getText().toString());
         stock = editTextStock.getText().toString();
         net = Double.valueOf(editTextNet.getText().toString());
-        discPercentage=ParseDouble(editTextDiscountPercentage.getText().toString());
+        //discPercentage=ParseDouble(editTextDiscountPercentage.getText().toString());
 
         Log.d(TAG, "addToCart: net amount " + net);
 
 
         // add to added items view
 
-        txtAddedBarcode.setText(barCode);
-        txtAddedQuantity.setText(editTextQuantity.getText().toString());
-        txtAddedPrice.setText(editTextSale.getText().toString());
+        txtAddedBarcode.setText(barCode+ " X "+editTextQuantity.getText().toString()+" X "+editTextSale.getText().toString());
+
 
         // add items in to the cart...........................
 
@@ -438,8 +439,8 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     @OnClick(R.id.btnNext)
     public void onBtnNextClicked() {
         txtAddedBarcode.setText("");
-        txtAddedPrice.setText("");
-        txtAddedQuantity.setText("");
+//        txtAddedPrice.setText("");
+//        txtAddedQuantity.setText("");
 
 
         Intent intent = new Intent(this, GoodsItemListActivity.class);
@@ -661,9 +662,9 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
     private void initView() {
 
-        txtAddedPrice.setEnabled(false);
+        //txtAddedPrice.setEnabled(false);
         txtAddedBarcode.setEnabled(false);
-        txtAddedQuantity.setEnabled(false);
+        //txtAddedQuantity.setEnabled(false);
         editTextCost.setEnabled(false);
         editTextProductCode.setEnabled(false);
         editTextProductName.setEnabled(false);
@@ -681,28 +682,28 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         editTextBarcode.setFocusableInTouchMode(true);
         editTextBarcode.requestFocus();
 
-        dbHelper helper = new dbHelper(this);
+//        dbHelper helper = new dbHelper(this);
+//
+//        SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
+//        Cursor cursor = helper.getSettings(sqLiteDatabase);
+//        if (cursor.moveToFirst()) {
+//            companyCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_CODE));
+//            companyName = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME));
+//            deviceId = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID));
+//            branchCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_BRANCH_CODE));
+//            periodCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_PERIOD_CODE));
+//            locationCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_LOCATION_CODE));
+//            BASE_URL = SessionHandler.getInstance(GoodsReceiverActivity.this).getHost();
+//
+//        }
+//        cursor.close();
+//        sqLiteDatabase.close();
 
-        SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
-        Cursor cursor = helper.getSettings(sqLiteDatabase);
-        if (cursor.moveToFirst()) {
-            companyCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_CODE));
-            companyName = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME));
-            deviceId = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID));
-            branchCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_BRANCH_CODE));
-            periodCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_PERIOD_CODE));
-            locationCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_LOCATION_CODE));
-            BASE_URL = SessionHandler.getInstance(GoodsReceiverActivity.this).getHost();
-
-        }
-        cursor.close();
-        sqLiteDatabase.close();
-
-        txtInvoiceDate.setText(invoiceDate);
-        txtInvoiceNo.setText(invoiceNo);
+        txtInvoiceDate.setText("INV:DATE: "+invoiceDate);
+        txtInvoiceNo.setText("INV:NO: "+invoiceNo);
         editTextUser.setText(User);
         editTextSupplier.setText(supplierCode);
-        txtSupplierName.setText(supplierName);
+        //txtSupplierName.setText(supplierName);
 
     }
 
@@ -732,7 +733,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         Log.d(TAG, "setDoc: " + last_no);
         mDoc = last_no + 1;
         txtDate.setText(mDate);
-        txtDocNo.setText(String.valueOf(mDoc));
+        txtDocNo.setText("DOC NO:"+String.valueOf(mDoc));
     }
 
     @Override

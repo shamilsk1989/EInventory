@@ -839,6 +839,14 @@ public class dbHelper extends SQLiteOpenHelper {
         Cursor cursor = database.query(DataContract.Invoice.TABLE_NAME, projection, selection, selection_ars, null, null, null);
         return cursor;
     }
+
+    public Cursor getAllInvoiceByDate(String from,String to){
+        SQLiteDatabase database = this.getReadableDatabase();
+
+        Cursor c = database.rawQuery("select invoice_number,customer_name,net_amount,payment_type,invoice_date from " + DataContract.Invoice.TABLE_NAME
+                + " where invoice_date BETWEEN '" + from + "' AND '" + to + "' ", null);
+        return c;
+    }
     public Cursor getAllUnSyncInvoice(SQLiteDatabase database) {
 
         Log.d(TAG, "get Un sync Invoice : ");
@@ -1102,6 +1110,13 @@ public class dbHelper extends SQLiteOpenHelper {
         database.close();
     }
 
+    public Cursor getAllReceiptByDate(String from,String to){
+        SQLiteDatabase database = this.getReadableDatabase();
+
+        Cursor c = database.rawQuery("select receipts_number,customer_name,received_amount,payment_type,receipts_date from " + DataContract.Receipts.TABLE_NAME
+                + " where receipts_date BETWEEN '" + from + "' AND '" + to + "' ", null);
+        return c;
+    }
 
 
 

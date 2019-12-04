@@ -9,7 +9,7 @@
     android:layout_height="match_parent">
 
     <include
-        android:id="@+id/toolbar"
+
         layout="@layout/toolbar_layout">
 
     </include>
@@ -41,10 +41,7 @@
                 android:id="@+id/item_list_rv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/editext_border"
                 android:scrollbars="vertical">
-
             </android.support.v7.widget.RecyclerView>
 
             <Button
@@ -54,7 +51,7 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="10dp"
                 android:layout_marginEnd ="0dp"
-                android:background="@android:color/holo_green_dark"
+                android:background="@drawable/rounded_button"
                 android:textColor="@android:color/white" />
 
         </LinearLayout>

@@ -72,8 +72,8 @@ public class ListReceiptActivity extends AppCompatActivity {
 
     @BindView(R.id.doc_list_rv)
     RecyclerView docListRv;
-    @BindView(R.id.txtEmpty)
-    TextView txtEmpty;
+//    @BindView(R.id.txtEmpty)
+//    TextView txtEmpty;
     @BindView(R.id.fab)
     FloatingActionButton fab;
     RecyclerView.Adapter adapter;
@@ -109,6 +109,18 @@ public class ListReceiptActivity extends AppCompatActivity {
 //        type= intent.getStringExtra("Type");
 
         list = new ArrayList<>();
+
+        docListRv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0 && fab.getVisibility() == View.VISIBLE) {
+                    fab.hide();
+                } else if (dy < 0 && fab.getVisibility() != View.VISIBLE) {
+                    fab.show();
+                }
+            }
+        });
     }
 
     @Override
@@ -131,7 +143,7 @@ public class ListReceiptActivity extends AppCompatActivity {
         Log.d(TAG, "loadReceipts: " + cursor.getCount());
         if (cursor.moveToFirst()) {
 
-            txtEmpty.setVisibility(View.GONE);
+            //txtEmpty.setVisibility(View.GONE);
             do {
                 //Log.d(TAG, "loadReceipts: "+cursor.getInt(cursor.getColumnIndex(DataContract.Stocks.COL_DOCUMENT_NUMBER)));
                 ReceiptModel model = new ReceiptModel();
@@ -193,6 +205,7 @@ public class ListReceiptActivity extends AppCompatActivity {
 
                 @Override
                 public void OnShareClicked(int position) {
+                    Log.d(TAG, "OnShareClicked: ");
                     ReceiptModel receiptModel = list.get(position);
                     sharePdf(receiptModel.getReceiptNo());
 
@@ -208,7 +221,7 @@ public class ListReceiptActivity extends AppCompatActivity {
             ViewCompat.setNestedScrollingEnabled(docListRv, false);
 
         } else {
-            txtEmpty.setVisibility(View.VISIBLE);
+            //txtEmpty.setVisibility(View.VISIBLE);
         }
         cursor.close();
         database.close();

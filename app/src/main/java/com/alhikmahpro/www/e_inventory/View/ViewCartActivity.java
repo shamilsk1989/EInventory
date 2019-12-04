@@ -59,7 +59,7 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Cart ");
+
 
         Intent intent = getIntent();
         Action = intent.getStringExtra("ACTION");
@@ -68,6 +68,7 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
         salesmanId = intent.getStringExtra("SALESMAN_ID");
         invoiceNo = intent.getStringExtra("DOC_NO");
         invoiceDate = intent.getStringExtra("DOC_DATE");
+        getSupportActionBar().setTitle(customerName);
         Log.d(TAG, "view cart onCreate: invoice no: and Date" + invoiceNo + "/" + invoiceDate);
         calculate();
         loadRecyclerView();
@@ -180,7 +181,6 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
         menuItem.setIcon(Converter.convertLayoutToImage(ViewCartActivity.this,cart_count,R.drawable.ic_shopping_cart));
         itemDelete = menu.findItem(R.id.action_delete);
         itemDelete.setVisible(false);
-
         return true;
     }
 

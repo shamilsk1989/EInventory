@@ -445,7 +445,7 @@ class ViewPdfActivity : AppCompatActivity() {
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
-            cell = PdfPCell(Phrase(Chunk("Discount", mPrintNormal)))
+            cell = PdfPCell(Phrase(Chunk("Disc", mPrintNormal)))
             cell.horizontalAlignment = Element.ALIGN_CENTER
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
@@ -576,7 +576,7 @@ class ViewPdfActivity : AppCompatActivity() {
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
-            cell = PdfPCell(Phrase("Dis", mPrintNormal))
+            cell = PdfPCell(Phrase("Discount", mPrintNormal))
             cell.colspan = 2
             cell.horizontalAlignment = Element.ALIGN_LEFT
             cell.border = Rectangle.NO_BORDER

@@ -10,6 +10,8 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,6 +23,7 @@ import android.widget.Toast;
 import com.alhikmahpro.www.e_inventory.AppUtils;
 import com.alhikmahpro.www.e_inventory.Data.Cart;
 import com.alhikmahpro.www.e_inventory.Data.CartModel;
+import com.alhikmahpro.www.e_inventory.Data.Converter;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.GoodsData;
 import com.alhikmahpro.www.e_inventory.Data.ItemModel;
@@ -52,8 +55,8 @@ public class PaymentActivity extends AppCompatActivity {
     TextView textViewInvoice;
     @BindView(R.id.textViewDate)
     TextView textViewDate;
-    @BindView(R.id.textViewCustomer)
-    TextView textViewCustomer;
+//    @BindView(R.id.textViewCustomer)
+//    TextView textViewCustomer;
     @BindView(R.id.textViewSalesman)
     TextView textViewSalesman;
     @BindView(R.id.editTextDiscount)
@@ -79,12 +82,13 @@ public class PaymentActivity extends AppCompatActivity {
     VolleyServiceGateway serviceGateway;
     ProgressDialog progressDialog;
     dbHelper helper;
-    @BindView(R.id.textViewTotalRow)
-    TextView textViewTotalRow;
+//    @BindView(R.id.textViewTotalRow)
+//    TextView textViewTotalRow;
     @BindView(R.id.btn_delete)
     Button btnDelete;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+    private static int cart_count = 0;
 
 
     @Override
@@ -95,7 +99,7 @@ public class PaymentActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Payment");
+
         Intent intent = getIntent();
         Action = intent.getStringExtra("ACTION");
         type = intent.getStringExtra("TYPE");
@@ -105,8 +109,9 @@ public class PaymentActivity extends AppCompatActivity {
         Log.d(TAG, " payment activity onCreate: invoice date" + invoiceDate);
         invoiceNo = intent.getStringExtra("INV_NO");
         salesmanId = intent.getStringExtra("SALESMAN_ID");
-        int count = intent.getIntExtra("TOTAL_ROW", 0);
+        cart_count = intent.getIntExtra("TOTAL_ROW", 0);
         base_total = intent.getDoubleExtra("TOTAL", 0);
+        getSupportActionBar().setTitle(customerName);
         netAmount = base_total;
 
         if (type.equals("GDS")) {
@@ -117,11 +122,11 @@ public class PaymentActivity extends AppCompatActivity {
             textViewInvoice.setText(invoiceNo);
         }
 
-        textViewCustomer.setText(customerName);
+        //textViewCustomer.setText(customerName);
         textViewSalesman.setText(salesmanId);
         textViewNet.setText(String.valueOf(netAmount));
         textViewTotal.setText(String.valueOf(base_total));
-        textViewTotalRow.setText(String.valueOf(count));
+        //textViewTotalRow.setText(String.valueOf(count));
         textViewDate.setText(invoiceDate);
 
 
@@ -565,6 +570,32 @@ public class PaymentActivity extends AppCompatActivity {
             }
 
         }
+
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.cart_toolbar, menu);
+        MenuItem menuItem = menu.findItem(R.id.action_cart);
+        Log.d(TAG, "onCreateOptionsMenu: "+ Converter.convertLayoutToImage(PaymentActivity.this,cart_count,R.drawable.ic_shopping_cart));
+        menuItem.setIcon(Converter.convertLayoutToImage(PaymentActivity.this,cart_count,R.drawable.ic_shopping_cart));
+        MenuItem itemDelete = menu.findItem(R.id.action_delete);
+        itemDelete.setVisible(false);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+
+        int id = item.getItemId();
+        if(id==R.id.action_delete){
+            //deleteCart();
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
 }

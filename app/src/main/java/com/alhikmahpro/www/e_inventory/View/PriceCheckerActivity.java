@@ -60,7 +60,7 @@ public class PriceCheckerActivity extends AppCompatActivity {
     @BindView(R.id.imgSearch)
     ImageView imgSearch;
     @BindView(R.id.txtName)
-    EditText txtName;
+    TextView txtName;
     @BindView(R.id.txtCode)
     EditText txtCode;
     @BindView(R.id.txtPrice1)
@@ -103,7 +103,7 @@ public class PriceCheckerActivity extends AppCompatActivity {
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         //progressDialog = new ProgressDialog(this);
         setSupportActionBar(toolbar);
-        toolbar.setTitle("Price Checker");
+        getSupportActionBar().setTitle("Price Checker");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         initValues();

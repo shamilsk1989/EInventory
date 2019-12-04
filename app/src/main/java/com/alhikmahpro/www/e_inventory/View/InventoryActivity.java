@@ -21,6 +21,8 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -33,6 +35,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.AppUtils;
+import com.alhikmahpro.www.e_inventory.Data.Converter;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.RuntimeData;
 import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
@@ -65,12 +68,9 @@ import butterknife.OnClick;
 
 public class InventoryActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, ListItemFragment.OnCompleteListener {
 
-    @BindView(R.id.txtviewDate)
-    TextView txtviewDate;
+
     @BindView(R.id.txtDate)
     TextView txtDate;
-    @BindView(R.id.txtviewDocNo)
-    TextView txtviewDocNo;
     @BindView(R.id.txtDocNo)
     TextView txtDocNo;
     @BindView(R.id.txtBarcode)
@@ -82,7 +82,7 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
     @BindView(R.id.header_layout)
     LinearLayout headerLayout;
     @BindView(R.id.txtName)
-    EditText txtName;
+    TextView txtName;
     @BindView(R.id.txtCode)
     EditText txtCode;
     @BindView(R.id.spinner)
@@ -97,15 +97,15 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
     Button btnAdd;
     @BindView(R.id.txtAddedBarcode)
     EditText txtAddedBarcode;
-    @BindView(R.id.txtAddedPrice)
-    EditText txtAddedPrice;
-    @BindView(R.id.txtAddedQuantity)
-    EditText txtAddedQuantity;
+//    @BindView(R.id.txtAddedPrice)
+//    EditText txtAddedPrice;
+//    @BindView(R.id.txtAddedQuantity)
+//    EditText txtAddedQuantity;
     @BindView(R.id.btnNext)
     Button btnNext;
     private static final String TAG = "InventoryActivity";
     @BindView(R.id.txtUser)
-    EditText txtUser;
+    TextView txtUser;
     @BindView(R.id.content_layout)
     LinearLayout contentLayout;
     @BindView(R.id.imgSubmit)
@@ -122,6 +122,7 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
     dbHelper helper;
     private static final int CAMERA_PERMISSION_CODE = 101;
     boolean is_first;
+    private static int cart_count=0;
 
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
@@ -139,7 +140,7 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        toolbar.setTitle("Inventory");
+        getSupportActionBar().setTitle("Inventory");
         is_first = true;
         setDoc();
         initView();
@@ -209,6 +210,7 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
     protected void onResume() {
         Log.d(TAG, "onResume: ");
         super.onResume();
+        invalidateOptionsMenu();
         //setDoc();
     }
 
@@ -239,10 +241,19 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
 
     @OnClick(R.id.imgSearch)
     public void onImgSearchClicked() {
+        String item_key = txtBarcode.getText().toString();
+        if (item_key.length() < 3) {
+            txtBarcode.setError("Minimum 3 letters");
+        }else {
+            Bundle bundle = new Bundle();
+            bundle.putString("ITEM_NAME", item_key);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            ListItemFragment listItemFragment = new ListItemFragment();
+            listItemFragment.setArguments(bundle);
+            listItemFragment.show(fragmentManager, "Items");
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        ListItemFragment listCustomerFragment = new ListItemFragment();
-        listCustomerFragment.show(fragmentManager, "Items");
+        }
+
 
         //sendToServer();
     }
@@ -274,14 +285,16 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
                 boolean res = helper.saveStocksDetails(mDoc, barCode, txtCode.getText().toString(),
                         txtName.getText().toString(), selectedUnit, qty, salePrice, costPrice);
 
-                txtAddedBarcode.setText(barCode);
-                txtAddedQuantity.setText(txtQuantity.getText().toString());
-                txtAddedPrice.setText(txtSalePrice.getText().toString());
+                txtAddedBarcode.setText(barCode +" X "+txtQuantity.getText().toString()+" X "+txtSalePrice.getText().toString());
+                //txtAddedQuantity.setText(txtQuantity.getText().toString());
+                //txtAddedPrice.setText(txtSalePrice.getText().toString());
                 txtBarcode.setText("");
                 clearView();
                 setSpinner(false);
                 txtBarcode.setFocusableInTouchMode(true);
                 txtBarcode.requestFocus();
+                cart_count++;
+                invalidateOptionsMenu();
 
             }
 
@@ -293,8 +306,8 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
     public void onBtnNextClicked() {
 
         txtAddedBarcode.setText("");
-        txtAddedPrice.setText("");
-        txtAddedQuantity.setText("");
+        //txtAddedPrice.setText("");
+        //txtAddedQuantity.setText("");
 
         int docNo;
         try {
@@ -615,26 +628,26 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
     }
 
     private void initView() {
-        txtAddedPrice.setEnabled(false);
+        //txtAddedPrice.setEnabled(false);
         txtAddedBarcode.setEnabled(false);
-        txtAddedQuantity.setEnabled(false);
+        //txtAddedQuantity.setEnabled(false);
         txtCode.setEnabled(false);
         txtCost.setEnabled(false);
         txtSalePrice.setEnabled(false);
 
-        SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
-        Cursor cursor = helper.getSettings(sqLiteDatabase);
-        if (cursor.moveToFirst()) {
-            companyCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_CODE));
-            companyName = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME));
-            deviceId = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID));
-            branchCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_BRANCH_CODE));
-            periodCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_PERIOD_CODE));
-            locationCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_LOCATION_CODE));
-            BASE_URL = SessionHandler.getInstance(InventoryActivity.this).getHost();
-        }
-        cursor.close();
-        sqLiteDatabase.close();
+//        SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
+//        Cursor cursor = helper.getSettings(sqLiteDatabase);
+//        if (cursor.moveToFirst()) {
+//            companyCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_CODE));
+//            companyName = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME));
+//            deviceId = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID));
+//            branchCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_BRANCH_CODE));
+//            periodCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_PERIOD_CODE));
+//            locationCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_LOCATION_CODE));
+//            BASE_URL = SessionHandler.getInstance(InventoryActivity.this).getHost();
+//        }
+//        cursor.close();
+//        sqLiteDatabase.close();
     }
 
     @Override
@@ -684,5 +697,28 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
     @Override
     public void onComplete(String code) {
         txtBarcode.setText(code);
+    }
+
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.cart_toolbar, menu);
+        MenuItem menuItem = menu.findItem(R.id.action_cart);
+        Log.d(TAG, "onCreateOptionsMenu: "+ Converter.convertLayoutToImage(InventoryActivity.this,cart_count,R.drawable.ic_shopping_cart));
+        menuItem.setIcon(Converter.convertLayoutToImage(InventoryActivity.this,cart_count,R.drawable.ic_shopping_cart));
+        MenuItem menuItem2 = menu.findItem(R.id.action_delete);
+        menuItem2.setVisible(false);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+
+        int id = item.getItemId();
+
+        return super.onOptionsItemSelected(item);
     }
 }

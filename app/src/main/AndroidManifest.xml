@@ -20,7 +20,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".View.DashBoardActivity"></activity>
+        <activity android:name=".View.ReportActivity"></activity>
+        <activity android:name=".View.DashBoardActivity" />
         <activity android:name=".View.PrefSettingsActivity" />
         <activity android:name=".View.ReceiptPdfViewActivity" />
         <activity android:name=".View.SplashActivity">

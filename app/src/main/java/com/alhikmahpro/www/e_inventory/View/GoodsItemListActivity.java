@@ -87,7 +87,7 @@ public class GoodsItemListActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        toolbar.setTitle("Document  " + docNo);
+        getSupportActionBar().setTitle(supplierName);
         helper = new dbHelper(this);
 
         // check action is edit or not if edit then load item db to gCart;

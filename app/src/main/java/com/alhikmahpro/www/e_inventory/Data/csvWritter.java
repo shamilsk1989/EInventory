@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -34,6 +35,7 @@ public class csvWritter {
     private String folder_path,mDate;
     private int docNo;
     private static String folder_name="PriceChecker";
+    private static final String MSG_KEY = "Res";
 
 
     public csvWritter(Context mContext,int doc,String dt) {
@@ -76,7 +78,8 @@ public class csvWritter {
 
 
 
-        String file_path = getPath(folder_name);
+        //String file_path = getPath(folder_name);
+        String file_path=FileUtils.getAppPath(mContext);
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy-HH:mm:ss");
         final String dateTime = sdf.format(new Date());
         String filename = docNo+"-"+ dateTime;
@@ -90,9 +93,13 @@ public class csvWritter {
         progressDialog.setCancelable(true);
         progressDialog.show();
 
-        final Handler handler = new Handler(Looper.getMainLooper()) {
+        final Handler  handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message msg) {
+                progressDialog.dismiss();
+                Bundle bundle = msg.getData();
+                String string = bundle.getString(MSG_KEY);
+                Toast.makeText(mContext,string,Toast.LENGTH_LONG).show();
 
             }
         };
@@ -101,13 +108,12 @@ public class csvWritter {
             dbHelper helper=new dbHelper(mContext);
             SQLiteDatabase database = helper.getReadableDatabase();
             Cursor cursor = helper.getStockDetailsByDoc(database, docNo);
+            String res;
             public void run() {
 
                 try {
 
                     Log.d(TAG, "run: cursor " + cursor.getCount());
-
-
                     Log.d(TAG, "run: +creating csv");
 
                     FileWriter fileWriter = new FileWriter(csvFilename);
@@ -152,51 +158,31 @@ public class csvWritter {
                             fileWriter.append('\n');
 
                         }while (cursor.moveToNext());
-
                     }
-
-
-
-
-
-//                    for (ItemModel model : tempList) {
-//                        fileWriter.append(model.getBarCode());
-//                        fileWriter.append(',');
-//                        fileWriter.append(String.valueOf(model.getQty()));
-//                        fileWriter.append(',');
-//                        fileWriter.append(model.getSelectedPackage());
-//                        fileWriter.append(',');
-//                        fileWriter.append(model.getProductCode());
-//                        fileWriter.append(',');
-//                        fileWriter.append(model.getProductName());
-//                        fileWriter.append(',');
-//                        fileWriter.append(String.valueOf(model.getSalePrice()));
-//                        fileWriter.append(',');
-//                        fileWriter.append(String.valueOf(model.getCostPrice()));
-//                        fileWriter.append(',');
-//                        fileWriter.append(user);
-//                        fileWriter.append(',');
-//                        fileWriter.append(mDate);
-//                        fileWriter.append('\n');
-//                    }
-
-
                     fileWriter.close();
+                    res="exported";
 
                 } catch (Exception e) {
                     //e.printStackTrace();
+                    res="failed";
                 }
-                handler.sendEmptyMessage(0);
-                progressDialog.dismiss();
-                cursor.close();
-                database.close();
+                finally {
+                    Message msg = handler.obtainMessage();
+                    Bundle bundle = new Bundle();
+                    bundle.putString(MSG_KEY, res);
+                    msg.setData(bundle);
+                    handler.sendMessage(msg);
+                    cursor.close();
+                    database.close();
+                }
+
 
 
             }
         }.start();
 
         //Snackbar.make(findViewById(R.id.loginActivity), "Imported", Snackbar.LENGTH_LONG).show();
-        Toast.makeText(mContext,"Exported",Toast.LENGTH_LONG).show();
+
         //tempList.clear();
         //  showSnackbar();
 

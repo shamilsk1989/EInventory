@@ -8,36 +8,39 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <include
-        android:id="@+id/toolbar"
         layout="@layout/toolbar_layout">
-
     </include>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/toolbar"
-        android:id="@+id/txtCount"
-        android:text="0"
-        android:textSize="30dp"
-        android:textColor="@android:color/black"
-        android:background="@drawable/border_line"
+<!--    <TextView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_below="@+id/toolbar"-->
+<!--        android:id="@+id/txtCount"-->
+<!--        android:text="0"-->
+<!--        android:textSize="30dp"-->
+<!--        android:textColor="@android:color/black"-->
+<!--        android:background="@drawable/border_line"-->
 
 
-        />
+<!--        />-->
 
     <android.support.v4.widget.NestedScrollView
         android:id="@+id/scroll"
+
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
-        android:layout_marginTop="10dp"
-        android:layout_below="@+id/txtCount"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_below="@+id/toolbar"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <android.support.v7.widget.RecyclerView
+
             android:id="@+id/item_list_rv"
             android:scrollbars="vertical"
+            android:padding="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
         </android.support.v7.widget.RecyclerView>
@@ -56,17 +59,17 @@
         android:text="No Items"
         />
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/button_height"
-        android:background="@color/colorPrimary"
-        android:textColor="@android:color/white"
-        android:text="Export"
-        android:id="@+id/btnSave"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="10dp"
+<!--    <Button-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="@dimen/button_height"-->
+<!--        android:background="@color/colorPrimary"-->
+<!--        android:textColor="@android:color/white"-->
+<!--        android:text="Export"-->
+<!--        android:id="@+id/btnSave"-->
+<!--        android:layout_alignParentBottom="true"-->
+<!--        android:layout_marginBottom="10dp"-->
 
-        />
+<!--        />-->
 
 
 

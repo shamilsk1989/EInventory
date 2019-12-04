@@ -1,1 +1,1 @@
-include ':app',':rongta',':swipeback'
+include ':app', ':rongta', ':swipeback'

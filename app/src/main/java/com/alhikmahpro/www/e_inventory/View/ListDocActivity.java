@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -34,8 +35,8 @@ public class ListDocActivity extends AppCompatActivity {
 
     @BindView(R.id.doc_list_rv)
     RecyclerView docListRv;
-    @BindView(R.id.txtEmpty)
-    TextView txtEmpty;
+//    @BindView(R.id.txtEmpty)
+//    TextView txtEmpty;
     @BindView(R.id.fab)
     FloatingActionButton fab;
     private static final String TAG = "ListDocActivity";
@@ -62,6 +63,18 @@ public class ListDocActivity extends AppCompatActivity {
         type = mIntent.getStringExtra("Type");
         list = new ArrayList<>();
 
+        docListRv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0 && fab.getVisibility() == View.VISIBLE) {
+                    fab.hide();
+                } else if (dy < 0 && fab.getVisibility() != View.VISIBLE) {
+                    fab.show();
+                }
+            }
+        });
+
     }
 
     private void loadInventory() {
@@ -72,7 +85,7 @@ public class ListDocActivity extends AppCompatActivity {
         Cursor cursor = helper.getStocks(database);
         if (cursor.moveToFirst()) {
 
-            txtEmpty.setVisibility(View.GONE);
+            //txtEmpty.setVisibility(View.GONE);
             do {
                 Log.d(TAG, "loadInventory: " + cursor.getInt(cursor.getColumnIndex(DataContract.Stocks.COL_DOCUMENT_NUMBER)));
                 ItemModel model = new ItemModel();
@@ -84,7 +97,7 @@ public class ListDocActivity extends AppCompatActivity {
                 list.add(model);
             } while (cursor.moveToNext());
         } else {
-            txtEmpty.setVisibility(View.VISIBLE);
+            //txtEmpty.setVisibility(View.VISIBLE);
         }
         cursor.close();
         database.close();
@@ -97,7 +110,7 @@ public class ListDocActivity extends AppCompatActivity {
         Cursor cursor = helper.getGoods(database);
         if (cursor.moveToFirst()) {
 
-            txtEmpty.setVisibility(View.GONE);
+            //txtEmpty.setVisibility(View.GONE);
             do {
                 ItemModel model = new ItemModel();
                 model.setDocNo(cursor.getInt(cursor.getColumnIndex(DataContract.GoodsReceive.COL_DOCUMENT_NUMBER)));
@@ -116,7 +129,7 @@ public class ListDocActivity extends AppCompatActivity {
                 list.add(model);
             } while (cursor.moveToNext());
         } else {
-            txtEmpty.setVisibility(View.VISIBLE);
+            //txtEmpty.setVisibility(View.VISIBLE);
         }
         cursor.close();
         database.close();

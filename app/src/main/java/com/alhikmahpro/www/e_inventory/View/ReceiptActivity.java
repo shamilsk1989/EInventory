@@ -89,10 +89,10 @@ public class ReceiptActivity extends AppCompatActivity {
     TextView txtDate;
     @BindView(R.id.txt_receipt)
     TextView txtReceipt;
-    @BindView(R.id.textViewCustomerName)
-    TextView textViewCustomerName;
+//    @BindView(R.id.textViewCustomerName)
+//    TextView textViewCustomerName;
     @BindView(R.id.editTextBalance)
-    EditText editTextBalance;
+    TextView editTextBalance;
     @BindView(R.id.editTextAmount)
     EditText editTextAmount;
     @BindView(R.id.radioCash)
@@ -107,8 +107,7 @@ public class ReceiptActivity extends AppCompatActivity {
     EditText editTextChequeDate;
     @BindView(R.id.cheque_layout)
     LinearLayout chequeLayout;
-    @BindView(R.id.txt_remark)
-    TextView txtRemark;
+
     @BindView(R.id.editTextRemark)
     EditText editTextRemark;
     @BindView(R.id.btnPrint)
@@ -160,11 +159,12 @@ public class ReceiptActivity extends AppCompatActivity {
         salesmanId = intent.getStringExtra("SALESMAN");
         billStatus = false;
         mContext = getApplicationContext();
+        Log.d(TAG, "onCreate: Action"+action);
 
         if (action.equals(DataContract.ACTION_EDIT)) {
-            getSupportActionBar().setTitle("New Receipt");
+            getSupportActionBar().setTitle(customerName);
         }else{
-            getSupportActionBar().setTitle("Edit Receipt");
+            getSupportActionBar().setTitle(customerName);
         }
         myCalendar = Calendar.getInstance();
         initView();
@@ -225,7 +225,7 @@ public class ReceiptActivity extends AppCompatActivity {
 
         //double balAmount = ParseDouble(balanceAmount);
         editTextBalance.setText(currencyFormatter(balanceAmount));
-        textViewCustomerName.setText(customerName);
+        //textViewCustomerName.setText(customerName);
         txtDate.setText(mDate);
         txtReceipt.setText(String.valueOf(mDoc));
     }

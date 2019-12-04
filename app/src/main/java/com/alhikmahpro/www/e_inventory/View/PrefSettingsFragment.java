@@ -27,9 +27,11 @@ public class PrefSettingsFragment extends PreferenceFragment {
     public static String PREF_KEY_CNAME="key_company_name";
     public static String PREF_KEY_CCODE="key_company_code";
     public static String PREF_KEY_LCODE="key_location";
+
     public static String PREF_KEY_BCODE="key_branch_code";
     public static String PREF_KEY_PCODE="key_period";
-    public static String PREF_KEY_EMPID="Key_emp_id";
+
+    public static String PREF_KEY_EMPID="key_employee";
     public static String PREF_KEY_HEADER1="key_header_1";
     public static String PREF_KEY_HEADER2="key_header_2";
     public static String PREF_KEY_HEADER3="key_header_3";
@@ -38,6 +40,7 @@ public class PrefSettingsFragment extends PreferenceFragment {
     public static String PREF_KEY_SALE="key_module_sales";
     public static String PREF_KEY_RECEIPT="key_module_receipts";
     public static String PREF_KEY_INVENTORY="key_module_inventory";
+
     private SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener;
     private static final String TAG = "PrefSettingsFragment";
 
@@ -48,8 +51,7 @@ public class PrefSettingsFragment extends PreferenceFragment {
         preferenceChangeListener=new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-
-
+                Log.d(TAG, "onSharedPreferenceChanged"+key);
                 if (key.equals(PREF_KEY_BASE_URL)) {
                     Preference urlPref = findPreference(key);
                     urlPref.setSummary(sharedPreferences.getString(key, ""));
@@ -80,8 +82,7 @@ public class PrefSettingsFragment extends PreferenceFragment {
                 } else if (key.equals(PREF_KEY_HEADER3)) {
                     Preference header3Pref = findPreference(key);
                     header3Pref.setSummary(sharedPreferences.getString(key, ""));
-                }
-                else if (key.equals(PREF_KEY_FOOTER)) {
+                } else if (key.equals(PREF_KEY_FOOTER)) {
                     Preference footerPref = findPreference(key);
                     footerPref.setSummary(sharedPreferences.getString(key, ""));
                 }
@@ -90,38 +91,47 @@ public class PrefSettingsFragment extends PreferenceFragment {
 
         };
 
-        final CheckBoxPreference inventoryPref = (CheckBoxPreference) getPreferenceManager().findPreference(PREF_KEY_INVENTORY);
-        final CheckBoxPreference salePref = (CheckBoxPreference) getPreferenceManager().findPreference(PREF_KEY_INVENTORY);
-        final CheckBoxPreference goodsPref = (CheckBoxPreference) getPreferenceManager().findPreference(PREF_KEY_INVENTORY);
-        final CheckBoxPreference receiptPref = (CheckBoxPreference) getPreferenceManager().findPreference(PREF_KEY_INVENTORY);
+//        final CheckBoxPreference inventoryPref = (CheckBoxPreference) getPreferenceManager().findPreference(PREF_KEY_INVENTORY);
+//        final CheckBoxPreference salePref = (CheckBoxPreference) getPreferenceManager().findPreference(PREF_KEY_SALE);
+//        final CheckBoxPreference goodsPref = (CheckBoxPreference) getPreferenceManager().findPreference(PREF_KEY_GOODS);
+//        final CheckBoxPreference receiptPref = (CheckBoxPreference) getPreferenceManager().findPreference(PREF_KEY_RECEIPT);
+//
+//        inventoryPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+//            public boolean onPreferenceChange(Preference preference, Object newValue) {
+//                Log.d(TAG, "Pref " + preference.getKey() + " changed to " + newValue.toString());
+//                return true;
+//            }
+//        });
+//        salePref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+//            public boolean onPreferenceChange(Preference preference, Object newValue) {
+//                Log.d(TAG, "Pref " + preference.getKey() + " changed to " + newValue.toString());
+//                return true;
+//            }
+//        });
+//        goodsPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+//            public boolean onPreferenceChange(Preference preference, Object newValue) {
+//                Log.d(TAG, "Pref " + preference.getKey() + " changed to " + newValue.toString());
+//
+//                return true;
+//            }
+//        });
+//        receiptPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+//            public boolean onPreferenceChange(Preference preference, Object newValue) {
+//                Log.d(TAG, "Pref " + preference.getKey() + " changed to " + newValue.toString());
+//                return true;
+//            }
+//        });
 
-        inventoryPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                Log.d(TAG, "Pref " + preference.getKey() + " changed to " + newValue.toString());
-
+        Preference printerPref = findPreference(getString(R.string.key_printer));
+        printerPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent intent_printer = new Intent(getActivity(), MainPrintSettings.class);
+                startActivity(intent_printer);
                 return true;
             }
         });
-        salePref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                Log.d(TAG, "Pref " + preference.getKey() + " changed to " + newValue.toString());
-                return true;
-            }
-        });
-        goodsPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                Log.d(TAG, "Pref " + preference.getKey() + " changed to " + newValue.toString());
 
-                return true;
-            }
-        });
-        receiptPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                Log.d(TAG, "Pref " + preference.getKey() + " changed to " + newValue.toString());
-
-                return true;
-            }
-        });
 
 
 
@@ -150,7 +160,7 @@ public class PrefSettingsFragment extends PreferenceFragment {
         branchPref.setSummary(getPreferenceScreen().getSharedPreferences().getString(PREF_KEY_BCODE,""));
 
         Preference periodPref = findPreference(PREF_KEY_PCODE);
-        periodPref.setSummary(getPreferenceScreen().getSharedPreferences().getString(PREF_KEY_BCODE,""));
+        periodPref.setSummary(getPreferenceScreen().getSharedPreferences().getString(PREF_KEY_PCODE,""));
 
         Preference empPref = findPreference(PREF_KEY_EMPID);
         empPref.setSummary(getPreferenceScreen().getSharedPreferences().getString(PREF_KEY_EMPID,""));

@@ -30,7 +30,6 @@ public class PrefSettingsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-
         getSupportActionBar().setTitle("Settings");
         PrefSettingsFragment fragment=new PrefSettingsFragment();
 
@@ -46,4 +45,10 @@ public class PrefSettingsActivity extends AppCompatActivity {
 
 
     }
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
 }

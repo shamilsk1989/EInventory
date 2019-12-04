@@ -15,6 +15,19 @@
     <dimen name="custom_text_size">20sp</dimen>
     <dimen name="fab_margin">16dp</dimen>
 
+    <dimen name="medium_padding">10dp</dimen>
+    <dimen name="medium_margin">10dp</dimen>
+    <dimen name="card_width">160dp</dimen>
+    <dimen name="card_height">190dp</dimen>
+    <dimen name="card_width_mob">130dp</dimen>
+    <dimen name="card_height_mob">140dp</dimen>
+    <dimen name="card_height_small">150dp</dimen>
+    <dimen name="card_width_large">340dp</dimen>
+    <dimen name="card_width_large_mob">280dp</dimen>
+    <dimen name="image_size">64dp</dimen>
+    <dimen name="image_size_mob">50dp</dimen>
+    <dimen name="small_padding">5dp</dimen>
+    <dimen name="small_height">30dp</dimen>
 
 
 </resources>

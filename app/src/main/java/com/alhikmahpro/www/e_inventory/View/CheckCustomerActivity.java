@@ -273,32 +273,7 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
 
     }
 
-//    private void requestStoragePermission() {
-//        if (ActivityCompat.shouldShowRequestPermissionRationale(CheckCustomerActivity.this, Manifest.permission.CAMERA)) {
-//
-//            new AlertDialog.Builder(CheckCustomerActivity.this)
-//                    .setTitle("Permission needed")
-//                    .setMessage("To continue please allow the permission ")
-//                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            ActivityCompat.requestPermissions(CheckCustomerActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
-//
-//                        }
-//                    })
-//                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//                        @Override
-//
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            dialog.cancel();
-//                        }
-//                    }).create().show();
-//
-//
-//        } else {
-//            ActivityCompat.requestPermissions(CheckCustomerActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
-//        }
-//    }
+
 
     private void scanBarcode() {
         Log.d(TAG, "onScannerPressed: ");

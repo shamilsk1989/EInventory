@@ -13,7 +13,9 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -27,6 +29,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.Adapter.SalesListAdapter;
 import com.alhikmahpro.www.e_inventory.Data.Cart;
@@ -35,6 +38,7 @@ import com.alhikmahpro.www.e_inventory.Data.CreatePdf;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.ItemModel;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
+import com.alhikmahpro.www.e_inventory.FileUtils;
 import com.alhikmahpro.www.e_inventory.Interface.OnListAdapterClickListener;
 import com.alhikmahpro.www.e_inventory.R;
 import com.karumi.dexter.Dexter;
@@ -43,6 +47,7 @@ import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,8 +59,8 @@ public class ListSalesActivity extends AppCompatActivity {
 
     @BindView(R.id.doc_list_rv)
     RecyclerView docListRv;
-    @BindView(R.id.txtEmpty)
-    TextView txtEmpty;
+//    @BindView(R.id.txtEmpty)
+//    TextView txtEmpty;
     @BindView(R.id.fab)
     FloatingActionButton fab;
     List<ItemModel> list = new ArrayList<>();
@@ -82,6 +87,19 @@ public class ListSalesActivity extends AppCompatActivity {
 //        type= intent.getStringExtra("Type");
         getSupportActionBar().setTitle("Sales");
         populateRecycler();
+
+
+        docListRv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0 && fab.getVisibility() == View.VISIBLE) {
+                    fab.hide();
+                } else if (dy < 0 && fab.getVisibility() != View.VISIBLE) {
+                    fab.show();
+                }
+            }
+        });
     }
 
     private void populateRecycler() {
@@ -101,7 +119,7 @@ public class ListSalesActivity extends AppCompatActivity {
         Cursor cursor = helper.getInvoice(database);
         if (cursor.moveToFirst()) {
 
-            txtEmpty.setVisibility(View.GONE);
+            //txtEmpty.setVisibility(View.GONE);
             do {
                 ItemModel model = new ItemModel();
                 model.setInvoiceNo(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_INVOICE_NUMBER)));
@@ -141,7 +159,8 @@ public class ListSalesActivity extends AppCompatActivity {
                         requestStoragePermission();
 
                     } else {
-                        createPdfWrapper();
+                        //createPdfWrapper();
+                        sharePdf();
                     }
 
 
@@ -156,17 +175,16 @@ public class ListSalesActivity extends AppCompatActivity {
             docListRv.setAdapter(adapter);
             ViewCompat.setNestedScrollingEnabled(docListRv, false);
         } else {
-            txtEmpty.setVisibility(View.VISIBLE);
+            //txtEmpty.setVisibility(View.VISIBLE);
         }
         cursor.close();
         database.close();
     }
 
     private void createPdfWrapper() {
-        Log.d(TAG, "createPdfWrapper: ");
-
-        CreatePdf createPdf = new CreatePdf(this, invoiceNo);
-        createPdf.execute();
+//        Log.d(TAG, "createPdfWrapper: ");
+//        CreatePdf createPdf = new CreatePdf(this, invoiceNo);
+//        createPdf.execute();
 
 
     }
@@ -219,7 +237,8 @@ public class ListSalesActivity extends AppCompatActivity {
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
                         //check all permission granted
                         if (report.areAllPermissionsGranted()) {
-                            createPdfWrapper();
+                            //createPdfWrapper();
+                            sharePdf();
                         }
                         //check any permission permanent denied
                         if (report.isAnyPermissionPermanentlyDenied()) {
@@ -346,6 +365,25 @@ public class ListSalesActivity extends AppCompatActivity {
 
         startActivity(intent);
     }
+
+
+    private void sharePdf() {
+        String fileName = null;
+        fileName = FileUtils.getSubDirPath(this, DataContract.DIR_INVOICE) + invoiceNo + ".pdf";
+        File outputFile = new File(fileName);
+        if (outputFile.exists()) {
+            Uri uri = FileProvider.getUriForFile(ListSalesActivity.this, ListSalesActivity.this.getPackageName() + ".provider", outputFile);
+            Intent share = new Intent();
+            share.setAction(Intent.ACTION_SEND);
+            share.setType("application/pdf");
+            share.putExtra(Intent.EXTRA_STREAM, uri);
+            startActivity(Intent.createChooser(share, "Share to :"));
+        } else {
+            Toast.makeText(this, "File not found", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
 
 
 }

@@ -42,7 +42,8 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
 
         ItemModel itemModel=saleList.get(position);
         holder.invoiceNo.setText(itemModel.getInvoiceNo());
-        String date=itemModel.getInvoiceDate();
+        String date= itemModel.getInvoiceDate().substring(0,10);
+
         Log.d(TAG, "onBindViewHolder:date "+date);
         int sync=itemModel.getIs_sync();
         if(sync==DataContract.SYNC_STATUS_OK){

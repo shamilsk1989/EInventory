@@ -4,9 +4,11 @@ package com.alhikmahpro.www.e_inventory.View;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -69,6 +71,13 @@ public class ListCustomerFragment extends DialogFragment implements SwipeRefresh
     String companyCode, companyName, deviceId, branchCode, periodCode, locationCode;
     private static final String TAG = "ListCustomerFragment";
     public static final String DIALOG_FRAGMENT_TYPE="Customer";
+
+    public static String PREF_KEY_CCODE = "key_company_code";
+    public static String PREF_KEY_CNAME = "key_company_name";
+    public static String PREF_KEY_BCODE = "key_branch_code";
+    public static String PREF_KEY_PCODE= "key_period";
+    public static String PREF_KEY_DEVICE = "key_employee";
+    public static String PREF_KEY_LOCATION = "key_location";
     public ListCustomerFragment() {
         // Required empty public constructor
     }
@@ -104,22 +113,30 @@ public class ListCustomerFragment extends DialogFragment implements SwipeRefresh
         toolbar.setTitle("Customer List");
         initVolleyCallBack();
 
-
-        helper = new dbHelper(getActivity());
         supplierArrayList = new ArrayList<>();
-        SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
-        Cursor cursor = helper.getSettings(sqLiteDatabase);
-        if (cursor.moveToFirst()) {
-            companyCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_CODE));
-            companyName = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME));
-            deviceId = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID));
-            branchCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_BRANCH_CODE));
-            periodCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_PERIOD_CODE));
-            locationCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_LOCATION_CODE));
+//        helper = new dbHelper(getActivity());
+//        supplierArrayList = new ArrayList<>();
+//        SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
+//        Cursor cursor = helper.getSettings(sqLiteDatabase);
+//        if (cursor.moveToFirst()) {
+//            companyCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_CODE));
+//            companyName = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME));
+//            deviceId = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID));
+//            branchCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_BRANCH_CODE));
+//            periodCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_PERIOD_CODE));
+//            locationCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_LOCATION_CODE));
+//
+//        }
+//        cursor.close();
+//        sqLiteDatabase.close();
 
-        }
-        cursor.close();
-        sqLiteDatabase.close();
+        SharedPreferences sharedPreferences= PreferenceManager.getDefaultSharedPreferences(getActivity());
+        companyCode=sharedPreferences.getString(PREF_KEY_CCODE,"0");
+        companyName=sharedPreferences.getString(PREF_KEY_CNAME,"0");
+        deviceId=sharedPreferences.getString(PREF_KEY_DEVICE,"0");
+        branchCode=sharedPreferences.getString(PREF_KEY_BCODE,"0");
+        periodCode=sharedPreferences.getString(PREF_KEY_PCODE,"0");
+        locationCode=sharedPreferences.getString(PREF_KEY_LOCATION,"0");
         rvCustomerList.setHasFixedSize(true);
         rvCustomerList.setLayoutManager(new LinearLayoutManager(getContext()));
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);

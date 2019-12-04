@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -21,12 +22,15 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.Adapter.CartAdapter;
+import com.alhikmahpro.www.e_inventory.Data.Converter;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.ItemModel;
 import com.alhikmahpro.www.e_inventory.Data.RuntimeData;
@@ -56,8 +60,8 @@ public class ListItemActivity extends AppCompatActivity {
     RecyclerView itemListRv;
     @BindView(R.id.txtEmpty)
     TextView txtEmpty;
-    @BindView(R.id.btnSave)
-    Button btnSave;
+//    @BindView(R.id.btnSave)
+//    Button btnSave;
 
     private static final int STORAGE_PERMISSION_CODE = 100;
     ProgressDialog progressDialog;
@@ -69,10 +73,11 @@ public class ListItemActivity extends AppCompatActivity {
     private static final String TAG = "ListItemActivity";
     dbHelper helper;
     List<ItemModel> listItem = new ArrayList<>();
-    @BindView(R.id.txtCount)
-    TextView txtCount;
+//    @BindView(R.id.txtCount)
+//    TextView txtCount;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+    private static int cart_count = 0;
 
 
     @Override
@@ -92,7 +97,7 @@ public class ListItemActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        toolbar.setTitle("Document  " + docNo);
+        getSupportActionBar().setTitle("Document  " + docNo);
         initView();
 
 
@@ -111,18 +116,18 @@ public class ListItemActivity extends AppCompatActivity {
         return true;
     }
 
-    @OnClick(R.id.btnSave)
-    public void onViewClicked() {
-
-        Log.d(TAG, "onViewClicked: ");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            //csvWritter writer=new csvWritter(getContext(),docNo);
-            requestStoragePermission();
-
-        } else {
-            saveToDataBase();
-        }
-    }
+//    @OnClick(R.id.btnSave)
+//    public void onViewClicked() {
+//
+//        Log.d(TAG, "onViewClicked: ");
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            //csvWritter writer=new csvWritter(getContext(),docNo);
+//            requestStoragePermission();
+//
+//        } else {
+//            saveToDataBase();
+//        }
+//    }
 
 
     private void initView() {
@@ -153,7 +158,7 @@ public class ListItemActivity extends AppCompatActivity {
         if (listItem.size() > 0) {
 
             txtEmpty.setVisibility(View.GONE);
-            txtCount.setText("Total Items :" + String.valueOf(listItem.size()));
+            //txtCount.setText("Total Items :" + String.valueOf(listItem.size()));
             layoutManager = new LinearLayoutManager(this);
             itemListRv.setLayoutManager(layoutManager);
             itemListRv.setItemAnimator(new DefaultItemAnimator());
@@ -190,25 +195,25 @@ public class ListItemActivity extends AppCompatActivity {
                 }
             });
             itemListRv.setAdapter(adapter);
+            cart_count = listItem.size();
+            invalidateOptionsMenu();
         } else {
             txtEmpty.setVisibility(View.VISIBLE);
-            txtCount.setVisibility(View.GONE);
+
         }
     }
 
 
     private void deleteItem(int id, int position) {
-
-
         Log.d(TAG, "deleteItem: ID" + position);
-
         boolean del = helper.deleteStockDetailsById(id);
         if (del) {
-
             listItem.remove(position);
             adapter.notifyItemRemoved(position);
             adapter.notifyItemRangeChanged(position, listItem.size());
-            txtCount.setText("Total Items :" + String.valueOf(listItem.size()));
+            //txtCount.setText("Total Items :" + String.valueOf(listItem.size()));
+            cart_count = listItem.size();
+            invalidateOptionsMenu();
             Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show();
 
         } else {
@@ -218,6 +223,95 @@ public class ListItemActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.cart_toolbar, menu);
+        MenuItem menuItem = menu.findItem(R.id.action_cart);
+        Log.d(TAG, "onCreateOptionsMenu: " + Converter.convertLayoutToImage(ListItemActivity.this, cart_count, R.drawable.ic_shopping_cart));
+        menuItem.setIcon(Converter.convertLayoutToImage(ListItemActivity.this, cart_count, R.drawable.ic_shopping_cart));
+        MenuItem itemDelete = menu.findItem(R.id.action_delete);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+
+        int id = item.getItemId();
+        if (id == R.id.action_delete) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                //csvWritter writer=new csvWritter(getContext(),docNo);
+                requestStoragePermission();
+
+            } else {
+                saveToDataBase();
+            }
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void saveToDataBase() {
+
+        if (listItem.size() > 0) {
+            double total = 0;
+            for (ItemModel itemModel : RuntimeData.mCartData) {
+                total = total + itemModel.getQty() * itemModel.getCostPrice();
+            }
+            helper.updateStocks(docNo, total);
+
+            csvWritter writer = new csvWritter(ListItemActivity.this, docNo, mDate);
+            try {
+                writer.exportToCSV(staffName);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Intent i = new Intent(ListItemActivity.this, DashBoardActivity.class);
+// set the new task and clear flags
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+
+
+
+        } else {
+            Toast.makeText(this, "No items", Toast.LENGTH_SHORT).show();
+        }
+
+
+    }
+
+
+    private void alertMessage(String message) {
+
+        new AlertDialog.Builder(ListItemActivity.this)
+                .setTitle("Status")
+                .setMessage(message)
+                .setCancelable(false)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        RuntimeData.mCartData.clear();
+                        finish();
+
+                    }
+                }).create().show();
+
+    }
+
+    private void writeToCSV() {
+        Log.d(TAG, "writeToCSV: ");
+        csvWritter writer = new csvWritter(ListItemActivity.this, docNo, mDate);
+        try {
+            writer.exportToCSV(staffName);
+            RuntimeData.mCartData.clear();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 
     private void requestStoragePermission() {
 
@@ -275,59 +369,5 @@ public class ListItemActivity extends AppCompatActivity {
         intent.setData(uri);
         startActivityForResult(intent, 101);
     }
-
-    private void saveToDataBase() {
-
-        if (listItem.size() > 0) {
-            double total = 0;
-            for (ItemModel itemModel : RuntimeData.mCartData) {
-                total = total + itemModel.getQty() * itemModel.getCostPrice();
-            }
-
-            helper.updateStocks(docNo, total);
-            writeToCSV();
-            Intent i = new Intent(ListItemActivity.this, HomeActivity.class);
-// set the new task and clear flags
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(i);
-        } else {
-            Toast.makeText(this, "No items", Toast.LENGTH_SHORT).show();
-        }
-
-
-    }
-
-
-    private void alertMessage(String message) {
-
-        new AlertDialog.Builder(ListItemActivity.this)
-                .setTitle("Status")
-                .setMessage(message)
-                .setCancelable(false)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                        RuntimeData.mCartData.clear();
-                        finish();
-
-                    }
-                }).create().show();
-
-    }
-
-    private void writeToCSV() {
-        Log.d(TAG, "writeToCSV: ");
-        csvWritter writer = new csvWritter(ListItemActivity.this, docNo, mDate);
-        try {
-            writer.exportToCSV(staffName);
-            RuntimeData.mCartData.clear();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-
 
 }

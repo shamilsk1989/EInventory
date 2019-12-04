@@ -5,11 +5,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
@@ -62,6 +64,7 @@ import org.json.JSONObject;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -73,8 +76,8 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     TextView textViewInvoice;
     @BindView(R.id.textViewDate)
     TextView textViewDate;
-    @BindView(R.id.textViewCustomer)
-    TextView textViewCustomer;
+//    @BindView(R.id.textViewCustomer)
+//    TextView textViewCustomer;
     @BindView(R.id.textViewSalesman)
     TextView textViewSalesman;
     @BindView(R.id.editTextBarcode)
@@ -116,10 +119,10 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     Button btnAdd;
     @BindView(R.id.txtAddedBarcode)
     EditText txtAddedBarcode;
-    @BindView(R.id.txtAddedPrice)
-    EditText txtAddedPrice;
-    @BindView(R.id.txtAddedQuantity)
-    EditText txtAddedQuantity;
+//    @BindView(R.id.txtAddedPrice)
+//    EditText txtAddedPrice;
+//    @BindView(R.id.txtAddedQuantity)
+//    EditText txtAddedQuantity;
 
     RadioButton radioButton;
     private static final String TAG = "SalesActivity";
@@ -128,8 +131,8 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     ProgressBar progressBar;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
-    @BindView(R.id.title_layout2)
-    LinearLayout titleLayout2;
+//    @BindView(R.id.title_layout2)
+//    LinearLayout titleLayout2;
     @BindView(R.id.radioReturn)
     RadioButton radioReturn;
     @BindView(R.id.radioFree)
@@ -155,7 +158,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("New Sales");
+        //getSupportActionBar().setTitle("New Sales");
         list = new ArrayList<>();
         initView();
         initVolleyCallBack();
@@ -356,9 +359,9 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         discPercentage=ParseDouble(editTextDiscountPercentage.getText().toString());
 
         // add to added items view
-        txtAddedBarcode.setText(barCode);
-        txtAddedQuantity.setText(editTextQuantity.getText().toString());
-        txtAddedPrice.setText(editTextRate.getText().toString());
+        txtAddedBarcode.setText(barCode+ " X "+editTextQuantity.getText().toString()+" X "+editTextRate.getText().toString());
+//        txtAddedQuantity.setText(editTextQuantity.getText().toString());
+//        txtAddedPrice.setText(editTextRate.getText().toString());
 
         //add item into cart
 
@@ -623,6 +626,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         Intent intent = getIntent();
         customerName = intent.getStringExtra("Customer");
         customerCode = intent.getStringExtra("CustomerCode");
+        getSupportActionBar().setTitle(customerName);
         Log.d(TAG, "customer name: " + customerName);
         //get default radio button values
 
@@ -643,21 +647,24 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         //editTextDiscountPer.setEnabled(false);
         editTextBarcode.setFocusableInTouchMode(true);
         editTextBarcode.requestFocus();
+        SharedPreferences sharedPreferences= PreferenceManager.getDefaultSharedPreferences(this);
+        salesmanId=sharedPreferences.getString("key_employee","0");
+
+//        dbHelper helper = new dbHelper(this);
+//
+//        SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
+//        Cursor cursor = helper.getSettings(sqLiteDatabase);
+//        if (cursor.moveToFirst()) {
+//            salesmanId = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID));
+//        }
+//        cursor.close();
+//        sqLiteDatabase.close();
 
         dbHelper helper = new dbHelper(this);
 
-        SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
-        Cursor cursor = helper.getSettings(sqLiteDatabase);
-        if (cursor.moveToFirst()) {
-            salesmanId = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID));
-        }
-        cursor.close();
-        sqLiteDatabase.close();
-
-
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-        //mDate = sdf.format(new Date());
-        invoiceDate = AppUtils.getDateAndTime();
+        invoiceDate= sdf.format(new Date());
+        //invoiceDate = AppUtils.getDateAndTime();
         helper = new dbHelper(this);
         int last_no = helper.getLastInvoiceNo();
         Log.d(TAG, "setDoc: " + last_no + "***" + invoiceDate);
@@ -665,7 +672,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         textViewDate.setText(invoiceDate);
         invoiceNo = "INV" + "-" + mDoc;
         textViewInvoice.setText(invoiceNo);
-        textViewCustomer.setText(customerName);
+        //textViewCustomer.setText(customerName);
         textViewSalesman.setText(salesmanId);
     }
 
@@ -735,8 +742,8 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
         clearView();
         txtAddedBarcode.setText("");
-        txtAddedPrice.setText("0.0");
-        txtAddedQuantity.setText("0");
+//        txtAddedPrice.setText("0.0");
+//        txtAddedQuantity.setText("0");
 
         Intent intent = new Intent(SalesActivity.this, ViewCartActivity.class);
         intent.putExtra("ACTION", DataContract.ACTION_NEW);
@@ -825,8 +832,13 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
                         im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
                         editTextDiscount.setText(editTextUserInput.getText().toString());
                         double total = ParseDouble(editTextTotal.getText().toString());
-                        double discountPercentage = ParseDouble(editTextUserInput.getText().toString()) / total * 100;
-                        editTextDiscountPercentage.setText(String.format("%.2f",discountPercentage));
+                        if(total==0){
+                            editTextDiscountPercentage.setText("0");
+                        }else{
+                            double discountPercentage = ParseDouble(editTextUserInput.getText().toString()) / total * 100;
+                            editTextDiscountPercentage.setText(String.format("%.2f",discountPercentage));
+                        }
+
                         calculateNetValue();
                     }
                 })
@@ -866,11 +878,18 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
                         InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                         im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
 
-                        editTextDiscountPercentage.setText(editTextUserInput.getText().toString());
-                        discountPercentage = ParseDouble(editTextUserInput.getText().toString());
-                        double percentageDecimal = discountPercentage / 100;
-                        double discountAmount = percentageDecimal * ParseDouble(editTextTotal.getText().toString());
-                        editTextDiscount.setText(String.format("%.2f",discountAmount));
+                        double total=ParseDouble(editTextTotal.getText().toString());
+                        if(total==0){
+                            editTextDiscount.setText("0");
+                        }else{
+                            editTextDiscountPercentage.setText(editTextUserInput.getText().toString());
+                            discountPercentage = ParseDouble(editTextUserInput.getText().toString());
+                            double percentageDecimal = discountPercentage / 100;
+                            double discountAmount = percentageDecimal * ParseDouble(editTextTotal.getText().toString());
+                            editTextDiscount.setText(String.format("%.2f",discountAmount));
+                        }
+
+
                         calculateNetValue();
                     }
                 })
