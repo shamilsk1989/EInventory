@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.provider.Settings
 import android.support.v4.content.FileProvider
 import android.support.v7.app.AlertDialog
@@ -20,16 +21,14 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 
-import com.alhikmahpro.www.e_inventory.Data.DashedSeparator
-import com.alhikmahpro.www.e_inventory.Data.DataContract
-import com.alhikmahpro.www.e_inventory.Data.dbHelper
 import com.alhikmahpro.www.e_inventory.FileUtils
 import com.alhikmahpro.www.e_inventory.R
 import com.itextpdf.text.pdf.draw.DottedLineSeparator
 
 import butterknife.ButterKnife
 import com.alhikmahpro.www.e_inventory.App.AppController
-import com.alhikmahpro.www.e_inventory.Data.Cart
+import com.alhikmahpro.www.e_inventory.AppUtils
+import com.alhikmahpro.www.e_inventory.Data.*
 import com.alhikmahpro.www.e_inventory.FileUtils.getAppPath
 import com.itextpdf.text.*
 import com.itextpdf.text.pdf.*
@@ -55,6 +54,7 @@ class ViewPdfActivity : AppCompatActivity() {
     lateinit var itemShare: MenuItem
     lateinit var itemClear: MenuItem
     lateinit var customerName: String
+    lateinit var customerCode: String
     lateinit var invoiceNo: String
     lateinit var invoiceDate: String
     lateinit var salesmanId: String
@@ -63,8 +63,12 @@ class ViewPdfActivity : AppCompatActivity() {
     internal var discountAmount: Double = 0.toDouble()
     internal var totalAmount: Double = 0.toDouble()
     internal var netAmount: Double = 0.toDouble()
-    var TAG="ViewPdfActivity"
-
+    var TAG = "ViewPdfActivity"
+    var PREF_KEY_HEADER1 = "key_header_1"
+    var PREF_KEY_HEADER2 = "key_header_2"
+    var PREF_KEY_HEADER3 = "key_header_3"
+    var PREF_KEY_FOOTER = "key_footer"
+    var PREF_KEY_COMPANY = "key_company_name"
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,10 +85,16 @@ class ViewPdfActivity : AppCompatActivity() {
         // action = intent.getStringExtra("TYPE")
         intent?.getStringExtra("CUS_NAME")?.let { customerName = it }
                 ?: kotlin.run { customerName = "customer name" }
+
+        intent?.getStringExtra("CUS_CODE")?.let { customerCode = it }
+                ?: kotlin.run { customerCode = "customer code" }
+
         intent?.getStringExtra("DOC_NO")?.let { invoiceNo = it }
                 ?: kotlin.run { invoiceNo = "invoice_no" }
+
         intent?.getStringExtra("DOC_DATE")?.let { invoiceDate = it }
                 ?: kotlin.run { invoiceDate = "invoice date" }
+
         intent?.getStringExtra("SALESMAN_ID")?.let { salesmanId = it }
                 ?: kotlin.run { salesmanId = "Id" }
         intent?.getStringExtra("PAY_MOD")?.let { paymentMode = it }
@@ -96,7 +106,7 @@ class ViewPdfActivity : AppCompatActivity() {
                 ?: kotlin.run { totalAmount = 0.0 }
         intent?.getDoubleExtra("NET", 0.0)?.let { netAmount = it }
                 ?: kotlin.run { netAmount = 0.0 }
-
+        Log.d(TAG, "Code" + customerCode)
 
         requestPermission();
     }
@@ -105,17 +115,17 @@ class ViewPdfActivity : AppCompatActivity() {
         Dexter.withActivity(this@ViewPdfActivity)
                 .withPermissions(
                         Manifest.permission.READ_EXTERNAL_STORAGE
-                        ,Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                .withListener(object: MultiplePermissionsListener {
+                        , Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .withListener(object : MultiplePermissionsListener {
                     override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
                         report?.let {
-                            if(report.areAllPermissionsGranted()){
-                                Log.d(TAG,"Permission granted")
+                            if (report.areAllPermissionsGranted()) {
+                                Log.d(TAG, "Permission granted")
                                 createPdf(FileUtils.getSubDirPath(mContext, DataContract.DIR_INVOICE), 0f)
-
                             }
                         }
                     }
+
                     override fun onPermissionRationaleShouldBeShown(
                             permissions: MutableList<PermissionRequest>?,
                             token: PermissionToken?
@@ -127,7 +137,6 @@ class ViewPdfActivity : AppCompatActivity() {
                 })
                 .withErrorListener {
                     showSettingDialog()
-
                 }
                 .check()
     }
@@ -150,10 +159,6 @@ class ViewPdfActivity : AppCompatActivity() {
         intent.data = uri
         startActivityForResult(intent, 101)
     }
-
-
-
-
 
 
     private fun viewPdf() {
@@ -191,7 +196,7 @@ class ViewPdfActivity : AppCompatActivity() {
         itemShare = menu.findItem(R.id.action_share)
         itemClear = menu.findItem(R.id.action_clear)
         itemSync.isVisible = false
-        itemClear.isVisible=false
+        itemClear.isVisible = false
 
         return true
     }
@@ -207,7 +212,7 @@ class ViewPdfActivity : AppCompatActivity() {
 
         } else if (id == R.id.action_share) {
             sharePdf()
-            Log.d(TAG,"action share")
+            Log.d(TAG, "action share")
 
         }
         return super.onOptionsItemSelected(item)
@@ -265,7 +270,6 @@ class ViewPdfActivity : AppCompatActivity() {
     }
 
 
-
     fun hsPrint() {
         AppController?.instance?.hsPrint(generateImage(), 0) //1 for 80 0 58
     }
@@ -277,44 +281,31 @@ class ViewPdfActivity : AppCompatActivity() {
         val table: PdfPTable
         var cell: PdfPCell
         val cb: PdfContentByte
-        val fName = dest+invoiceNo+".pdf"
+        val fName = dest + invoiceNo + ".pdf"
         if (File(fName).exists()) {
             File(fName).delete()
         }
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        var companyName = sharedPreferences.getString(PREF_KEY_COMPANY, "0")
+        var header1 = sharedPreferences.getString(PREF_KEY_HEADER1, "0")
+        var header2 = sharedPreferences.getString(PREF_KEY_HEADER2, "0")
+        var header3 = sharedPreferences.getString(PREF_KEY_HEADER3, "0")
+        var footer = sharedPreferences.getString(PREF_KEY_FOOTER, "0")
 
-        val helper = dbHelper(this)
-        val database = helper.readableDatabase
-        val cursor = helper.getPaperSettings(database)
-        var companyName = "ecorn.com"
-        var companyAddress = "برمجة الحكمة"
-        var companyPhone = "+9740123456"
-        var footer = "Thank you"
-
-        val bmp: Bitmap
-        var img: ByteArray? = null
-
-        if (cursor.moveToFirst()) {
-            companyName = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_NAME))
-            companyAddress = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_ADDRESS))
-            companyPhone = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_PHONE))
-            footer = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_FOOTER))
-            img = cursor.getBlob(cursor.getColumnIndex(DataContract.PaperSettings.COL_LOGO))
-            Log.d(TAG, "image : " + img!!)
-
-        }
-        cursor.close()
-        database.close()
-
-
+        var currentDate = AppUtils.getDateAndTime();
 
         try {
 
             val width = 480f
-            var max = 300f;
+            var max = 200f;
             val fontSmall = 26f
             val fontMed = 36f
             val fontBig = 40f
-
+//            val width = 480f
+//            var max = 300f;
+//            var fontSamll = 28f;
+//            var fontBig = 45f;
+//            var fontMediam = 28f;
 
             val baseFont = BaseFont.createFont("assets/brandon_bold.otf", "UTF-8", BaseFont.EMBEDDED)
             val baseFontArial = BaseFont.createFont("assets/fonts/Arial.ttf", "UTF-8", BaseFont.EMBEDDED)
@@ -322,6 +313,7 @@ class ViewPdfActivity : AppCompatActivity() {
 
 
             val mArabicFont = Font(arabicBaseFont, fontSmall, Font.NORMAL, BaseColor.BLACK)
+            val mArabicFontMedium = Font(arabicBaseFont, fontMed, Font.NORMAL, BaseColor.BLACK)
             val mPrintNormal = Font(baseFontArial, fontSmall, Font.NORMAL, BaseColor.BLACK)
             val mPrintMedium = Font(baseFontArial, fontMed, Font.NORMAL, BaseColor.BLACK)
 
@@ -338,16 +330,27 @@ class ViewPdfActivity : AppCompatActivity() {
             val writer = PdfWriter.getInstance(document, FileOutputStream(fName))
             document.open()
             // add logo
+            val helper = dbHelper(this);
+            val sqLiteDatabase = helper.getReadableDatabase()
+            val cursor = helper.getLogo(sqLiteDatabase)
+
+//            if (cursor.moveToFirst()) {
+//
+//                val img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO))
+//                return try {
+//                    val bitmap = BitmapFactory.decodeByteArray(img, 0, img.size)
+//
+//                } catch (e: Exception) {
+//                    e.printStackTrace()
+//                }
+            if (cursor.moveToFirst()) {
+                val img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO))
+                val bitmap = BitmapFactory.decodeByteArray(img, 0, img.size)
+            }
             try {
-//                bmp = BitmapFactory.decodeByteArray(img, 0, img!!.size)
-//                val scaledBitmap = scaleDown(bmp, 80f, true)
-//                val stream = ByteArrayOutputStream()
-//                scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-//                val image = Image.getInstance(stream.toByteArray())
-//                image.alignment = Image.ALIGN_TOP or Image.ALIGN_CENTER
-//                document.add(image)
-                bmp = getBitmapFromAssets("icon.png")
-                val scaledBitmap = ViewPdfActivity.scaleDown(bmp, 80f, true)
+
+                val bmp = getBitmapFromAssets("logo.png")
+                val scaledBitmap = ViewPdfActivity.scaleDown(bmp, 150f, true)
                 val stream = ByteArrayOutputStream()
                 scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
                 val image = Image.getInstance(stream.toByteArray())
@@ -364,8 +367,9 @@ class ViewPdfActivity : AppCompatActivity() {
             table2.isLockedWidth = true
             table2.horizontalAlignment = Element.ALIGN_LEFT
 
+            // arabic header printing
             var phraseh1 = Phrase(
-                    companyAddress, mArabicFont)
+                    header1, mArabicFontMedium)
             cell = PdfPCell(phraseh1)
             cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
             cell.horizontalAlignment = Element.ALIGN_CENTER
@@ -373,20 +377,19 @@ class ViewPdfActivity : AppCompatActivity() {
             table2.addCell(cell)
 
             var phraseh2 = Phrase(
-                    companyName,mPrintNormal)
+                    companyName, mPrintMedium)
             cell = PdfPCell(phraseh2)
             cell.horizontalAlignment = Element.ALIGN_CENTER
             cell.border = Rectangle.NO_BORDER
             table2.addCell(cell)
 
-//            var phraseh3 = Phrase(
-//                    companyAddress, mPrintNormal)
-//            cell = PdfPCell(phraseh3)
-//            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-//            cell.horizontalAlignment = Element.ALIGN_CENTER
-//            cell.border = Rectangle.NO_BORDER
-//            table2.addCell(cell)
-            var phraseh4 = Phrase(companyPhone, mPrintNormal)
+            var phraseh3 = Phrase(
+                    header2, mPrintNormal)
+            cell = PdfPCell(phraseh3)
+            cell.horizontalAlignment = Element.ALIGN_CENTER
+            cell.border = Rectangle.NO_BORDER
+            table2.addCell(cell)
+            var phraseh4 = Phrase(header3, mPrintNormal)
             cell = PdfPCell(phraseh4)
             cell.horizontalAlignment = Element.ALIGN_CENTER
             cell.border = Rectangle.NO_BORDER
@@ -394,37 +397,47 @@ class ViewPdfActivity : AppCompatActivity() {
             document.add(table2)
 
 
-            val separator = DashedSeparator()
-            separator.percentage = 59500f / 523f
-            val linebreak = Chunk(separator)
+//            val separator = DashedSeparator()
+//
+//            separator.percentage = 59500f / 523f
+//            val linebreak = Chunk(separator)
+
+            val customseparator = CustomDashedLineSeparator()
+            customseparator.percentage = 59500f / 523f
+            val linebreak = Chunk(customseparator)
+            //customSeparator.setDash
 
 
-            paragraph = Paragraph("InvoiceNo: " + salesmanId+"/"+ invoiceNo, mPrintNormal)
+
+            paragraph = Paragraph("InvoiceNo: " + salesmanId + "/" + invoiceNo, mPrintNormal)
+            paragraph.alignment = Element.ALIGN_LEFT
+
+            document.add(paragraph)
+
+            paragraph = Paragraph("Date:" + currentDate, mPrintNormal)
             paragraph.alignment = Element.ALIGN_LEFT
             document.add(paragraph)
 
-//            paragraph = Paragraph("Salesman: "+salesmanId, mPrintNormal)
-//            paragraph.alignment = Element.ALIGN_LEFT
-//            document.add(paragraph)
-
-            paragraph = Paragraph("Payment Mode:"+paymentMode, mPrintNormal)
+            paragraph = Paragraph("Customer Code:" + customerCode, mPrintNormal)
             paragraph.alignment = Element.ALIGN_LEFT
             document.add(paragraph)
 
-            paragraph = Paragraph("Date:" + invoiceDate, mPrintNormal)
+            paragraph = Paragraph("Customer Name:" + customerName, mPrintNormal)
             paragraph.alignment = Element.ALIGN_LEFT
             document.add(paragraph)
 
-
-
+            paragraph = Paragraph("Payment Mode:" + paymentMode, mPrintNormal)
+            paragraph.alignment = Element.ALIGN_LEFT
+            document.add(paragraph)
             document.add(linebreak)
+
+
             val snWidth = 0f
             val p = (width - 10) / 3
             val re = ((p * 2) - snWidth) / 3
 
             //  val rem = re / 3
-
-            val columnWidths = floatArrayOf(re,re, re, re,re)
+            val columnWidths = floatArrayOf(re, re, re, re, re)
             table = PdfPTable(columnWidths)
             table.totalWidth = width - 10
             table.isLockedWidth = true
@@ -455,7 +468,8 @@ class ViewPdfActivity : AppCompatActivity() {
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
-            val separato = DashedSeparator()
+            val separato = CustomDashedLineSeparator()
+
             separato.percentage = 59500f / 523f
             cell = PdfPCell(Phrase(Chunk(separato)))
             cell.colspan = 5
@@ -467,9 +481,9 @@ class ViewPdfActivity : AppCompatActivity() {
             var i = 0
             for (mm in Cart.mCart) {
                 val item = mm.productCode
-                val itemName=mm.productName
+                val itemName = mm.productName
                 val qty = mm.qty.toString()
-                val dis=mm.discount.toString()
+                val dis = mm.discount.toString()
                 val price = decimalFormat.format(mm.rate).toString()
                 val sub_total = decimalFormat.format(mm.net).toString()
                 val item_format = price + " X " + mm.qty
@@ -501,11 +515,9 @@ class ViewPdfActivity : AppCompatActivity() {
 
                 cell = PdfPCell(Phrase(Chunk(itemName, mPrintNormal)))
                 cell.horizontalAlignment = Element.ALIGN_LEFT
-                cell.colspan=5
+                cell.colspan = 5
                 cell.border = Rectangle.NO_BORDER
                 table.addCell(cell)
-
-
 
 
                 // arabic
@@ -534,8 +546,7 @@ class ViewPdfActivity : AppCompatActivity() {
             }
 
 
-
-            val separator1 = DashedSeparator()
+            val separator1 = CustomDashedLineSeparator()
             separator1.percentage = 59500f / 523f
 
             cell = PdfPCell(Phrase(Chunk(separator1)))
@@ -596,21 +607,20 @@ class ViewPdfActivity : AppCompatActivity() {
             table.addCell(cell)
 
 
-            cell = PdfPCell(Phrase("Net Total", mPrintNormal))
+            cell = PdfPCell(Phrase("Net Total", mPrintMedium))
             cell.colspan = 2
             cell.horizontalAlignment = Element.ALIGN_LEFT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
-            cell = PdfPCell(Phrase((currencyFormatter(netAmount) ?: "0"), mPrintNormal))
+            cell = PdfPCell(Phrase((currencyFormatter(netAmount) ?: "0"), mPrintMedium))
             cell.colspan = 3
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
 
-
-           //net total arabic
+            //net total arabic
 //            val phrase = Phrase(
 ////                    "المجموع الصافي ", mArabicFont)
 ////            cell = PdfPCell(phrase)
@@ -647,10 +657,10 @@ class ViewPdfActivity : AppCompatActivity() {
 //                var pg = writer.pageNumber?.minus(1)
 //                var size = (pg * (max?.minus(30f)))?.plus(y!!)
 //                createPdf(dest, size)
-                var  tableHeightTotal =table?.totalHeight;
+                var tableHeightTotal = table?.totalHeight;
                 var pg = writer.pageNumber
                 //var remove=pg*50f
-                createPdf(dest, tableHeightTotal+900f)
+                createPdf(dest, tableHeightTotal + 700f)
             } else {
 
                 viewPdf()
@@ -660,6 +670,7 @@ class ViewPdfActivity : AppCompatActivity() {
             e.printStackTrace()
         }
     }
+
     private fun getBitmapFromAssets(fileName: String): Bitmap {
         val assetManager = assets
         var inputStream: InputStream? = null
@@ -671,6 +682,7 @@ class ViewPdfActivity : AppCompatActivity() {
 
         return BitmapFactory.decodeStream(inputStream)
     }
+
     fun currencyFormatter(amount: Double): String {
         val format = NumberFormat.getCurrencyInstance()
         val pattern = (format as DecimalFormat).toPattern()
@@ -681,10 +693,10 @@ class ViewPdfActivity : AppCompatActivity() {
     }
 
     private fun sharePdf() {
-        Log.d("share","clicked");
+        Log.d("share", "clicked");
         val path = FileUtils.getSubDirPath(mContext, DataContract.DIR_INVOICE) + invoiceNo + ".pdf"
         val outputFile = File(path)
-        if(outputFile.exists()){
+        if (outputFile.exists()) {
             // Uri uri = Uri.fromFile(outputFile);
             val uri = FileProvider.getUriForFile(mContext, mContext.packageName + ".provider", outputFile)
             val share = Intent()
@@ -692,14 +704,14 @@ class ViewPdfActivity : AppCompatActivity() {
             share.type = "application/pdf"
             share.putExtra(Intent.EXTRA_STREAM, uri)
             startActivity(Intent.createChooser(share, "Share to :"))
-        }
-        else
-            Toast.makeText(this,"File not found",Toast.LENGTH_LONG).show()
+        } else
+            Toast.makeText(this, "File not found", Toast.LENGTH_LONG).show()
     }
 
     override fun onBackPressed() {
         clearActivity()
     }
+
     private fun clearActivity() {
         Cart.mCart.clear()
         // finish all activity and go to home activity
@@ -707,4 +719,15 @@ class ViewPdfActivity : AppCompatActivity() {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         startActivity(intent)
     }
+
+    private fun getCell(text:String, alignment:Int):PdfPCell {
+        var cell = PdfPCell(Phrase(text));
+        cell.setPadding(0f)
+        cell.setHorizontalAlignment(alignment);
+        cell.setBorder(PdfPCell.NO_BORDER);
+        return cell;
+    }
+
+
+
 }

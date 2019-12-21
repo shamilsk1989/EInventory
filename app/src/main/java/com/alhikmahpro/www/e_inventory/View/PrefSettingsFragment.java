@@ -131,7 +131,15 @@ public class PrefSettingsFragment extends PreferenceFragment {
                 return true;
             }
         });
-
+        Preference logoPref = findPreference(getString(R.string.key_logo));
+        logoPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent intent_logo = new Intent(getActivity(), AddLogoActivity.class);
+                startActivity(intent_logo);
+                return true;
+            }
+        });
 
 
 

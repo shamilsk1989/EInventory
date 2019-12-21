@@ -65,7 +65,7 @@
     <string name="key_printer">key_printer</string>
     <string name="server_settings">Server</string>
     <string name="summery_server">Configure server</string>
-    <string name="default_company_name">Encorn.com</string>
+    <string name="default_company_name">Company Name</string>
     <string name="key_company_name">key_company_name</string>
     <string name="title_company_name">Company Name</string>
     <string name="key_company_code">key_company_code</string>
@@ -80,11 +80,19 @@
     <string name="key_employee">key_employee</string>
     <string name="title_employee">Employee Id</string>
     <string name="default_header">Header</string>
+    <string name="default_logo">Click to Add logo</string>
     <string name="action_logout">Logout</string>
     <string name="action_settings">Settings</string>
     <string name="action_export">Export</string>
     <string name="click_to_start">Click to start</string>
     <string name="nav_report">Reports</string>
+    <string name="default_header_arabic">Header(Arabic)</string>
+    <string name="title_logo">logo</string>
+    <string name="key_logo">key_logo</string>
+    <string name="default_branch_code">Branch Code</string>
+    <string name="default_location">Location Code</string>
+    <string name="default_employee_code">Employee Code</string>
+    <string name="default_period_code">Period Code</string>
 
 
     <!--Spinner -->

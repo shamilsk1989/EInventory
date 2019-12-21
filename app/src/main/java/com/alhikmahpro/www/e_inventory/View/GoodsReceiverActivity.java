@@ -1,6 +1,7 @@
 package com.alhikmahpro.www.e_inventory.View;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,8 +10,10 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -49,9 +52,17 @@ import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
 import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
 import com.alhikmahpro.www.e_inventory.R;
 import com.android.volley.VolleyError;
+import com.google.android.gms.vision.barcode.Barcode;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.CaptureActivity;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
+import com.notbytes.barcode_reader.BarcodeReaderActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -125,12 +136,12 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 //    EditText txtAddedQuantity;
 
 
-
     @BindView(R.id.btnNext)
     Button btnNext;
     private static final int CAMERA_PERMISSION_CODE = 101;
+    private static final int BARCODE_READER_ACTIVITY_REQUEST = 100;
     private static final String TAG = "GoodsReceiverActivity";
-//    @BindView(R.id.txtSupplierName)
+    //    @BindView(R.id.txtSupplierName)
 //    TextView txtSupplierName;
     @BindView(R.id.content_layout)
     LinearLayout contentLayout;
@@ -140,13 +151,13 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     Toolbar toolbar;
     private String BASE_URL = "";
     private String companyCode, companyName, deviceId, branchCode, locationCode, periodCode;
-    ProgressDialog progressDialog;
+    //ProgressDialog progressDialog;
     private ConnectivityManager connectivityManager;
     String supplierName, supplierCode, invoiceNo, invoiceDate, User, orderNo;
     boolean is_first;
-    private static int cart_count=0;
+    private static int cart_count = 0;
 
-    double price1 = 0, price2 = 0, price3 = 0, cost = 0, costPrice = 0, salePrice = 0, discount = 0, rate = 0,discountPercentage=0;
+    double price1 = 0, price2 = 0, price3 = 0, cost = 0, costPrice = 0, salePrice = 0, discount = 0, rate = 0, discountPercentage = 0;
     int unit1Qty, unit2Qty, unit3Qty, unitIndex, mDoc;
     String barCode, selectedUnit, selectedFreeUnit, unit1, unit2, unit3, packing1, packing2, packing3, mDate;
     ArrayList<String> list;
@@ -178,13 +189,11 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
         getSupportActionBar().setTitle(supplierName);
         Log.d(TAG, "onCreate: " + "supc:" + supplierCode + "supname:" + supplierName + "inv:" + invoiceNo + "date:" + invoiceDate);
-        progressDialog = new ProgressDialog(this);
+       // progressDialog = new ProgressDialog(this);
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         is_first = true;
         list = new ArrayList<>();
         list2 = new ArrayList<>();
-
-
 
 
         setDoc();
@@ -288,11 +297,11 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     }
 
     private void calculateNetValue() {
-        double net, rate, quantity,total,discountAmount;
+        double net, rate, quantity, total, discountAmount;
 
-        total=ParseDouble(editTextTotal.getText().toString());
-        discountAmount=ParseDouble(editTextDiscount.getText().toString());
-        net=total-discountAmount;
+        total = ParseDouble(editTextTotal.getText().toString());
+        discountAmount = ParseDouble(editTextDiscount.getText().toString());
+        net = total - discountAmount;
 
 
 //        quantity = ParseDouble(editTextQuantity.getText().toString());
@@ -308,17 +317,10 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
     @OnClick(R.id.imgBarcode)
     public void onImgBarcodeClicked() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "Permission already granted: ");
-
-                scanBarcode();
-            } else {
-                requestStoragePermission();
-            }
-        } else {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            requestCameraPermission();
+        else
             scanBarcode();
-        }
     }
 
     @OnClick(R.id.imgSearch)
@@ -364,7 +366,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
                 //set added items view
 
-                txtAddedBarcode.setText(barCode+ " X "+editTextQuantity.getText().toString()+" X "+editTextSale.getText().toString());
+                txtAddedBarcode.setText(barCode + " X " + editTextQuantity.getText().toString() + " X " + editTextSale.getText().toString());
 //                txtAddedQuantity.setText(editTextQuantity.getText().toString());
 //                txtAddedPrice.setText(editTextSale.getText().toString());
 
@@ -385,12 +387,12 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     }
 
     private void addToCart() {
-        double qty = 0, rate = 0, disc = 0, net = 0, free_qty, old_qty = 0,discPercentage;
+        double qty = 0, rate = 0, disc = 0, net = 0, free_qty, old_qty = 0, discPercentage;
         String stock;
         qty = Double.valueOf(editTextQuantity.getText().toString());
         free_qty = Double.valueOf(editTextFreeQuantity.getText().toString());
         rate = Double.valueOf(editTextRate.getText().toString());
-       // disc = Double.valueOf(editTextDiscount.getText().toString());
+        // disc = Double.valueOf(editTextDiscount.getText().toString());
         stock = editTextStock.getText().toString();
         net = Double.valueOf(editTextNet.getText().toString());
         //discPercentage=ParseDouble(editTextDiscountPercentage.getText().toString());
@@ -400,7 +402,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
         // add to added items view
 
-        txtAddedBarcode.setText(barCode+ " X "+editTextQuantity.getText().toString()+" X "+editTextSale.getText().toString());
+        txtAddedBarcode.setText(barCode + " X " + editTextQuantity.getText().toString() + " X " + editTextSale.getText().toString());
 
 
         // add items in to the cart...........................
@@ -491,66 +493,93 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
     }
 
-    private void requestStoragePermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(GoodsReceiverActivity.this, Manifest.permission.CAMERA)) {
+    private void requestCameraPermission() {
+        Dexter.withActivity(this)
+                .withPermission(Manifest.permission.CAMERA)
+                .withListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted(PermissionGrantedResponse response) {
+                        //permission granted
+                        scanBarcode();
 
-            new AlertDialog.Builder(GoodsReceiverActivity.this)
-                    .setTitle("Permission needed")
-                    .setMessage("To continue please allow the permission ")
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions(GoodsReceiverActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
+                    }
 
-                        }
-                    })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
+                    @Override
+                    public void onPermissionDenied(PermissionDeniedResponse response) {
 
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    }).create().show();
+                        showSettingDialog();
+
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
+
+                        token.continuePermissionRequest();
+                    }
+                }).check();
+
+    }
 
 
-        } else {
-            ActivityCompat.requestPermissions(GoodsReceiverActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
-        }
+    private void showSettingDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(GoodsReceiverActivity.this);
+        builder.setTitle("Need Permissions");
+        builder.setMessage("This app needs permission to use this feature. You can grant them in app settings.");
+        builder.setPositiveButton("GOTO SETTINGS", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                openSettings();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
+    }
+
+    private void openSettings() {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        startActivityForResult(intent, 101);
     }
 
     private void scanBarcode() {
 
         Log.d(TAG, "onScannerPressed: ");
-        IntentIntegrator intentIntegrator = new IntentIntegrator(this);
-        intentIntegrator.setCameraId(0);
-        intentIntegrator.setPrompt("Scan code");
-        intentIntegrator.setBeepEnabled(true);
-        intentIntegrator.setOrientationLocked(false);
-        intentIntegrator.setCaptureActivity(CaptureActivity.class);
-        intentIntegrator.initiateScan();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
-        if (requestCode == CAMERA_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "onRequestPermissionsResult: permission granted ");
-                scanBarcode();
-            } else {
-                Log.d(TAG, "onRequestPermissionsResult: permission not granted");
-            }
-        }
+//        IntentIntegrator intentIntegrator = new IntentIntegrator(this);
+//        intentIntegrator.setCameraId(0);
+//        intentIntegrator.setPrompt("Scan code");
+//        intentIntegrator.setBeepEnabled(true);
+//        intentIntegrator.setOrientationLocked(false);
+//        intentIntegrator.setCaptureActivity(CaptureActivity.class);
+//        intentIntegrator.initiateScan();
+        Intent launchIntent = BarcodeReaderActivity.getLaunchIntent(this, true, false);
+        startActivityForResult(launchIntent, BARCODE_READER_ACTIVITY_REQUEST);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
+//        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+//        if (result != null) {
+//
+//            editTextBarcode.setText(result.getContents());
+//        } else {
+//            Toast.makeText(this, "error", Toast.LENGTH_SHORT).show();
+//        }
 
-            editTextBarcode.setText(result.getContents());
-        } else {
-            Toast.makeText(this, "error", Toast.LENGTH_SHORT).show();
+        if (resultCode != Activity.RESULT_OK) {
+            Toast.makeText(this, "error in  scanning", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (requestCode == BARCODE_READER_ACTIVITY_REQUEST && data != null) {
+            Barcode barcode = data.getParcelableExtra(BarcodeReaderActivity.KEY_CAPTURED_BARCODE);
+            editTextBarcode.setText(barcode.rawValue);
         }
     }
 
@@ -571,7 +600,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
                 e.printStackTrace();
             }
 
-            progressDialog = AppUtils.showProgressDialog(this, "Loading....");
+           // progressDialog = AppUtils.showProgressDialog(this, "Loading....");
             serviceGateway = new VolleyServiceGateway(mVolleyListener, this);
             serviceGateway.postDataVolley("POSTCALL", "PriceChecker/check_price.php", postParam);
         }
@@ -682,25 +711,9 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         editTextBarcode.setFocusableInTouchMode(true);
         editTextBarcode.requestFocus();
 
-//        dbHelper helper = new dbHelper(this);
-//
-//        SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
-//        Cursor cursor = helper.getSettings(sqLiteDatabase);
-//        if (cursor.moveToFirst()) {
-//            companyCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_CODE));
-//            companyName = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME));
-//            deviceId = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID));
-//            branchCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_BRANCH_CODE));
-//            periodCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_PERIOD_CODE));
-//            locationCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_LOCATION_CODE));
-//            BASE_URL = SessionHandler.getInstance(GoodsReceiverActivity.this).getHost();
-//
-//        }
-//        cursor.close();
-//        sqLiteDatabase.close();
 
-        txtInvoiceDate.setText("INV:DATE: "+invoiceDate);
-        txtInvoiceNo.setText("INV:NO: "+invoiceNo);
+        txtInvoiceDate.setText("INV:DATE: " + invoiceDate);
+        txtInvoiceNo.setText("INV:NO: " + invoiceNo);
         editTextUser.setText(User);
         editTextSupplier.setText(supplierCode);
         //txtSupplierName.setText(supplierName);
@@ -733,7 +746,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         Log.d(TAG, "setDoc: " + last_no);
         mDoc = last_no + 1;
         txtDate.setText(mDate);
-        txtDocNo.setText("DOC NO:"+String.valueOf(mDoc));
+        txtDocNo.setText("DOC NO:" + String.valueOf(mDoc));
     }
 
     @Override
@@ -810,9 +823,10 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
                         im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
                         editTextQuantity.setText(editTextUserInput.getText().toString());
                         //calculate total
-                        double total=(ParseDouble(editTextQuantity.getText().toString()) * ParseDouble(editTextRate.getText().toString()));
+                        double total = (ParseDouble(editTextQuantity.getText().toString()) * ParseDouble(editTextRate.getText().toString()));
                         editTextTotal.setText(String.valueOf(total));
-                        calculateNetValue(); }
+                        calculateNetValue();
+                    }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
@@ -829,6 +843,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
 
     }
+
     private void freeQuantityCustomDialog(String value) {
 
         LayoutInflater layoutInflater = LayoutInflater.from(this);
@@ -850,9 +865,10 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
                         im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
                         editTextFreeQuantity.setText(editTextUserInput.getText().toString());
                         //calculate total
-                        double total=(ParseDouble(editTextQuantity.getText().toString()) * ParseDouble(editTextRate.getText().toString()));
+                        double total = (ParseDouble(editTextQuantity.getText().toString()) * ParseDouble(editTextRate.getText().toString()));
                         editTextTotal.setText(String.valueOf(total));
-                        calculateNetValue(); }
+                        calculateNetValue();
+                    }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
@@ -892,7 +908,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
                         editTextDiscount.setText(editTextUserInput.getText().toString());
                         double total = ParseDouble(editTextTotal.getText().toString());
                         double discountPercentage = ParseDouble(editTextUserInput.getText().toString()) / total * 100;
-                        editTextDiscountPercentage.setText(String.format("%.2f",discountPercentage));
+                        editTextDiscountPercentage.setText(String.format("%.2f", discountPercentage));
                         calculateNetValue();
                     }
                 })
@@ -936,7 +952,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
                         discountPercentage = ParseDouble(editTextUserInput.getText().toString());
                         double percentageDecimal = discountPercentage / 100;
                         double discountAmount = percentageDecimal * ParseDouble(editTextTotal.getText().toString());
-                        editTextDiscount.setText(String.format("%.2f",discountAmount));
+                        editTextDiscount.setText(String.format("%.2f", discountAmount));
                         calculateNetValue();
                     }
                 })
@@ -962,8 +978,8 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
         getMenuInflater().inflate(R.menu.cart_toolbar, menu);
         MenuItem menuItem = menu.findItem(R.id.action_cart);
-        Log.d(TAG, "onCreateOptionsMenu: "+ Converter.convertLayoutToImage(GoodsReceiverActivity.this,cart_count,R.drawable.ic_shopping_cart));
-        menuItem.setIcon(Converter.convertLayoutToImage(GoodsReceiverActivity.this,cart_count,R.drawable.ic_shopping_cart));
+        Log.d(TAG, "onCreateOptionsMenu: " + Converter.convertLayoutToImage(GoodsReceiverActivity.this, cart_count, R.drawable.ic_shopping_cart));
+        menuItem.setIcon(Converter.convertLayoutToImage(GoodsReceiverActivity.this, cart_count, R.drawable.ic_shopping_cart));
         MenuItem menuItem2 = menu.findItem(R.id.action_delete);
         menuItem2.setVisible(false);
         return true;

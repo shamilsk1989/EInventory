@@ -59,7 +59,7 @@ public class ListSalesActivity extends AppCompatActivity {
 
     @BindView(R.id.doc_list_rv)
     RecyclerView docListRv;
-//    @BindView(R.id.txtEmpty)
+    //    @BindView(R.id.txtEmpty)
 //    TextView txtEmpty;
     @BindView(R.id.fab)
     FloatingActionButton fab;
@@ -153,15 +153,16 @@ public class ListSalesActivity extends AppCompatActivity {
                     Log.d(TAG, "OnShareClicked: ");
                     ItemModel itemModel = list.get(position);
                     invoiceNo = itemModel.getInvoiceNo();
+                    goToNext(position);
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
-                        requestStoragePermission();
-
-                    } else {
-                        //createPdfWrapper();
-                        sharePdf();
-                    }
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//
+//                        requestStoragePermission();
+//
+//                    } else {
+//                        //createPdfWrapper();
+//                        sharePdf();
+//                    }
 
 
                 }
@@ -200,30 +201,31 @@ public class ListSalesActivity extends AppCompatActivity {
         //get invoice details and add to the cart
         helper.getInvoiceDetailsById(invoiceNo);
         Log.d(TAG, "goToNext:cart size " + Cart.mCart.size());
-        Intent intent;
+        // Intent intent;
 
         // syc successfully then goto PrintViewActivity
-        if (itemModel.getIs_sync() == DataContract.SYNC_STATUS_FAILED) {
-            intent = new Intent(ListSalesActivity.this, ViewCartActivity.class);
+//        if (itemModel.getIs_sync() == DataContract.SYNC_STATUS_FAILED) {
+//            intent = new Intent(ListSalesActivity.this, ViewCartActivity.class);
 
 //        else {
 //            intent = new Intent(ListSalesActivity.this, ViewCartActivity.class);
 //        }
-
-            intent.putExtra("ACTION", DataContract.ACTION_EDIT);
-            intent.putExtra("TYPE", "SAL");
-            intent.putExtra("CUS_NAME", itemModel.getCustomerName());
-            intent.putExtra("CUS_CODE", itemModel.getCustomerCode());
-            intent.putExtra("DISCOUNT", itemModel.getDiscount());
-            intent.putExtra("SALESMAN_ID", itemModel.getStaffName());
-            intent.putExtra("DOC_NO", itemModel.getInvoiceNo());
-            intent.putExtra("DOC_DATE", itemModel.getInvoiceDate());
-            intent.putExtra("TOTAL", itemModel.getTotal());
-            intent.putExtra("NET", itemModel.getNet());
-            intent.putExtra("PAY_MOD", itemModel.getPaymentType());
-            startActivity(intent);
-        }
+        Intent intent = new Intent(ListSalesActivity.this, ViewPdfActivity.class);
+        intent.putExtra("ACTION", DataContract.ACTION_EDIT);
+        intent.putExtra("TYPE", "SAL");
+        intent.putExtra("CUS_NAME", itemModel.getCustomerName());
+        intent.putExtra("CUS_CODE", itemModel.getCustomerCode());
+        intent.putExtra("DISCOUNT", itemModel.getDiscount());
+        intent.putExtra("SALESMAN_ID", itemModel.getStaffName());
+        intent.putExtra("DOC_NO", itemModel.getInvoiceNo());
+        intent.putExtra("DOC_DATE", itemModel.getInvoiceDate());
+        intent.putExtra("TOTAL", itemModel.getTotal());
+        intent.putExtra("NET", itemModel.getNet());
+        intent.putExtra("PAY_MOD", itemModel.getPaymentType());
+        startActivity(intent);
     }
+
+
 
     private void requestStoragePermission() {
 
@@ -382,8 +384,6 @@ public class ListSalesActivity extends AppCompatActivity {
             Toast.makeText(this, "File not found", Toast.LENGTH_SHORT).show();
         }
     }
-
-
 
 
 }

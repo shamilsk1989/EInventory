@@ -277,6 +277,7 @@ public class SettingsActivity extends AppCompatActivity {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         byte[] img_data = stream.toByteArray();
+
         if (validate(c_code, url)) {
             //save url to shared preference
 

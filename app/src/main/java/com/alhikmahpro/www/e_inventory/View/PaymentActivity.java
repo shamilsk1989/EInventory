@@ -106,7 +106,7 @@ public class PaymentActivity extends AppCompatActivity {
         customerName = intent.getStringExtra("CUS_NAME");
         customerCode = intent.getStringExtra("CUS_CODE");
         invoiceDate = intent.getStringExtra("INV_DATE");
-        Log.d(TAG, " payment activity onCreate: invoice date" + invoiceDate);
+        Log.d(TAG, " payment activity onCreate: CUS_CODE" + customerCode);
         invoiceNo = intent.getStringExtra("INV_NO");
         salesmanId = intent.getStringExtra("SALESMAN_ID");
         cart_count = intent.getIntExtra("TOTAL_ROW", 0);
@@ -153,9 +153,14 @@ public class PaymentActivity extends AppCompatActivity {
         public void onTextChanged(CharSequence s, int i, int i1, int i2) {
             editTextDiscountPercentage.removeTextChangedListener(percentageWatcher);
             if (!s.toString().equals("")) {
-                double discountPercentage = Math.round(Double.parseDouble(s.toString()) / base_total * 100);
+                double discountAmount=ParseDouble(s.toString());
+                if(discountAmount>0){
+                    double discountPercentage =  discountAmount/ base_total * 100;
+                    editTextDiscountPercentage.setText(String.format("%.2f",discountPercentage));
+                }else{
+                    editTextDiscountPercentage.setText("0");
+                }
 
-                editTextDiscountPercentage.setText(String.format("%.2f",discountPercentage));
             }else{
                 editTextDiscountPercentage.setText("");
             }
@@ -180,10 +185,15 @@ public class PaymentActivity extends AppCompatActivity {
             editTextDiscount.removeTextChangedListener(amountWatcher);
             if (!s.toString().equals("")) {
 
-                double discountPercentage = Double.parseDouble(s.toString());
-                double percentageDecimal = discountPercentage / 100;
-                double discountAmount = percentageDecimal * base_total;
-                editTextDiscount.setText(String.format("%.2f",discountAmount));
+                double discountPercentage = ParseDouble(s.toString());
+                if(discountPercentage>0){
+                    double percentageDecimal = discountPercentage / 100;
+                    double discountAmount = percentageDecimal * base_total;
+                    editTextDiscount.setText(String.format("%.2f",discountAmount));
+                }else{
+                    editTextDiscount.setText("0");
+                }
+
             }else {
                 editTextDiscount.setText("");
             }
@@ -596,6 +606,16 @@ public class PaymentActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    double ParseDouble(String strNumber) {
+        if (strNumber != null && strNumber.length() > 0) {
+            try {
+                return Double.parseDouble(strNumber);
+            } catch (Exception e) {
+                return -1;   // or some value to mark this field is wrong. or make a function validates field first ...
+            }
+        } else return 0;
     }
 
 }

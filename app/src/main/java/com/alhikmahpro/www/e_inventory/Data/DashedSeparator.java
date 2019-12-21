@@ -6,6 +6,7 @@ import com.itextpdf.text.pdf.draw.LineSeparator;
 public class DashedSeparator extends LineSeparator {
     /** the gap between the dots. */
     protected float gap = 2;
+    //protected float customLineWidth = 2;
 
     /**
      * @see com.itextpdf.text.pdf.draw.DrawInterface#draw(com.itextpdf.text.pdf.PdfContentByte, float, float, float, float, float)

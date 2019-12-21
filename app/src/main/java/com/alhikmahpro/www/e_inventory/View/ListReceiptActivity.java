@@ -206,8 +206,9 @@ public class ListReceiptActivity extends AppCompatActivity {
                 @Override
                 public void OnShareClicked(int position) {
                     Log.d(TAG, "OnShareClicked: ");
-                    ReceiptModel receiptModel = list.get(position);
-                    sharePdf(receiptModel.getReceiptNo());
+//                    ReceiptModel receiptModel = list.get(position);
+//                    sharePdf(receiptModel.getReceiptNo());
+                    gotoViewPdf(position);
 
                 }
 
@@ -228,10 +229,10 @@ public class ListReceiptActivity extends AppCompatActivity {
     }
 
     private void gotoViewPdf(int position) {
-        Intent view_pdf = new Intent(this, ViewPdfActivity.class);
+        Intent view_pdf = new Intent(this, ReceiptPdfViewActivity.class);
         ReceiptModel receiptModel = list.get(position);
         view_pdf.putExtra("CUSTOMER_NAME",receiptModel.getCustomerName());
-       // view_pdf.putExtra("CUSTOMER_CODE",receiptModel.getCustomerCode());
+        view_pdf.putExtra("CUSTOMER_CODE",receiptModel.getCustomerCode());
         view_pdf.putExtra("SALESMAN_ID",receiptModel.getSalesmanId());
         view_pdf.putExtra("RECEIPT_NO",receiptModel.getReceiptNo());
         view_pdf.putExtra("RECEIPT_DATE",receiptModel.getReceiptDate());

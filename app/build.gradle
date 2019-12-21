@@ -45,9 +45,11 @@ dependencies {
     implementation files('libs/opencsv-3.8.jar')
     //Google vision Barcode API
     implementation 'com.google.android.gms:play-services-vision:17.0.2'
+    implementation project(':barcode-reader')
+
 
     //ZXing barcode
-//    implementation 'com.google.android.gms:play-services-auth:16.0.0'
+
 //    implementation 'me.dm7.barcodescanner:zxing:1.9'
 
     //Zxing core (using intentIntegtrator)
@@ -67,17 +69,21 @@ dependencies {
 
 
     implementation project(':rongta')
+    implementation project(path: ':swipeback')
+
     //implementation project(':zxing-android-embedded')
 
     //Runtime permission library
     implementation 'com.karumi:dexter:4.2.0'
     implementation 'com.github.fondesa:kpermissions:1.0.0'
 
+
     implementation 'com.android.support:multidex:1.0.0'
 
     //kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation project(path: ':swipeback')
+    implementation 'com.github.zomato:androidphotofilters:1.0.2'
+
 
 
 }

@@ -1,6 +1,7 @@
 package com.alhikmahpro.www.e_inventory.View;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -44,6 +45,7 @@ import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
 import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
 import com.alhikmahpro.www.e_inventory.R;
 import com.android.volley.VolleyError;
+import com.google.android.gms.vision.barcode.Barcode;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.CaptureActivity;
@@ -53,6 +55,7 @@ import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
+import com.notbytes.barcode_reader.BarcodeReaderActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -120,7 +123,7 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
     int unit1Qty, unit2Qty, unit3Qty, unitIndex, mDoc;
     String barCode, selectedUnit, unit1, unit2, unit3, packing1, packing2, packing3, mDate;
     dbHelper helper;
-    private static final int CAMERA_PERMISSION_CODE = 101;
+    private static final int BARCODE_READER_ACTIVITY_REQUEST = 101;
     boolean is_first;
     private static int cart_count=0;
 
@@ -388,28 +391,25 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
     }
 
 
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//
-//        if (requestCode == CAMERA_PERMISSION_CODE) {
-//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                Log.d(TAG, "onRequestPermissionsResult: permission granted ");
-//                scanBarcode();
-//            } else {
-//                Log.d(TAG, "onRequestPermissionsResult: permission not granted");
-//            }
-//        }
-//    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
+//        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+//        if (result != null) {
+//
+//            txtBarcode.setText(result.getContents());
+//        } else {
+//            Toast.makeText(this, "error", Toast.LENGTH_SHORT).show();
+//        }
 
-            txtBarcode.setText(result.getContents());
-        } else {
-            Toast.makeText(this, "error", Toast.LENGTH_SHORT).show();
+        if (resultCode != Activity.RESULT_OK) {
+            Toast.makeText(this, "error in  scanning", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (requestCode == BARCODE_READER_ACTIVITY_REQUEST && data != null) {
+            Barcode barcode = data.getParcelableExtra(BarcodeReaderActivity.KEY_CAPTURED_BARCODE);
+            txtBarcode.setText(barcode.rawValue);
         }
 
     }
@@ -579,13 +579,15 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
     private void scanBarcode() {
 
         Log.d(TAG, "onScannerPressed: ");
-        IntentIntegrator intentIntegrator = new IntentIntegrator(this);
-        intentIntegrator.setCameraId(0);
-        intentIntegrator.setPrompt("Scan code");
-        intentIntegrator.setBeepEnabled(true);
-        intentIntegrator.setOrientationLocked(false);
-        intentIntegrator.setCaptureActivity(CaptureActivity.class);
-        intentIntegrator.initiateScan();
+//        IntentIntegrator intentIntegrator = new IntentIntegrator(this);
+//        intentIntegrator.setCameraId(0);
+//        intentIntegrator.setPrompt("Scan code");
+//        intentIntegrator.setBeepEnabled(true);
+//        intentIntegrator.setOrientationLocked(false);
+//        intentIntegrator.setCaptureActivity(CaptureActivity.class);
+//        intentIntegrator.initiateScan();
+        Intent launchIntent = BarcodeReaderActivity.getLaunchIntent(this, true, false);
+        startActivityForResult(launchIntent,BARCODE_READER_ACTIVITY_REQUEST);
     }
 
 //    private void requestStoragePermission() {

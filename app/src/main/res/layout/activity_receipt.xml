@@ -172,6 +172,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:layout_marginTop="10dp"
+                android:hint="Remarks"
                 android:layout_below="@+id/cheque_layout"
                 android:background="@drawable/border_line" />
 

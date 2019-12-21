@@ -91,6 +91,7 @@
                     android:layout_weight="1"
                     android:background="@drawable/rounded_edittext"
                     android:hint="Invoice Date"
+                    android:textColor="@android:color/black"
                     android:padding="10dp"
                     android:singleLine="true" />
 

@@ -9,15 +9,15 @@
     <include layout="@layout/toolbar_layout"></include>
 
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:layout_gravity="center"
-        android:indeterminate="true"
-        android:theme="@style/progressBarTheme" />
+<!--    <ProgressBar-->
+<!--        android:id="@+id/progressBar"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_centerHorizontal="true"-->
+<!--        android:layout_centerVertical="true"-->
+<!--        android:layout_gravity="center"-->
+<!--        android:indeterminate="true"-->
+<!--        android:theme="@style/progressBarTheme" />-->
 
     <ScrollView
         android:id="@+id/scrollView"

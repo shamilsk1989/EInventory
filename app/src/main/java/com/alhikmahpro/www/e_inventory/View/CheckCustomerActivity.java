@@ -1,14 +1,17 @@
 package com.alhikmahpro.www.e_inventory.View;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
@@ -33,6 +36,7 @@ import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
 import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
 import com.alhikmahpro.www.e_inventory.R;
 import com.android.volley.VolleyError;
+import com.google.android.gms.vision.barcode.Barcode;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.CaptureActivity;
@@ -42,6 +46,7 @@ import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
+import com.notbytes.barcode_reader.BarcodeReaderActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -79,8 +84,9 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
     Button btnInvoice;
 
 
-    private static final int CAMERA_PERMISSION_CODE = 100;
+    private static final int BARCODE_READER_ACTIVITY_REQUEST = 100;
     private static final String TAG = "CheckCustomerActivity";
+    private static final String PREF_KEY_DEVICE = "key_employee";
 
     private ConnectivityManager connectivityManager;
     String companyCode, companyName, deviceId, locationCode, branchCode, periodCode;
@@ -105,6 +111,8 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
         Intent intent = getIntent();
         type = intent.getStringExtra("TYPE");
         Log.d(TAG, "onCreate:type "+type);
+        SharedPreferences sharedPreferences= PreferenceManager.getDefaultSharedPreferences(this);
+        deviceId=sharedPreferences.getString(PREF_KEY_DEVICE,"0");
 
         //disable edit text
 
@@ -277,13 +285,15 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
 
     private void scanBarcode() {
         Log.d(TAG, "onScannerPressed: ");
-        IntentIntegrator intentIntegrator = new IntentIntegrator(this);
-        intentIntegrator.setCameraId(0);
-        intentIntegrator.setPrompt("Scan code");
-        intentIntegrator.setBeepEnabled(true);
-        intentIntegrator.setOrientationLocked(false);
-        intentIntegrator.setCaptureActivity(CaptureActivity.class);
-        intentIntegrator.initiateScan();
+//        IntentIntegrator intentIntegrator = new IntentIntegrator(this);
+//        intentIntegrator.setCameraId(0);
+//        intentIntegrator.setPrompt("Scan code");
+//        intentIntegrator.setBeepEnabled(true);
+//        intentIntegrator.setOrientationLocked(false);
+//        intentIntegrator.setCaptureActivity(CaptureActivity.class);
+//        intentIntegrator.initiateScan();
+        Intent launchIntent = BarcodeReaderActivity.getLaunchIntent(this, true, false);
+        startActivityForResult(launchIntent,BARCODE_READER_ACTIVITY_REQUEST);
     }
 
 
@@ -351,16 +361,7 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
             textViewCustomerName.setError("Invalid customer");
         } else {
 
-            // fetch device id from data base
-            dbHelper helper = new dbHelper(this);
-            SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
-            Cursor cursor = helper.getDeviceIdFromSettings(sqLiteDatabase);
-            String deviceId="";
-            if(cursor.moveToFirst()){
-                deviceId=cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID));
-            }
-            cursor.close();
-            sqLiteDatabase.close();
+
             clearView();
             Intent intent_rec = new Intent(CheckCustomerActivity.this, ReceiptActivity.class);
             intent_rec.putExtra("ACTION", DataContract.ACTION_NEW);
@@ -410,29 +411,26 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
         return true;
     }
 
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//
-//        if (requestCode == CAMERA_PERMISSION_CODE) {
-//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                Log.d(TAG, "onRequestPermissionsResult: permission granted ");
-//                scanBarcode();
-//            } else {
-//                Log.d(TAG, "onRequestPermissionsResult: permission not granted");
-//            }
-//        }
-//    }
 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
+//        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+//        if (result != null) {
+//
+//            editTextBarcode.setText(result.getContents());
+//        } else {
+//            Toast.makeText(this, "error", Toast.LENGTH_SHORT).show();
+//        }
+        if (resultCode != Activity.RESULT_OK) {
+            Toast.makeText(this, "error in  scanning", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-            editTextBarcode.setText(result.getContents());
-        } else {
-            Toast.makeText(this, "error", Toast.LENGTH_SHORT).show();
+        if (requestCode == BARCODE_READER_ACTIVITY_REQUEST && data != null) {
+            Barcode barcode = data.getParcelableExtra(BarcodeReaderActivity.KEY_CAPTURED_BARCODE);
+            editTextBarcode.setText(barcode.rawValue);
         }
 
     }

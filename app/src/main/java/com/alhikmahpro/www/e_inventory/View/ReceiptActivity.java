@@ -372,7 +372,7 @@ public class ReceiptActivity extends AppCompatActivity {
         Intent view_pdf = new Intent(this, ReceiptPdfViewActivity.class);
 
         view_pdf.putExtra("CUSTOMER_NAME",customerName);
-        //view_pdf.putExtra("CUSTOMER_CODE",customerCode);
+        view_pdf.putExtra("CUSTOMER_CODE",customerCode);
         view_pdf.putExtra("SALESMAN_ID",salesmanId);
         view_pdf.putExtra("RECEIPT_NO",txtReceipt.getText().toString());
         view_pdf.putExtra("RECEIPT_DATE",mDate);

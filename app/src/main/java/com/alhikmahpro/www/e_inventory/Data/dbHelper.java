@@ -205,6 +205,23 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
     //*****************************settings table********************
+
+    public boolean saveLogo(byte[]logo){
+        SQLiteDatabase database = getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+
+        try {
+            contentValues.put(DataContract.Settings.COL_LOGO, logo);
+            database.insert(DataContract.Settings.TABLE_NAME, null, contentValues);
+            database.close();
+           return  true;
+
+        }catch (Exception e){
+            e.printStackTrace();
+            database.close();
+            return false;
+        }
+    }
     public boolean saveSettings(String CCode, String CCName, String BCode, String LCode, String PCode, String deviceId,
                                 byte[] logo, int saleStat, int invStat, int gdsStat, int recStat) {
 
@@ -284,9 +301,9 @@ public class dbHelper extends SQLiteOpenHelper {
 
     }
 
-    public Cursor getDeviceIdFromSettings(SQLiteDatabase sqLiteDatabase) {
+    public Cursor getLogo(SQLiteDatabase sqLiteDatabase) {
         String[] projections = {
-                DataContract.Settings.COL_DEVICE_ID, DataContract.Settings.COL_DEVICE_ID,
+                DataContract.Settings.COL_ID, DataContract.Settings.COL_LOGO,
         };
         Cursor cursor = sqLiteDatabase.query(DataContract.Settings.TABLE_NAME, projections, null,
                 null, null, null, DataContract.Settings.COL_ID + " DESC ", "1 ");

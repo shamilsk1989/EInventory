@@ -1,6 +1,7 @@
 package com.alhikmahpro.www.e_inventory.View;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,6 +12,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -18,6 +22,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -31,6 +36,7 @@ import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
 import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
 import com.alhikmahpro.www.e_inventory.R;
 import com.android.volley.VolleyError;
+import com.google.android.gms.vision.barcode.Barcode;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.CaptureActivity;
@@ -40,17 +46,22 @@ import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
+import com.notbytes.barcode_reader.BarcodeReaderActivity;
+import com.notbytes.barcode_reader.BarcodeReaderFragment;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DecimalFormat;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class PriceCheckerActivity extends AppCompatActivity {
+
+
+public class PriceCheckerActivity extends AppCompatActivity implements BarcodeReaderFragment.BarcodeReaderListener{
 
 
     @BindView(R.id.txtBarcode)
@@ -73,7 +84,7 @@ public class PriceCheckerActivity extends AppCompatActivity {
     EditText txtStock;
 
     private static final String TAG = "PriceCheckerActivity";
-    private static final int CAMERA_PERMISSION_CODE = 100;
+    private static final int BARCODE_READER_ACTIVITY_REQUEST = 100;
 
     String companyCode, companyName, deviceId, branchCode, locationCode, periodCode;
 
@@ -93,7 +104,8 @@ public class PriceCheckerActivity extends AppCompatActivity {
 
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
-
+    private BarcodeReaderFragment mBarcodeReaderFragment;
+    private BarcodeReaderFragment barcodeReader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +118,7 @@ public class PriceCheckerActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Price Checker");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
         initValues();
         initVolleyCallBack();
 
@@ -199,21 +212,19 @@ public class PriceCheckerActivity extends AppCompatActivity {
 
     @OnClick(R.id.imgBarcode)
     public void onImgBarcodeClicked() {
+        FragmentManager supportFragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = supportFragmentManager.beginTransaction();
+        Fragment fragmentById = supportFragmentManager.findFragmentById(R.id.fm_container);
+        if (fragmentById != null) {
+            fragmentTransaction.remove(fragmentById);
+        }
+        fragmentTransaction.commitAllowingStateLoss();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-//                Log.d(TAG, "Permission already granted: ");
-//
-//                scanBarcode();
-//            } else {
-//                requestStoragePermission();
-//            }
             requestCameraPermission();
         } else {
             scanBarcode();
         }
-
-
     }
 
     @OnClick(R.id.imgSearch)
@@ -222,7 +233,6 @@ public class PriceCheckerActivity extends AppCompatActivity {
     }
 
     private boolean validate(String code) {
-
         if (TextUtils.isEmpty(code)) {
             txtBarcode.setError("Invalid barcode or product code");
             return false;
@@ -326,13 +336,19 @@ public class PriceCheckerActivity extends AppCompatActivity {
     private void scanBarcode() {
 
         Log.d(TAG, "onScannerPressed: ");
-        IntentIntegrator intentIntegrator = new IntentIntegrator(this);
-        intentIntegrator.setCameraId(0);
-        intentIntegrator.setPrompt("Scan code");
-        intentIntegrator.setBeepEnabled(true);
-        intentIntegrator.setOrientationLocked(false);
-        intentIntegrator.setCaptureActivity(CaptureActivity.class);
-        intentIntegrator.initiateScan();
+//        IntentIntegrator intentIntegrator = new IntentIntegrator(this);
+//        intentIntegrator.setCameraId(0);
+//        intentIntegrator.setPrompt("Scan code");
+//        intentIntegrator.setBeepEnabled(true);
+//        intentIntegrator.setOrientationLocked(false);
+//        intentIntegrator.setCaptureActivity(CaptureActivity.class);
+//        intentIntegrator.initiateScan();
+
+        //google vision api for barcode reader
+//        Intent intent=new Intent(PriceCheckerActivity.this,ScanBarcodeActivity.class);
+//        startActivityForResult(intent,0);
+        Intent launchIntent = BarcodeReaderActivity.getLaunchIntent(this, true, false);
+        startActivityForResult(launchIntent,BARCODE_READER_ACTIVITY_REQUEST);
     }
 
     private void requestCameraPermission() {
@@ -361,30 +377,7 @@ public class PriceCheckerActivity extends AppCompatActivity {
                 }).check();
 
 
-//        if (ActivityCompat.shouldShowRequestPermissionRationale(PriceCheckerActivity.this, Manifest.permission.CAMERA)) {
-//
-//            new AlertDialog.Builder(PriceCheckerActivity.this)
-//                    .setTitle("Permission needed")
-//                    .setMessage("To continue please allow the permission ")
-//                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            ActivityCompat.requestPermissions(PriceCheckerActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
-//
-//                        }
-//                    })
-//                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//                        @Override
-//
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            dialog.cancel();
-//                        }
-//                    }).create().show();
-//
-//
-//        } else {
-//            ActivityCompat.requestPermissions(PriceCheckerActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
-//        }
+
     }
 
     private void showSettingDialog() {
@@ -424,30 +417,26 @@ public class PriceCheckerActivity extends AppCompatActivity {
     }
 
 
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//
-//        if (requestCode == CAMERA_PERMISSION_CODE) {
-//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                Log.d(TAG, "onRequestPermissionsResult: permission granted ");
-//                scanBarcode();
-//            } else {
-//                Log.d(TAG, "onRequestPermissionsResult: permission not granted");
-//            }
-//        }
-//    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
+//        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+//        if (result != null) {
+//
+//            txtBarcode.setText(result.getContents());
+//        } else {
+//            Toast.makeText(this, "error", Toast.LENGTH_SHORT).show();
+//        }
 
-            txtBarcode.setText(result.getContents());
-        } else {
-            Toast.makeText(this, "error", Toast.LENGTH_SHORT).show();
+        if (resultCode != Activity.RESULT_OK) {
+            Toast.makeText(this, "error in  scanning", Toast.LENGTH_SHORT).show();
+            return;
         }
 
+        if (requestCode == BARCODE_READER_ACTIVITY_REQUEST && data != null) {
+            Barcode barcode = data.getParcelableExtra(BarcodeReaderActivity.KEY_CAPTURED_BARCODE);
+            txtBarcode.setText(barcode.rawValue);
+        }
     }
 
 
@@ -458,6 +447,35 @@ public class PriceCheckerActivity extends AppCompatActivity {
         txtBarcode.setFocusableInTouchMode(true);
         txtBarcode.requestFocus();
 
+
+    }
+
+    @Override
+    public void onScanned(Barcode barcode) {
+        Log.e(TAG, "onScanned: " + barcode.displayValue);
+
+
+
+
+    }
+
+    @Override
+    public void onScannedMultiple(List<Barcode> barcodes) {
+
+    }
+
+    @Override
+    public void onBitmapScanned(SparseArray<Barcode> sparseArray) {
+
+    }
+
+    @Override
+    public void onScanError(String errorMessage) {
+
+    }
+
+    @Override
+    public void onCameraPermissionDenied() {
 
     }
 }

@@ -9,9 +9,11 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
@@ -54,9 +56,17 @@ import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
 import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
 import com.alhikmahpro.www.e_inventory.R;
 import com.android.volley.VolleyError;
+import com.google.android.gms.vision.barcode.Barcode;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.CaptureActivity;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
+import com.notbytes.barcode_reader.BarcodeReaderActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -127,6 +137,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     RadioButton radioButton;
     private static final String TAG = "SalesActivity";
     private static final int CAMERA_PERMISSION_CODE = 101;
+    private static final int BARCODE_READER_ACTIVITY_REQUEST=100;
     @BindView(R.id.progressBar)
     ProgressBar progressBar;
     @BindView(R.id.toolbar)
@@ -303,42 +314,70 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
 
     private void requestStoragePermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(SalesActivity.this, Manifest.permission.CAMERA)) {
+        Dexter.withActivity(this)
+                .withPermission(Manifest.permission.CAMERA)
+                .withListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted(PermissionGrantedResponse response) {
+                        //permission granted
+                        scanBarcode();
 
-            new AlertDialog.Builder(SalesActivity.this)
-                    .setTitle("Permission needed")
-                    .setMessage("To continue please allow the permission ")
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions(SalesActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
+                    }
 
-                        }
-                    })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
+                    @Override
+                    public void onPermissionDenied(PermissionDeniedResponse response) {
 
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    }).create().show();
+                        showSettingDialog();
 
+                    }
 
-        } else {
-            ActivityCompat.requestPermissions(SalesActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
-        }
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
+
+                        token.continuePermissionRequest();
+                    }
+                }).check();
     }
+    private void showSettingDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(SalesActivity.this);
+        builder.setTitle("Need Permissions");
+        builder.setMessage("This app needs permission to use this feature. You can grant them in app settings.");
+        builder.setPositiveButton("GOTO SETTINGS", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                openSettings();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
+    }
+
+    private void openSettings() {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        startActivityForResult(intent, 101);
+    }
+
 
     private void scanBarcode() {
 
         Log.d(TAG, "onScannerPressed: ");
-        IntentIntegrator intentIntegrator = new IntentIntegrator(this);
-        intentIntegrator.setCameraId(0);
-        intentIntegrator.setPrompt("Scan code");
-        intentIntegrator.setBeepEnabled(true);
-        intentIntegrator.setOrientationLocked(false);
-        intentIntegrator.setCaptureActivity(CaptureActivity.class);
-        intentIntegrator.initiateScan();
+//        IntentIntegrator intentIntegrator = new IntentIntegrator(this);
+//        intentIntegrator.setCameraId(0);
+//        intentIntegrator.setPrompt("Scan code");
+//        intentIntegrator.setBeepEnabled(true);
+//        intentIntegrator.setOrientationLocked(false);
+//        intentIntegrator.setCaptureActivity(CaptureActivity.class);
+//        intentIntegrator.initiateScan();
+        Intent launchIntent = BarcodeReaderActivity.getLaunchIntent(this, true, false);
+        startActivityForResult(launchIntent,BARCODE_READER_ACTIVITY_REQUEST);
     }
 
     private void addToCart() {
@@ -555,26 +594,23 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
-        if (requestCode == CAMERA_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "onRequestPermissionsResult: permission granted ");
-                scanBarcode();
-            } else {
-                Log.d(TAG, "onRequestPermissionsResult: permission not granted");
-            }
-        }
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
+//        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+//        if (result != null) {
+//
+//            editTextBarcode.setText(result.getContents());
+//        } else {
+//            Toast.makeText(this, "error", Toast.LENGTH_SHORT).show();
+//        }
 
-            editTextBarcode.setText(result.getContents());
-        } else {
-            Toast.makeText(this, "error", Toast.LENGTH_SHORT).show();
+        if (resultCode != Activity.RESULT_OK) {
+            Toast.makeText(this, "error in  scanning", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (requestCode == BARCODE_READER_ACTIVITY_REQUEST && data != null) {
+            Barcode barcode = data.getParcelableExtra(BarcodeReaderActivity.KEY_CAPTURED_BARCODE);
+            editTextBarcode.setText(barcode.rawValue);
         }
     }
 
@@ -627,7 +663,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         customerName = intent.getStringExtra("Customer");
         customerCode = intent.getStringExtra("CustomerCode");
         getSupportActionBar().setTitle(customerName);
-        Log.d(TAG, "customer name: " + customerName);
+        Log.d(TAG, "customer code: " + customerCode);
         //get default radio button values
 
         int radioId = radioGroup.getCheckedRadioButtonId();
