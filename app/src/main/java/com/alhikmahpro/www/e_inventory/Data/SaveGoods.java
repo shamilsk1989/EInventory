@@ -45,21 +45,26 @@ public class SaveGoods extends AsyncTask<GoodsData,Void,String> {
         double base_total=data[0].base_total;
         double disc=data[0].disc;
         double netAmount=data[0].netAmount;
+        double otherAmount=data[0].otherAmount;
+        double gTotal=data[0].gTotal;
         String paymentMode=data[0].paymentMode;
         String mDate=data[0].mDate;
+        String serverInvoice=data[0].serverInvoice;
         int syncStatus=data[0].syncStatus;
 
         SQLiteDatabase database=dbHelper.getReadableDatabase();
         // check goods_receive table doc no already exist or not
         if(dbHelper.checkGoods(database,docNo)){
             database.close();
+            Log.d(TAG, "doInBackground: "+serverInvoice);
 
-           dbHelper.updateGoods(docNo,orderNo,customerCode,customerName,invoiceNo,invoiceDate,salesmanId,base_total,disc,netAmount,paymentMode,mDate,syncStatus);
+           dbHelper.updateGoods(docNo,orderNo,customerCode,customerName,invoiceNo,invoiceDate,salesmanId,base_total,disc,netAmount,otherAmount,gTotal,paymentMode,mDate,serverInvoice, syncStatus);
            dbHelper.updateGoodsDetails1(docNo,syncStatus);
            return "Saved";
         }else {
+            Log.d(TAG, "doInBackground: "+serverInvoice);
             database.close();
-            dbHelper.saveGoods(docNo,orderNo,customerCode,customerName,invoiceNo,invoiceDate,salesmanId,base_total,disc,netAmount,paymentMode,mDate,syncStatus);
+            dbHelper.saveGoods(docNo,orderNo,customerCode,customerName,invoiceNo,invoiceDate,salesmanId,base_total,disc,netAmount,otherAmount,gTotal,paymentMode,mDate,serverInvoice,syncStatus);
             dbHelper.saveGoodsDetails1(docNo,syncStatus);
             return "Saved";
         }

@@ -36,21 +36,30 @@ public class SaveSales extends AsyncTask<SaleData, Void, String> {
         double disc = data[0].disc;
         double disc_per = data[0].discPer;
         double netAmount = data[0].netAmount;
+        double otherAmount=data[0].otherAmount;
+        double grantTotal=data[0].grandTotal;
         String paymentMode = data[0].paymentMode;
         String mDate = data[0].mDate;
+        String serverInvoice=data[0].serverInvoice;
         Log.d(TAG, "doInBackground: "+disc_per);
         int syncStatus = data[0].syncStatus;
         if (dbHelper.checkInvoice(database, invoiceNo)) {
             database.close();
-            dbHelper.updateInvoice(invoiceNo, invoiceDate, salesmanId, customerCode, customerName, base_total, disc,disc_per, netAmount, paymentMode, mDate, syncStatus);
+            dbHelper.updateInvoice(invoiceNo, invoiceDate, salesmanId, customerCode, customerName,
+                    base_total, disc,disc_per, netAmount,otherAmount,grantTotal,
+                    paymentMode, mDate,serverInvoice, syncStatus);
+
             dbHelper.updateInvoiceDetails(invoiceNo, syncStatus);
 
             return "Saved";
 
         } else {
+
             database.close();
-            dbHelper.saveInvoice(invoiceNo, invoiceDate, salesmanId, customerCode, customerName, base_total, disc,disc_per,netAmount, paymentMode, mDate, syncStatus);
-            dbHelper.saveInvoiceDetails(invoiceNo, syncStatus);
+            dbHelper.saveInvoice(invoiceNo, invoiceDate, salesmanId, customerCode, customerName, base_total,
+                    disc,disc_per,netAmount,otherAmount,grantTotal,paymentMode, mDate,serverInvoice, syncStatus);
+           // dbHelper.saveInvoiceDetails(invoiceNo, syncStatus);
+
 
             return "Saved";
         }

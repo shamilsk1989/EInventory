@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.alhikmahpro.www.e_inventory">
 
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -13,14 +15,17 @@
 
     <application
         android:name=".App.AppController"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:usesCleartextTraffic="true">
-        <activity android:name=".View.ReportActivity"></activity>
+        android:usesCleartextTraffic="true"
+        tools:replace="android:allowBackup">
+        <activity android:name=".View.OrderActivity"></activity>
+        <activity android:name=".View.ReportViewActivity" />
+        <activity android:name=".View.ReportActivity" />
         <activity android:name=".View.DashBoardActivity" />
         <activity android:name=".View.PrefSettingsActivity" />
         <activity android:name=".View.ReceiptPdfViewActivity" />
@@ -73,6 +78,7 @@
         <activity android:name=".View.ClearDataActivity" />
         <activity android:name=".View.ListReceiptActivity" />
         <activity android:name=".View.ReceiptActivity" />
+        <activity android:name=".View.AddLogoActivity" />
         <activity
             android:name="com.mocoo.hang.rtprinter.main.HeatSensitiveActivity"
             android:configChanges="orientation"

@@ -69,7 +69,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:gravity="center"
-                android:text="Total"
+                android:text="Total Value "
                 android:textSize="30sp" />
             <TextView
                 android:id="@+id/textViewTotal"
@@ -100,7 +100,7 @@
                     android:layout_width="0dp"
                     android:layout_height="@dimen/edittext_height"
                     android:layout_weight="1"
-                    android:background="@drawable/custom_edittext"
+                    android:background="@drawable/rounded_edittext"
                     android:hint="amount"
                     android:padding="10dp"
                     android:inputType="numberDecimal"
@@ -112,7 +112,7 @@
                     android:layout_height="@dimen/edittext_height"
                     android:layout_marginLeft="5dp"
                     android:layout_weight="1"
-                    android:background="@drawable/custom_edittext"
+                    android:background="@drawable/rounded_edittext"
                     android:padding="10dp"
                     android:hint="%"
                     android:inputType="numberDecimal"
@@ -158,7 +158,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:text="Net Payable "
+                    android:text="Net Total "
                     android:textSize="20sp" />
 
                 <TextView
@@ -170,24 +170,79 @@
                     android:background="@drawable/custom_edittext"
                     android:textSize="20sp" />
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/other_layout"
+                android:layout_below="@+id/net_layout"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:weightSum="3">
+
+                <TextView
+
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:text="Round off"
+                    android:textSize="20sp" />
+
+                <EditText
+                    android:id="@+id/editTextOtherAmount"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/edittext_height"
+                    android:layout_weight="1"
+                    android:background="@drawable/rounded_edittext"
+
+                    android:gravity="center"
+                    android:inputType="none"
+                    android:textSize="20sp"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/grant_layout"
+                android:layout_below="@+id/other_layout"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:weightSum="3">
+
+                <TextView
+
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:text="Grand Total "
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/textViewGrantTotal"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/edittext_height"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:background="@drawable/custom_edittext"
+                    android:textSize="20sp" />
+            </LinearLayout>
 
             <Button
                 android:id="@+id/btn_delete"
-                android:layout_below="@+id/net_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/edittext_height"
+                android:layout_below="@+id/grant_layout"
                 android:layout_alignParentStart="true"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/rounded_button"
-                android:text="Delete"
-                android:textStyle="bold"
-                android:textColor="@android:color/white" />
+                android:text="@string/cancel"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
 
 
 
             <Button
                 android:id="@+id/btn_pay"
-                android:layout_below="@+id/net_layout"
+                android:layout_below="@+id/grant_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/edittext_height"
                 android:layout_alignParentEnd="true"

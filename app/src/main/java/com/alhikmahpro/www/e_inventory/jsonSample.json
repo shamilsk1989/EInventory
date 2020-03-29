@@ -1,10 +1,42 @@
 {
-  "receipts_number": "1",
-  "receipts_date": "03-10-2019",
-  "customer_code": "C1000",
-  "customer_name": "SAMA RENEWABLE ENERGY",
-  "received_amount": "500",
-  "cheque_number": "",
-  "cheque_date": "",
-  "remark": ""
+  "Goods": [
+    {
+      "document_number": 4,
+      "order_no": "",
+      "supplier_code": "V0001",
+      "invoice_no": "inv02",
+      "invoice_date": "25-02-2020",
+      "staff_name": "s0001",
+      "total": 1000,
+      "discount_amount": 20,
+      "discount_percentage": 2,
+      "other_amount": 10,
+      "net_amount": 990,
+      "payment_type": "Cash",
+      "date_time": "25-02-2020"
+    }
+  ],
+  "Details": [
+    {
+      "serial_no": 1,
+      "doc_no": 4,
+      "bar_code": "5136600",
+      "product_code": "513660",
+      "product_name": "3+1ST ACTIVITY BOOK GOOD HABITS ",
+      "quantity": 10,
+      "free_quantity": 0,
+      "rate": 100,
+      "discount": 0,
+      "discount_percentage": 0,
+      "net_value": 1000,
+      "um1": "EA",
+      "um2": "",
+      "um3": "",
+      "selected_unit": "EA",
+      "selected_free_unit": "EA",
+      "um1_qty": 1,
+      "um2_qty": 0,
+      "um3_qty": 0
+    }
+  ]
 }

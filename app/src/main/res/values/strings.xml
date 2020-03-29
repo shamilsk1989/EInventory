@@ -93,6 +93,10 @@
     <string name="default_location">Location Code</string>
     <string name="default_employee_code">Employee Code</string>
     <string name="default_period_code">Period Code</string>
+    <string name="default_backup">Backup</string>
+    <string name="title_backup">Backup Data</string>
+    <string name="key_backup">key_backup</string>
+    <string name="nav_order">Order</string>
 
 
     <!--Spinner -->

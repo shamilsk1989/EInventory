@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -13,6 +14,7 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -67,6 +69,9 @@ import com.notbytes.barcode_reader.BarcodeReaderActivity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -164,7 +169,9 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     ArrayList<String> list2;
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
-
+    dbHelper helper;
+    SharedPreferences pref;
+    SharedPreferences.Editor editor;
 
     // public static List<ItemModel>itemCart=new ArrayList<>();
 
@@ -194,7 +201,9 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         is_first = true;
         list = new ArrayList<>();
         list2 = new ArrayList<>();
-
+        helper=new dbHelper(this);
+        pref=getApplicationContext().getSharedPreferences("Goods",0);
+        editor=pref.edit();
 
         setDoc();
         initView();
@@ -226,14 +235,23 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
         editTextQuantity.setFocusable(false);
         editTextQuantity.setClickable(true);
-
         editTextFreeQuantity.setFocusable(false);
         editTextFreeQuantity.setClickable(true);
         editTextDiscount.setFocusable(false);
         editTextDiscount.setClickable(true);
         editTextDiscountPercentage.setFocusable(false);
         editTextDiscountPercentage.setClickable(true);
+        editTextRate.setFocusable(false);
+        editTextRate.setClickable(true);
 
+
+        editTextRate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: ");
+                rateCustomDialog(editTextRate.getText().toString());
+            }
+        });
 
         editTextQuantity.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -276,8 +294,29 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
             @Override
             public void notifyError(String requestType, VolleyError error) {
 
+                generateLog(String.valueOf(error));
+
             }
         };
+    }
+    public void generateLog(String error){
+        Log.d(TAG, "generateLog: ");
+        try{
+            String body="/**GoodsReceiverActivity**/"+error;
+            File root=new File(Environment.getExternalStorageDirectory(),"Logs");
+            if(!root.exists()){
+                root.mkdir();
+            }
+            String fileName=AppUtils.getDateAndTime()+".txt";
+            File file=new File(root,fileName);
+            FileWriter writer=new FileWriter(file);
+            writer.append(body);
+            writer.flush();
+            writer.close();
+
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -404,35 +443,47 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
         txtAddedBarcode.setText(barCode + " X " + editTextQuantity.getText().toString() + " X " + editTextSale.getText().toString());
 
+       // add items into goods_details table
+        long id=helper.saveGoodsDetails(mDoc,barCode,editTextProductCode.getText().toString(),editTextProductName.getText().toString(),
+                editTextProductName.getText().toString(),selectedUnit,selectedFreeUnit,qty,free_qty,rate,discount,discountPercentage,
+                salePrice,costPrice,stock,net,unit1,unit2,unit3,unit1Qty,unit2Qty,unit3Qty,DataContract.SYNC_STATUS_FAILED);
+
+
 
         // add items in to the cart...........................
+        //check insertion successfully
+        if(id>0){
+            Log.d("LastID", "Saved: "+id);
+            ItemModel itemModel = new ItemModel();
+            itemModel.set_id((int)(long)id);
+            itemModel.setDocNo(mDoc);
+            itemModel.setBarCode(barCode);
+            itemModel.setProductCode(editTextProductCode.getText().toString());
+            itemModel.setProductName(editTextProductName.getText().toString());
+            itemModel.setQty(qty);
+            itemModel.setFreeQty(free_qty);
+            itemModel.setSelectedPackage(selectedUnit);
+            itemModel.setSelectedFreePackage(selectedFreeUnit);
+            itemModel.setRate(rate);
+            itemModel.setDiscount(discount);
+            itemModel.setDiscountPercentage(discountPercentage);
+            itemModel.setCostPrice(costPrice);
+            itemModel.setSalePrice(salePrice);
+            itemModel.setStock(stock);
+            itemModel.setUnit1(unit1);
+            itemModel.setUnit2(unit2);
+            itemModel.setUnit3(unit3);
+            itemModel.setUnit1Qty(unit1Qty);
+            itemModel.setUnit2Qty(unit2Qty);
+            itemModel.setUnit3Qty(unit3Qty);
+            itemModel.setNet(net);
+            Cart.gCart.add(itemModel);
+            cart_count++;
+            invalidateOptionsMenu();
+        }
 
 
-        ItemModel itemModel = new ItemModel();
-        itemModel.setDocNo(mDoc);
-        itemModel.setBarCode(barCode);
-        itemModel.setProductCode(editTextProductCode.getText().toString());
-        itemModel.setProductName(editTextProductName.getText().toString());
-        itemModel.setQty(qty);
-        itemModel.setFreeQty(free_qty);
-        itemModel.setSelectedPackage(selectedUnit);
-        itemModel.setSelectedFreePackage(selectedFreeUnit);
-        itemModel.setRate(rate);
-        itemModel.setDiscount(discount);
-        itemModel.setDiscountPercentage(discountPercentage);
-        itemModel.setCostPrice(costPrice);
-        itemModel.setSalePrice(salePrice);
-        itemModel.setStock(stock);
-        itemModel.setUnit1(unit1);
-        itemModel.setUnit2(unit2);
-        itemModel.setUnit3(unit3);
-        itemModel.setUnit1Qty(unit1Qty);
-        itemModel.setUnit2Qty(unit2Qty);
-        itemModel.setUnit3Qty(unit3Qty);
-        itemModel.setNet(net);
-        Cart.gCart.add(itemModel);
-        cart_count++;
-        invalidateOptionsMenu();
+
         // }
 
 
@@ -470,6 +521,8 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         editTextSale.setText("");
         editTextStock.setText("");
         editTextNet.setText("");
+        editTextDiscount.setText("0");
+        editTextDiscountPercentage.setText("0");
         list.clear();
         list2.clear();
         setSpinner();
@@ -614,6 +667,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
             editTextQuantity.setEnabled(true);
             editTextFreeQuantity.setEnabled(true);
             editTextDiscountPercentage.setEnabled(true);
+            editTextRate.setEnabled(true);
 
             Log.d(TAG, "setValues: " + response);
             String productCode = response.getString("ProductCode");
@@ -689,7 +743,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     }
 
 
-    private void initView() {
+    private void  initView() {
 
         //txtAddedPrice.setEnabled(false);
         txtAddedBarcode.setEnabled(false);
@@ -707,9 +761,9 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         editTextTotal.setEnabled(false);
         editTextDiscountPercentage.setEnabled(false);
         editTextFreeQuantity.setEnabled(false);
-
         editTextBarcode.setFocusableInTouchMode(true);
         editTextBarcode.requestFocus();
+
 
 
         txtInvoiceDate.setText("INV:DATE: " + invoiceDate);
@@ -747,6 +801,11 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         mDoc = last_no + 1;
         txtDate.setText(mDate);
         txtDocNo.setText("DOC NO:" + String.valueOf(mDoc));
+
+
+        // save document number in shared preference;
+        editor.putInt("Doc",mDoc);
+        editor.commit();
     }
 
     @Override
@@ -790,6 +849,47 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         return true;
     }
 
+    @Override
+    public void onBackPressed() {
+
+        if (Cart.gCart.size() > 0) {
+            new android.app.AlertDialog.Builder(GoodsReceiverActivity.this)
+                    .setTitle("Warning")
+                    .setMessage("Do you want to cancel ?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                           // Cart.gCart.clear();
+                            ClearCart();
+                            finish();
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    }).create().show();
+        } else {
+            finish();
+        }
+    }
+
+    private void ClearCart() {
+        Cart.gCart.clear();
+        if(pref.contains("Doc")){
+            int doc = pref.getInt("Doc", 0);
+            boolean del = helper.deleteGoodsDetailsByDoc(doc);
+            if (del) {
+                editor.remove("Doc");
+                editor.clear();
+                editor.commit();
+
+            }
+        }
+    }
+
     @OnClick(R.id.imgSubmit)
     public void onViewClicked() {
         clearView();
@@ -798,10 +898,53 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
     @Override
     public void onComplete(String code) {
+        clearView();
         editTextBarcode.setText(code);
     }
 
 
+    private void rateCustomDialog(String value) {
+
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View dialogView = layoutInflater.inflate(R.layout.custom_dialog, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+
+        final EditText editTextUserInput = (EditText) dialogView.findViewById(R.id.editTextDialogUserInput);
+        final TextView textView = (TextView) dialogView.findViewById(R.id.textViewTitle);
+        editTextUserInput.setText(value);
+        editTextUserInput.setSelection(editTextUserInput.getText().length());
+        textView.setText("Enter the rate");
+
+        builder.setCancelable(false)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
+                        editTextRate.setText(editTextUserInput.getText().toString());
+                        editTextRate.setError(null);
+                        //calculate total
+                        double total = (ParseDouble(editTextQuantity.getText().toString()) * ParseDouble(editTextRate.getText().toString()));
+                        editTextTotal.setText(String.valueOf(total));
+                        calculateNetValue();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
+                        dialog.cancel();
+
+
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+
+    }
     private void quantityCustomDialog(String value) {
 
         LayoutInflater layoutInflater = LayoutInflater.from(this);
@@ -822,6 +965,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
                         InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                         im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
                         editTextQuantity.setText(editTextUserInput.getText().toString());
+                        editTextQuantity.setError(null);
                         //calculate total
                         double total = (ParseDouble(editTextQuantity.getText().toString()) * ParseDouble(editTextRate.getText().toString()));
                         editTextTotal.setText(String.valueOf(total));
@@ -905,11 +1049,25 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
                     public void onClick(DialogInterface dialog, int i) {
                         InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                         im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
-                        editTextDiscount.setText(editTextUserInput.getText().toString());
-                        double total = ParseDouble(editTextTotal.getText().toString());
-                        double discountPercentage = ParseDouble(editTextUserInput.getText().toString()) / total * 100;
-                        editTextDiscountPercentage.setText(String.format("%.2f", discountPercentage));
+                        //editTextDiscount.setText(editTextUserInput.getText().toString());
+                        double disAmount=ParseDouble(editTextUserInput.getText().toString());
+                        if(disAmount==0){
+                            editTextDiscount.setText("0");
+                            editTextDiscountPercentage.setText("0");
+                        }else {
+                            double total = ParseDouble(editTextTotal.getText().toString());
+                            if(total==0){
+                                editTextDiscount.setText("0");
+                                editTextDiscountPercentage.setText("0");
+                            }else {
+                                editTextDiscount.setText(String.valueOf(disAmount));
+                                double discountPercentage = ParseDouble(editTextUserInput.getText().toString()) / total * 100;
+                                editTextDiscountPercentage.setText(String.format("%.2f", discountPercentage));
+                            }
+                        }
                         calculateNetValue();
+
+
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

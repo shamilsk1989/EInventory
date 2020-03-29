@@ -1,6 +1,7 @@
 package com.alhikmahpro.www.e_inventory.View;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -14,6 +15,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.alhikmahpro.www.e_inventory.Data.CreatePdf;
+import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.R;
 
 import java.text.SimpleDateFormat;
@@ -133,9 +135,13 @@ public class ReportActivity extends AppCompatActivity {
 
     private void createPdfWrapper() {
         Log.d(TAG, "createPdfWrapper: ");
-        CreatePdf createPdf = new CreatePdf(this,txtFromDate.getText().toString(),txtToDate.getText().toString(),Type );
-        createPdf.execute();
-
+        //CreatePdf createPdf = new CreatePdf(this,txtFromDate.getText().toString(),txtToDate.getText().toString(),Type );
+//        createPdf.execute();
+        Intent intent_rec = new Intent(ReportActivity.this, ReportViewActivity.class);
+        intent_rec.putExtra("TYPE", Type);
+        intent_rec.putExtra("FROM_DATE", txtFromDate.getText().toString());
+        intent_rec.putExtra("TO_DATE", txtToDate.getText().toString());
+        startActivity(intent_rec);
 
     }
     @Override

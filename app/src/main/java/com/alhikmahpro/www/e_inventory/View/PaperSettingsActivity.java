@@ -107,6 +107,8 @@ public class PaperSettingsActivity extends AppCompatActivity implements AdapterV
 
             } while (cursor.moveToNext());
         }
+        cursor.close();
+        database.close();
         adapter = ArrayAdapter.createFromResource(this, R.array.paper_size, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);

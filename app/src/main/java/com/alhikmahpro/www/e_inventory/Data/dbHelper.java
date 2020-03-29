@@ -11,7 +11,7 @@ import android.util.Log;
 
 public class dbHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "m-inv";
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 3;
     private static final String TAG = "dbHelper";
 
     private final String SQL_CREATE_SETTINGS_TABLE = "CREATE TABLE IF NOT EXISTS " + DataContract.Settings.TABLE_NAME + " (" +
@@ -68,6 +68,9 @@ public class dbHelper extends SQLiteOpenHelper {
             DataContract.GoodsReceive.COL_DISCOUNT_AMOUNT + " REAL ," +
             DataContract.GoodsReceive.COL_DISCOUNT_PERCENTAGE + " REAL ," +
             DataContract.GoodsReceive.COL_NET_AMOUNT + " REAL ," +
+            DataContract.GoodsReceive.COL_OTHER_AMOUNT + " REAL ," +
+            DataContract.GoodsReceive.COL_GRAND_TOTAL_AMOUNT + " REAL ," +
+            DataContract.GoodsReceive.COL_SERVER_INVOICE_NUMBER + " TEXT ," +
             DataContract.GoodsReceive.COL_PAYMENT_TYPE + " TEXT ," +
             DataContract.GoodsReceive.COL_DATE_TIME + " TEXT ," +
             DataContract.GoodsReceive.COL_IS_SYNC + " INTEGER DEFAULT 0 " + ");";
@@ -113,6 +116,9 @@ public class dbHelper extends SQLiteOpenHelper {
             DataContract.Invoice.COL_DISCOUNT_PERCENTAGE + " REAL ," +
             DataContract.Invoice.COL_PAYMENT_TYPE + " TEXT ," +
             DataContract.Invoice.COL_NET_AMOUNT + " REAL ," +
+            DataContract.Invoice.COL_OTHER_AMOUNT + " REAL ," +
+            DataContract.Invoice.COL_GRAND_TOTAL_AMOUNT + " REAL ," +
+            DataContract.Invoice.COL_SERVER_INVOICE_NUMBER + " TEXT ," +
             DataContract.Invoice.COL_DATE_TIME + " TEXT ," +
             DataContract.Invoice.COL_IS_SYNC + " INTEGER DEFAULT 0 " + ");";
 
@@ -206,7 +212,7 @@ public class dbHelper extends SQLiteOpenHelper {
 
     //*****************************settings table********************
 
-    public boolean saveLogo(byte[]logo){
+    public boolean saveLogo(byte[] logo) {
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
 
@@ -214,14 +220,15 @@ public class dbHelper extends SQLiteOpenHelper {
             contentValues.put(DataContract.Settings.COL_LOGO, logo);
             database.insert(DataContract.Settings.TABLE_NAME, null, contentValues);
             database.close();
-           return  true;
+            return true;
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             database.close();
             return false;
         }
     }
+
     public boolean saveSettings(String CCode, String CCName, String BCode, String LCode, String PCode, String deviceId,
                                 byte[] logo, int saleStat, int invStat, int gdsStat, int recStat) {
 
@@ -247,8 +254,6 @@ public class dbHelper extends SQLiteOpenHelper {
         } catch (Exception e) {
             return false;
         }
-
-
     }
 
     public boolean updateSettings(int _id, String CCode, String CCName, String BCode, String LCode, String PCode, String deviceId,
@@ -370,6 +375,7 @@ public class dbHelper extends SQLiteOpenHelper {
             contentValues.put(DataContract.StocksDetails.COL_COST_PRICE, cost);
 
             database.insert(DataContract.StocksDetails.TABLE_NAME, null, contentValues);
+            database.close();
 
             Log.d(TAG, "one row inserted in StocksDetails table ......... ");
 
@@ -412,7 +418,9 @@ public class dbHelper extends SQLiteOpenHelper {
 
     public boolean deleteStockDetailsById(int _id) {
         SQLiteDatabase database = getReadableDatabase();
-        return database.delete(DataContract.StocksDetails.TABLE_NAME, DataContract.StocksDetails.COL_ID + "= ?", new String[]{String.valueOf(_id)}) > 0;
+        boolean res= database.delete(DataContract.StocksDetails.TABLE_NAME, DataContract.StocksDetails.COL_ID + "= ?", new String[]{String.valueOf(_id)}) > 0;
+        database.close();
+        return res;
     }
 
     public int getLastDocNo() {
@@ -437,12 +445,14 @@ public class dbHelper extends SQLiteOpenHelper {
 
     /******************************* Goods table***********************************/
 
-    public boolean saveGoods(int docNo, String orderNo, String supplierCode, String supplierName, String invoiceNo, String invoiceDate,
-                             String staffName, double total, double disc, double net, String payment, String date, int status) {
+    public long saveGoods(int docNo, String orderNo, String supplierCode, String supplierName, String invoiceNo, String invoiceDate,
+                             String staffName, double total, double disc, double net, double other, double gTotal,
+                             String payment, String date, String serverInvoice, int status) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        try {
+        Log.d(TAG, "saveGoods: " + serverInvoice);
+
             contentValues.put(DataContract.GoodsReceive.COL_DOCUMENT_NUMBER, docNo);
             contentValues.put(DataContract.GoodsReceive.COL_ORDER_NUMBER, orderNo);
             contentValues.put(DataContract.GoodsReceive.COL_SUPPLIER_CODE, supplierCode);
@@ -454,18 +464,58 @@ public class dbHelper extends SQLiteOpenHelper {
             contentValues.put(DataContract.GoodsReceive.COL_DISCOUNT_AMOUNT, disc);
             contentValues.put(DataContract.GoodsReceive.COL_NET_AMOUNT, net);
             contentValues.put(DataContract.GoodsReceive.COL_TOTAL, net);
+            contentValues.put(DataContract.GoodsReceive.COL_OTHER_AMOUNT, other);
+            contentValues.put(DataContract.GoodsReceive.COL_GRAND_TOTAL_AMOUNT, gTotal);
             contentValues.put(DataContract.GoodsReceive.COL_PAYMENT_TYPE, payment);
             contentValues.put(DataContract.GoodsReceive.COL_DATE_TIME, date);
+            contentValues.put(DataContract.GoodsReceive.COL_SERVER_INVOICE_NUMBER, serverInvoice);
             contentValues.put(DataContract.GoodsReceive.COL_IS_SYNC, status);
-            database.insert(DataContract.GoodsReceive.TABLE_NAME, null, contentValues);
+            long id=database.insert(DataContract.GoodsReceive.TABLE_NAME, null, contentValues);
             database.close();
             Log.d(TAG, "one row inserted in goods table ......... ");
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+            return id;
+
     }
 
+
+
+    public long saveGoodsDetails(int docNo, String bCode,String pCode,String pName,String pNameAr,String unit,
+                                    String freeUnit,double qty,double freeQty,double rate,double disc,double disPerc,
+                                    double salePrice,double costPrice,String stock,double netVal,String unit1,String unit2,
+                                    String unit3,int qty1,int qty2,int qty3,int status) {
+
+
+        SQLiteDatabase database = getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_DOCUMENT_NUMBER, docNo);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_BAR_CODE, bCode);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_PRODUCT_CODE, pCode);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_PRODUCT_NAME,pName);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_PRODUCT_NAME_AR,pNameAr);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_UNIT, unit);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_FREE_UNIT, freeUnit);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_QUANTITY, qty);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_FREE_QUANTITY, freeQty);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_RATE,rate);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_DISCOUNT,disc);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_DISCOUNT_PERCENTAGE,disPerc);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_SALES_PRICE, salePrice);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_COST_PRICE, costPrice);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_STOCK, stock);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_NET_VALUE, netVal);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_UNIT1,unit1);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_UNIT2, unit2);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_UNIT3, unit3);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_UN_QTY1,qty1);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_UN_QTY2, qty2);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_UN_QTY3,qty3);
+        contentValues.put(DataContract.GoodsReceiveDetails.COL_IS_SYNC, status);
+        long last=database.insert(DataContract.GoodsReceiveDetails.TABLE_NAME, null, contentValues);
+        database.close();
+        Log.d(TAG, "one row inserted in GoodsReceiveDetails table ......... ");
+        return last;
+    }
     public boolean saveGoodsDetails1(int docNo, int status) {
 
         boolean result;
@@ -495,6 +545,7 @@ public class dbHelper extends SQLiteOpenHelper {
                 contentValues.put(DataContract.GoodsReceiveDetails.COL_UN_QTY3, model.getUnit3Qty());
                 contentValues.put(DataContract.GoodsReceiveDetails.COL_IS_SYNC, status);
                 database.insert(DataContract.GoodsReceiveDetails.TABLE_NAME, null, contentValues);
+                database.close();
                 Log.d(TAG, "one row inserted in GoodsReceiveDetails table ......... ");
 
             }
@@ -509,7 +560,7 @@ public class dbHelper extends SQLiteOpenHelper {
 
 
     public void updateGoods(int docNo, String orderNo, String supplierCode, String supplierName, String invoiceNo, String invoiceDate,
-                            String staffName, double total, double disc, double net, String payment, String date, int status) {
+                            String staffName, double total, double disc, double net, double other, double gTotal, String payment, String date, String serverInvoice, int status) {
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(DataContract.GoodsReceive.COL_DOCUMENT_NUMBER, docNo);
@@ -523,8 +574,12 @@ public class dbHelper extends SQLiteOpenHelper {
         contentValues.put(DataContract.GoodsReceive.COL_DISCOUNT_AMOUNT, disc);
         contentValues.put(DataContract.GoodsReceive.COL_NET_AMOUNT, net);
         contentValues.put(DataContract.GoodsReceive.COL_TOTAL, net);
+        contentValues.put(DataContract.GoodsReceive.COL_OTHER_AMOUNT, other);
+        contentValues.put(DataContract.GoodsReceive.COL_GRAND_TOTAL_AMOUNT, gTotal);
         contentValues.put(DataContract.GoodsReceive.COL_PAYMENT_TYPE, payment);
+
         contentValues.put(DataContract.GoodsReceive.COL_DATE_TIME, date);
+        contentValues.put(DataContract.GoodsReceive.COL_SERVER_INVOICE_NUMBER, serverInvoice);
         contentValues.put(DataContract.GoodsReceive.COL_IS_SYNC, status);
         database.update(DataContract.GoodsReceive.TABLE_NAME, contentValues, DataContract.GoodsReceive.COL_DOCUMENT_NUMBER + "=?", new String[]{String.valueOf(docNo)});
         Log.d(TAG, "one row update in GoodsReceiveDetails table ......... ");
@@ -560,6 +615,7 @@ public class dbHelper extends SQLiteOpenHelper {
                 contentValues.put(DataContract.GoodsReceiveDetails.COL_UN_QTY3, model.getUnit3Qty());
                 contentValues.put(DataContract.GoodsReceiveDetails.COL_IS_SYNC, status);
                 database.update(DataContract.GoodsReceive.TABLE_NAME, contentValues, DataContract.GoodsReceive.COL_DOCUMENT_NUMBER + "=?", new String[]{String.valueOf(docNo)});
+                database.close();
                 Log.d(TAG, "one row update in GoodsReceiveDetails table ......... ");
 
             }
@@ -627,6 +683,7 @@ public class dbHelper extends SQLiteOpenHelper {
                 DataContract.GoodsReceive.COL_TOTAL,
                 DataContract.GoodsReceive.COL_DISCOUNT_AMOUNT,
                 DataContract.GoodsReceive.COL_NET_AMOUNT,
+                DataContract.GoodsReceive.COL_SERVER_INVOICE_NUMBER,
                 DataContract.GoodsReceive.COL_PAYMENT_TYPE,
                 DataContract.GoodsReceive.COL_DATE_TIME,
                 DataContract.GoodsReceive.COL_IS_SYNC
@@ -641,8 +698,25 @@ public class dbHelper extends SQLiteOpenHelper {
 
     public boolean deleteGoodsById(int _id) {
         SQLiteDatabase database = getReadableDatabase();
-        return database.delete(DataContract.GoodsReceive.TABLE_NAME, DataContract.GoodsReceive.COL_ID + "= ?", new String[]{String.valueOf(_id)}) > 0;
+        boolean res=database.delete(DataContract.GoodsReceive.TABLE_NAME, DataContract.GoodsReceive.COL_ID + "= ?", new String[]{String.valueOf(_id)}) > 0;
+        database.close();
+        return res;
     }
+
+    public boolean deleteGoodsDetailsByDoc(int docNo) {
+        SQLiteDatabase database = getReadableDatabase();
+        boolean res=database.delete(DataContract.GoodsReceiveDetails.TABLE_NAME, DataContract.GoodsReceiveDetails.COL_DOCUMENT_NUMBER + "= ?", new String[]{String.valueOf(docNo)}) > 0;
+        database.close();
+        return res;
+    }
+
+    public boolean deleteGoodsDetailsById(int _id) {
+        SQLiteDatabase database = getReadableDatabase();
+        boolean res = database.delete(DataContract.GoodsReceiveDetails.TABLE_NAME, DataContract.GoodsReceiveDetails.COL_ID + "= ?", new String[]{String.valueOf(_id)}) > 0;
+        database.close();
+        return res;
+    }
+
 
     public void updateGoodsSync(int doc) {
         try {
@@ -650,6 +724,7 @@ public class dbHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put(DataContract.GoodsReceive.COL_IS_SYNC, DataContract.SYNC_STATUS_OK);
             database.update(DataContract.GoodsReceive.TABLE_NAME, values, DataContract.GoodsReceive.COL_DOCUMENT_NUMBER + "=?", new String[]{String.valueOf(doc)});
+            database.close();
 
             Log.v(TAG, "invoice sync updated");
         } catch (Exception ex) {
@@ -662,74 +737,108 @@ public class dbHelper extends SQLiteOpenHelper {
 
     /******************************* invoice table***********************************/
 
-    public boolean saveInvoice(String invoiceNo, String invoiceDate, String salesmanId, String customerCode, String customerName,
-                               double total, double discount,double dis_per, double net, String paymentMode, String date, int status) {
+    public long saveInvoice(String invoiceNo, String invoiceDate, String salesmanId, String customerCode, String customerName,
+                            double total, double discount, double dis_per, double net, double other_amount, double gTotal, String paymentMode, String date, String serverInvoice, int status) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        try {
-            contentValues.put(DataContract.Invoice.COL_INVOICE_NUMBER, invoiceNo);
-            contentValues.put(DataContract.Invoice.COL_INVOICE_DATE, invoiceDate);
-            contentValues.put(DataContract.Invoice.COL_SALESMAN_ID, salesmanId);
-            contentValues.put(DataContract.Invoice.COL_CUSTOMER_CODE, customerCode);
-            contentValues.put(DataContract.Invoice.COL_CUSTOMER_NAME, customerName);
-            contentValues.put(DataContract.Invoice.COL_TOTAL_AMOUNT, total);
-            contentValues.put(DataContract.Invoice.COL_DISCOUNT_AMOUNT, discount);
-            contentValues.put(DataContract.Invoice.COL_DISCOUNT_PERCENTAGE, discount);
-            contentValues.put(DataContract.Invoice.COL_NET_AMOUNT, net);
-            contentValues.put(DataContract.Invoice.COL_PAYMENT_TYPE, paymentMode);
-            contentValues.put(DataContract.Invoice.COL_DATE_TIME, date);
-            contentValues.put(DataContract.Invoice.COL_IS_SYNC, status);
-            database.insert(DataContract.Invoice.TABLE_NAME, null, contentValues);
-            database.close();
-            Log.d(TAG, "one row inserted in sales table ......... ");
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+
+        contentValues.put(DataContract.Invoice.COL_INVOICE_NUMBER, invoiceNo);
+        contentValues.put(DataContract.Invoice.COL_INVOICE_DATE, invoiceDate);
+        contentValues.put(DataContract.Invoice.COL_SALESMAN_ID, salesmanId);
+        contentValues.put(DataContract.Invoice.COL_CUSTOMER_CODE, customerCode);
+        contentValues.put(DataContract.Invoice.COL_CUSTOMER_NAME, customerName);
+        contentValues.put(DataContract.Invoice.COL_TOTAL_AMOUNT, total);
+        contentValues.put(DataContract.Invoice.COL_DISCOUNT_AMOUNT, discount);
+        contentValues.put(DataContract.Invoice.COL_DISCOUNT_PERCENTAGE, dis_per);
+        contentValues.put(DataContract.Invoice.COL_NET_AMOUNT, net);
+        contentValues.put(DataContract.Invoice.COL_OTHER_AMOUNT, other_amount);
+        contentValues.put(DataContract.Invoice.COL_GRAND_TOTAL_AMOUNT, gTotal);
+        contentValues.put(DataContract.Invoice.COL_PAYMENT_TYPE, paymentMode);
+        contentValues.put(DataContract.Invoice.COL_DATE_TIME, date);
+        contentValues.put(DataContract.Invoice.COL_SERVER_INVOICE_NUMBER, serverInvoice);
+        contentValues.put(DataContract.Invoice.COL_IS_SYNC, status);
+        long id = database.insert(DataContract.Invoice.TABLE_NAME, null, contentValues);
+        database.close();
+        Log.d(TAG, "one row inserted in sales table ......... ");
+        return id;
 
 
     }
+//insert one by one
 
-    public boolean saveInvoiceDetails(String invoiceNo, int status) {
+    public long saveInvoiceDetails(String invoiceNo, String barCode, String pCode, String pName, String pNameAr,
+                                   double qty, String unit, String unit1, String unit2, String unit3, int qty1,
+                                   int qty2, int qty3, double rate, double discount, double disPerc, double netAmt,
+                                   String saleType, int status) {
 
-        boolean result = false;
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
+        contentValues.put(DataContract.InvoiceDetails.COL_INVOICE_NUMBER, invoiceNo);
+        contentValues.put(DataContract.InvoiceDetails.COL_BAR_CODE, barCode);
+        contentValues.put(DataContract.InvoiceDetails.COL_PRODUCT_CODE, pCode);
+        contentValues.put(DataContract.InvoiceDetails.COL_PRODUCT_NAME, pName);
+        contentValues.put(DataContract.InvoiceDetails.COL_PRODUCT_NAME_AR, pNameAr);
+        contentValues.put(DataContract.InvoiceDetails.COL_QUANTITY, qty);
+        contentValues.put(DataContract.InvoiceDetails.COL_UNIT, unit);
+        contentValues.put(DataContract.InvoiceDetails.COL_UNIT1, unit1);
+        contentValues.put(DataContract.InvoiceDetails.COL_UNIT2, unit2);
+        contentValues.put(DataContract.InvoiceDetails.COL_UNIT3, unit3);
+        contentValues.put(DataContract.InvoiceDetails.COL_UN_QTY1, qty1);
+        contentValues.put(DataContract.InvoiceDetails.COL_UN_QTY2, qty2);
+        contentValues.put(DataContract.InvoiceDetails.COL_UN_QTY3, qty3);
+        contentValues.put(DataContract.InvoiceDetails.COL_RATE, rate);
+        contentValues.put(DataContract.InvoiceDetails.COL_DISCOUNT, discount);
+        contentValues.put(DataContract.InvoiceDetails.COL_DISCOUNT_PERCENTAGE, disPerc);
+        contentValues.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, netAmt);
+        contentValues.put(DataContract.InvoiceDetails.COL_SALE_TYPE, saleType);
+        contentValues.put(DataContract.InvoiceDetails.COL_IS_SYNC, status);
 
-
-        try {
-            for (CartModel model : Cart.mCart) {
-                contentValues.put(DataContract.InvoiceDetails.COL_INVOICE_NUMBER, invoiceNo);
-                contentValues.put(DataContract.InvoiceDetails.COL_BAR_CODE, model.getBarcode());
-                contentValues.put(DataContract.InvoiceDetails.COL_PRODUCT_CODE, model.getProductCode());
-                contentValues.put(DataContract.InvoiceDetails.COL_PRODUCT_NAME, model.getProductName());
-                contentValues.put(DataContract.InvoiceDetails.COL_QUANTITY, model.getQty());
-                contentValues.put(DataContract.InvoiceDetails.COL_UNIT, model.getSelectedUnit());
-                contentValues.put(DataContract.InvoiceDetails.COL_UNIT1, model.getUnit1());
-                contentValues.put(DataContract.InvoiceDetails.COL_UNIT2, model.getUnit2());
-                contentValues.put(DataContract.InvoiceDetails.COL_UNIT3, model.getUnit3());
-                contentValues.put(DataContract.InvoiceDetails.COL_UN_QTY1, model.getUnit1Qty());
-                contentValues.put(DataContract.InvoiceDetails.COL_UN_QTY2, model.getUnit2Qty());
-                contentValues.put(DataContract.InvoiceDetails.COL_UN_QTY3, model.getUnit3Qty());
-                contentValues.put(DataContract.InvoiceDetails.COL_RATE, model.getRate());
-                contentValues.put(DataContract.InvoiceDetails.COL_DISCOUNT, model.getDiscount());
-                contentValues.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, model.getNet());
-                contentValues.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, model.getNet());
-                contentValues.put(DataContract.InvoiceDetails.COL_SALE_TYPE, model.getSaleType());
-                contentValues.put(DataContract.InvoiceDetails.COL_IS_SYNC, status);
-                database.insertOrThrow(DataContract.InvoiceDetails.TABLE_NAME, null, contentValues);
-                Log.d(TAG, "one row inserted in invoiceDetails table ......... ");
-                result = true;
-            }
-
-
-        } catch (SQLException e) {
-            result = false;
-        }
-
-        return result;
+        long id = database.insert(DataContract.InvoiceDetails.TABLE_NAME, null, contentValues);
+        Log.d(TAG, "one row inserted in invoiceDetails table ......... ");
+        database.close();
+        return id;
     }
+// insert using cart
+//    public boolean saveInvoiceDetails(String invoiceNo, int status) {
+//
+//        boolean result = false;
+//        SQLiteDatabase database = getWritableDatabase();
+//        ContentValues contentValues = new ContentValues();
+//
+//
+//        try {
+//            for (CartModel model : Cart.mCart) {
+//                contentValues.put(DataContract.InvoiceDetails.COL_INVOICE_NUMBER, invoiceNo);
+//                contentValues.put(DataContract.InvoiceDetails.COL_BAR_CODE, model.getBarcode());
+//                contentValues.put(DataContract.InvoiceDetails.COL_PRODUCT_CODE, model.getProductCode());
+//                contentValues.put(DataContract.InvoiceDetails.COL_PRODUCT_NAME, model.getProductName());
+//                contentValues.put(DataContract.InvoiceDetails.COL_QUANTITY, model.getQty());
+//                contentValues.put(DataContract.InvoiceDetails.COL_UNIT, model.getSelectedUnit());
+//                contentValues.put(DataContract.InvoiceDetails.COL_UNIT1, model.getUnit1());
+//                contentValues.put(DataContract.InvoiceDetails.COL_UNIT2, model.getUnit2());
+//                contentValues.put(DataContract.InvoiceDetails.COL_UNIT3, model.getUnit3());
+//                contentValues.put(DataContract.InvoiceDetails.COL_UN_QTY1, model.getUnit1Qty());
+//                contentValues.put(DataContract.InvoiceDetails.COL_UN_QTY2, model.getUnit2Qty());
+//                contentValues.put(DataContract.InvoiceDetails.COL_UN_QTY3, model.getUnit3Qty());
+//                contentValues.put(DataContract.InvoiceDetails.COL_RATE, model.getRate());
+//                contentValues.put(DataContract.InvoiceDetails.COL_DISCOUNT, model.getDiscount());
+//                contentValues.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, model.getNet());
+//                contentValues.put(DataContract.InvoiceDetails.COL_NET_AMOUNT, model.getNet());
+//                contentValues.put(DataContract.InvoiceDetails.COL_SALE_TYPE, model.getSaleType());
+//                contentValues.put(DataContract.InvoiceDetails.COL_IS_SYNC, status);
+//                database.insertOrThrow(DataContract.InvoiceDetails.TABLE_NAME, null, contentValues);
+//                Log.d(TAG, "one row inserted in invoiceDetails table ......... ");
+//                result = true;
+//            }
+//
+//
+//        } catch (SQLException e) {
+//            result = false;
+//        }
+//
+//        return result;
+//    }
 
     public boolean checkInvoice(SQLiteDatabase database, String invoice_no) {
 
@@ -737,20 +846,19 @@ public class dbHelper extends SQLiteOpenHelper {
                         DataContract.Invoice.COL_INVOICE_NUMBER + "= ? ",
                 new String[]{String.valueOf(invoice_no)});
 
-        if (cursor.getCount() > 0){
+        if (cursor.getCount() > 0) {
             cursor.close();
             return true;
-        }
-
-        else{
-           cursor.close();
+        } else {
+            cursor.close();
             return false;
         }
 
     }
 
     public boolean updateInvoice(String invoiceNo, String invoiceDate, String salesmanId, String customerCode, String customerName,
-                                 double total, double discount,double dis_per, double net, String paymentMode, String date, int status) {
+                                 double total, double discount, double dis_per, double net, double other_amount, double gTotal,
+                                 String paymentMode, String date, String serverInvoice, int status) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -762,10 +870,13 @@ public class dbHelper extends SQLiteOpenHelper {
             contentValues.put(DataContract.Invoice.COL_CUSTOMER_NAME, customerName);
             contentValues.put(DataContract.Invoice.COL_TOTAL_AMOUNT, total);
             contentValues.put(DataContract.Invoice.COL_DISCOUNT_AMOUNT, discount);
-            contentValues.put(DataContract.Invoice.COL_DISCOUNT_PERCENTAGE,dis_per);
+            contentValues.put(DataContract.Invoice.COL_DISCOUNT_PERCENTAGE, dis_per);
             contentValues.put(DataContract.Invoice.COL_NET_AMOUNT, net);
+            contentValues.put(DataContract.Invoice.COL_OTHER_AMOUNT, other_amount);
+            contentValues.put(DataContract.Invoice.COL_GRAND_TOTAL_AMOUNT, gTotal);
             contentValues.put(DataContract.Invoice.COL_PAYMENT_TYPE, paymentMode);
             contentValues.put(DataContract.Invoice.COL_DATE_TIME, date);
+            contentValues.put(DataContract.Invoice.COL_SERVER_INVOICE_NUMBER, serverInvoice);
             contentValues.put(DataContract.Invoice.COL_IS_SYNC, status);
             database.update(DataContract.Invoice.TABLE_NAME, contentValues, DataContract.Invoice.COL_INVOICE_NUMBER + "=?", new String[]{invoiceNo});
             database.close();
@@ -806,6 +917,7 @@ public class dbHelper extends SQLiteOpenHelper {
                 contentValues.put(DataContract.InvoiceDetails.COL_SALE_TYPE, model.getSaleType());
                 contentValues.put(DataContract.InvoiceDetails.COL_IS_SYNC, status);
                 database.update(DataContract.InvoiceDetails.TABLE_NAME, contentValues, DataContract.InvoiceDetails.COL_INVOICE_NUMBER + "=?", new String[]{invoiceNo});
+                database.close();
                 Log.d(TAG, "one row updated in invoiceDetails table ......... ");
                 result = true;
             }
@@ -829,6 +941,9 @@ public class dbHelper extends SQLiteOpenHelper {
                 DataContract.Invoice.COL_TOTAL_AMOUNT,
                 DataContract.Invoice.COL_DISCOUNT_AMOUNT,
                 DataContract.Invoice.COL_NET_AMOUNT,
+                DataContract.Invoice.COL_OTHER_AMOUNT,
+                DataContract.Invoice.COL_GRAND_TOTAL_AMOUNT,
+                DataContract.Invoice.COL_SERVER_INVOICE_NUMBER,
                 DataContract.Invoice.COL_PAYMENT_TYPE,
                 DataContract.Invoice.COL_IS_SYNC,
         };
@@ -857,13 +972,15 @@ public class dbHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
-    public Cursor getAllInvoiceByDate(String from,String to){
+    public Cursor getAllInvoiceByDate(String from, String to) {
         SQLiteDatabase database = this.getReadableDatabase();
 
         Cursor c = database.rawQuery("select invoice_number,customer_name,net_amount,payment_type,invoice_date from " + DataContract.Invoice.TABLE_NAME
                 + " where invoice_date BETWEEN '" + from + "' AND '" + to + "' ", null);
+        database.close();
         return c;
     }
+
     public Cursor getAllUnSyncInvoice(SQLiteDatabase database) {
 
         Log.d(TAG, "get Un sync Invoice : ");
@@ -882,12 +999,9 @@ public class dbHelper extends SQLiteOpenHelper {
         String selection = DataContract.Invoice.COL_IS_SYNC + " LIKE ?";
         String[] selection_ars = {String.valueOf(DataContract.SYNC_STATUS_FAILED)};
         //Cursor cursor = database.rawQuery("select"+ DataContract.Invoice.COL_INVOICE_NUMBER+ "from " + DataContract.Invoice.TABLE_NAME + " where " + DataContract.Invoice.COL_IS_SYNC + "="+DataContract.SYNC_STATUS_FAILED , null);
-        Cursor cursor= database.query(DataContract.Invoice.TABLE_NAME, projection, selection, selection_ars, null, null, null);
+        Cursor cursor = database.query(DataContract.Invoice.TABLE_NAME, projection, selection, selection_ars, null, null, null);
         return cursor;
     }
-
-
-
 
 
     public void getInvoiceDetailsById(String invoiceId) {
@@ -904,6 +1018,7 @@ public class dbHelper extends SQLiteOpenHelper {
                 DataContract.InvoiceDetails.COL_RATE,
                 DataContract.InvoiceDetails.COL_DISCOUNT,
                 DataContract.InvoiceDetails.COL_NET_AMOUNT,
+
 
         };
         String selection = DataContract.InvoiceDetails.COL_INVOICE_NUMBER + " LIKE ?";
@@ -933,14 +1048,13 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
 
-
     public void updateAllInvoiceSync() {
         try {
             SQLiteDatabase database = getWritableDatabase();
             ContentValues values = new ContentValues();
             values.put(DataContract.Invoice.COL_IS_SYNC, DataContract.SYNC_STATUS_OK);
             database.update(DataContract.Invoice.TABLE_NAME, values, DataContract.Invoice.COL_IS_SYNC + "=?", new String[]{String.valueOf(DataContract.SYNC_STATUS_FAILED)});
-
+            database.close();
             Log.v(TAG, "invoice sync updated");
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -966,27 +1080,45 @@ public class dbHelper extends SQLiteOpenHelper {
 
     }
 
-    public boolean deleteInvoiceById(String invoice_no) {
+    public boolean deleteInvoiceByInvoiceNo(String invoice_no) {
         SQLiteDatabase database = getReadableDatabase();
-        return database.delete(DataContract.Invoice.TABLE_NAME, DataContract.Invoice.COL_INVOICE_NUMBER + "= ?", new String[]{invoice_no}) > 0;
+        boolean res = database.delete(DataContract.Invoice.TABLE_NAME, DataContract.Invoice.COL_INVOICE_NUMBER + "= ?", new String[]{invoice_no}) > 0;
+        database.close();
+        return res;
     }
 
-    public void deleteInvoice(){
-        SQLiteDatabase database=getReadableDatabase();
-        database.execSQL("delete from "+ DataContract.Invoice.TABLE_NAME);
-    }
-    public void deleteInvoiceDetails(){
-        SQLiteDatabase database=getReadableDatabase();
-        database.execSQL("delete from "+ DataContract.InvoiceDetails.TABLE_NAME);
+    public boolean deleteInvoiceDetailsById(int _id) {
+        SQLiteDatabase database = getReadableDatabase();
+        boolean res = database.delete(DataContract.InvoiceDetails.TABLE_NAME, DataContract.InvoiceDetails.COL_ID + "= ?", new String[]{String.valueOf(_id)}) > 0;
+        database.close();
+        return res;
     }
 
+    public boolean deleteInvoiceDetailsByInvoiceNo(String invoice_no) {
+        SQLiteDatabase database = getReadableDatabase();
+        boolean res = database.delete(DataContract.InvoiceDetails.TABLE_NAME, DataContract.InvoiceDetails.COL_INVOICE_NUMBER + "= ?", new String[]{invoice_no}) > 0;
+        database.close();
+        return res;
+    }
+
+    public void deleteInvoice() {
+        SQLiteDatabase database = getReadableDatabase();
+        database.execSQL("delete from " + DataContract.Invoice.TABLE_NAME);
+        database.close();
+    }
+
+    public void deleteInvoiceDetails() {
+        SQLiteDatabase database = getReadableDatabase();
+        database.execSQL("delete from " + DataContract.InvoiceDetails.TABLE_NAME);
+        database.close();
+    }
 
 
     /************************ end invoice*******************************************************/
 
     /************************ Receipt **********************************************************/
     public boolean saveReceipts(String receiptNo, String receiptDate, String salesmanId, String customerCode, String customerName,
-                                double balanceAmount,double receivedAmount, String paymentMode, String chqDate, String chqNumber,String remark, int status) {
+                                double balanceAmount, double receivedAmount, String paymentMode, String chqDate, String chqNumber, String remark, int status) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -1015,7 +1147,7 @@ public class dbHelper extends SQLiteOpenHelper {
     }
 
     public boolean updateReceipt(String receiptNo, String receiptDate, String salesmanId, String customerCode, String customerName,
-                                 double balanceAmount,double receivedAmount, String paymentMode, String chqDate, String chqNumber,String remark, int status) {
+                                 double balanceAmount, double receivedAmount, String paymentMode, String chqDate, String chqNumber, String remark, int status) {
 
         SQLiteDatabase database = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -1050,7 +1182,7 @@ public class dbHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put(DataContract.Receipts.COL_IS_SYNC, DataContract.SYNC_STATUS_OK);
             database.update(DataContract.Invoice.TABLE_NAME, values, DataContract.Receipts.COL_IS_SYNC + "=?", new String[]{String.valueOf(DataContract.SYNC_STATUS_FAILED)});
-
+            database.close();
             Log.v(TAG, "receipts sync updated");
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -1081,6 +1213,7 @@ public class dbHelper extends SQLiteOpenHelper {
         String[] projection = {
                 DataContract.Receipts.COL_RECEIPT_NUMBER,
                 DataContract.Receipts.COL_RECEIPT_DATE,
+
                 DataContract.Receipts.COL_SALESMAN_ID,
                 DataContract.Receipts.COL_CUSTOMER_CODE,
                 DataContract.Receipts.COL_CUSTOMER_NAME,
@@ -1117,35 +1250,36 @@ public class dbHelper extends SQLiteOpenHelper {
         String selection = DataContract.Receipts.COL_IS_SYNC + " LIKE ?";
         String[] selection_ars = {String.valueOf(DataContract.SYNC_STATUS_FAILED)};
         //Cursor cursor = database.rawQuery("select"+ DataContract.Invoice.COL_INVOICE_NUMBER+ "from " + DataContract.Invoice.TABLE_NAME + " where " + DataContract.Invoice.COL_IS_SYNC + "="+DataContract.SYNC_STATUS_FAILED , null);
-        Cursor cursor= database.query(DataContract.Receipts.TABLE_NAME, projection, selection, selection_ars, null, null, null);
+        Cursor cursor = database.query(DataContract.Receipts.TABLE_NAME, projection, selection, selection_ars, null, null, null);
         return cursor;
     }
 
-    public void deleteReceipt(){
-        SQLiteDatabase database=getReadableDatabase();
-        database.execSQL("delete from "+ DataContract.Receipts.TABLE_NAME);
+    public void deleteReceipt() {
+        SQLiteDatabase database = getReadableDatabase();
+        database.execSQL("delete from " + DataContract.Receipts.TABLE_NAME);
         database.close();
     }
 
-    public Cursor getAllReceiptByDate(String from,String to){
+    public Cursor getAllReceiptByDate(String from, String to) {
         SQLiteDatabase database = this.getReadableDatabase();
 
         Cursor c = database.rawQuery("select receipts_number,customer_name,received_amount,payment_type,receipts_date from " + DataContract.Receipts.TABLE_NAME
                 + " where receipts_date BETWEEN '" + from + "' AND '" + to + "' ", null);
+        database.close();
         return c;
     }
-
 
 
     /************************ end receipts*******************************************************/
     /************************************paper settings ********************************/
 
 
-    public void deletePaperSettings(){
-        SQLiteDatabase database=getReadableDatabase();
-        database.execSQL("delete from "+ DataContract.PaperSettings.TABLE_NAME);
+    public void deletePaperSettings() {
+        SQLiteDatabase database = getReadableDatabase();
+        database.execSQL("delete from " + DataContract.PaperSettings.TABLE_NAME);
         database.close();
     }
+
     public boolean savePaperSettings(String Name, String Address, String Phone, String Footer, byte[] logo, String Size) {
 
         SQLiteDatabase database = getWritableDatabase();
@@ -1170,7 +1304,7 @@ public class dbHelper extends SQLiteOpenHelper {
     public Cursor getPaperSettings(SQLiteDatabase sqLiteDatabase) {
         String[] projections = {DataContract.PaperSettings.COL_COMPANY_NAME, DataContract.PaperSettings.COL_COMPANY_ADDRESS,
                 DataContract.PaperSettings.COL_COMPANY_PHONE, DataContract.PaperSettings.COL_FOOTER,
-                DataContract.PaperSettings.COL_PAPER_SIZE,DataContract.PaperSettings.COL_LOGO};
+                DataContract.PaperSettings.COL_PAPER_SIZE, DataContract.PaperSettings.COL_LOGO};
         Cursor cursor = sqLiteDatabase.query(DataContract.PaperSettings.TABLE_NAME, projections, null, null, null, null,
                 DataContract.PaperSettings.COL_ID + " DESC ", "1");
         return cursor;
@@ -1198,6 +1332,7 @@ public class dbHelper extends SQLiteOpenHelper {
         SQLiteDatabase database = getReadableDatabase();
         String[] projection = {DataContract.Login.COL_PASSWORD};
         Cursor cursor = database.query(DataContract.Login.TABLE_NAME, projection, null, null, null, null, null);
+        database.close();
         if (cursor.moveToFirst()) {
             return true;
         } else {

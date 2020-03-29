@@ -124,10 +124,10 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Cart.mCart.remove(position);
-                        saleCartAdapter.notifyDataSetChanged();
-                        saleCartAdapter.notifyItemRemoved(position);
-                        saleCartAdapter.notifyItemRangeChanged(position, Cart.mCart.size());
+
+
+                        Delete(position);
+
                         calculate();
                     }
                 })
@@ -139,6 +139,21 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
                     }
                 }).create().show();
 
+
+    }
+
+    private void Delete(int position) {
+        CartModel cartModel=Cart.mCart.get(position);
+        int id = cartModel.get_id();
+        dbHelper helper = new dbHelper(this);
+        boolean del=helper.deleteInvoiceDetailsById(id);
+        if(del){
+            Cart.mCart.remove(position);
+            saleCartAdapter.notifyDataSetChanged();
+            saleCartAdapter.notifyItemRemoved(position);
+            saleCartAdapter.notifyItemRangeChanged(position, Cart.mCart.size());
+            Log.d("LastID", "Deleted: " + id);
+        }
 
     }
 

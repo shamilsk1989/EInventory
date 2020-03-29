@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -26,6 +27,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.alhikmahpro.www.e_inventory.Adapter.SupplierAdapter;
+import com.alhikmahpro.www.e_inventory.AppUtils;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
 import com.alhikmahpro.www.e_inventory.Data.SupplierModel;
@@ -40,6 +42,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -68,7 +73,7 @@ public class ListCustomerFragment extends DialogFragment implements SwipeRefresh
     // RecyclerView.Adapter adapter;
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
-    String companyCode, companyName, deviceId, branchCode, periodCode, locationCode;
+    String companyCode, companyName, deviceId, branchCode, periodCode, locationCode,customerName;
     private static final String TAG = "ListCustomerFragment";
     public static final String DIALOG_FRAGMENT_TYPE="Customer";
 
@@ -111,6 +116,8 @@ public class ListCustomerFragment extends DialogFragment implements SwipeRefresh
             }
         });
         toolbar.setTitle("Customer List");
+        Bundle bundle=getArguments();
+        customerName=bundle.getString("CUS_NAME").toUpperCase();
         initVolleyCallBack();
 
         supplierArrayList = new ArrayList<>();
@@ -171,21 +178,26 @@ public class ListCustomerFragment extends DialogFragment implements SwipeRefresh
             }
         });
 
-
-
-
         return view;
     }
 
     private void loadRecyclerView() {
         //Toast.makeText(getActivity(), "loading RecyclerView", Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "loadRecyclerView: ");
-        mSwipeRefreshLayout.setRefreshing(true);
-        supplierArrayList.clear();
-
-        serviceGateway = new VolleyServiceGateway(mVolleyListener, getContext());
-        serviceGateway.getDataVolley("POSTCALL", "PriceChecker/customer_list.php");
-
+        if(!AppUtils.isNetworkAvailable(getContext())){
+            Toast.makeText(getContext(), "No Internet", Toast.LENGTH_SHORT).show();
+        }else{
+            Log.d(TAG, "loadRecyclerView: ");
+            mSwipeRefreshLayout.setRefreshing(true);
+            supplierArrayList.clear();
+            JSONObject postParam = new JSONObject();
+            try {
+                postParam.put("Code", customerName);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            serviceGateway = new VolleyServiceGateway(mVolleyListener, getContext());
+            serviceGateway.postDataVolley("POSTCALL", "PriceChecker/customer_list.php",postParam);
+        }
     }
 
     private void initVolleyCallBack() {
@@ -225,8 +237,6 @@ public class ListCustomerFragment extends DialogFragment implements SwipeRefresh
                                 mListener.onComplete(code);
                                 Dialog dialog = getDialog();
                                 dialog.dismiss();
-
-
                             }
 
                             @Override
@@ -252,11 +262,11 @@ public class ListCustomerFragment extends DialogFragment implements SwipeRefresh
 
             }
         };
-
     }
 
     private void handleError(VolleyError error) {
         Log.d(TAG, "handleError: "+error);
+        generateLog(String.valueOf(error));
         Toast.makeText(getActivity(), "Network Error", Toast.LENGTH_SHORT).show();
     }
 
@@ -279,7 +289,6 @@ public class ListCustomerFragment extends DialogFragment implements SwipeRefresh
         }
     }
 
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -288,6 +297,25 @@ public class ListCustomerFragment extends DialogFragment implements SwipeRefresh
             this.mListener = (ListCustomerFragment.OnCompleteListener) activity;
         } catch (final ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement OnCompleteListener");
+        }
+    }
+    public void generateLog(String error){
+        Log.d(TAG, "generateLog: ");
+        try{
+            String body="/**ListCustomerFragment**/"+error;
+            File root=new File(Environment.getExternalStorageDirectory(),"Logs");
+            if(!root.exists()){
+                root.mkdir();
+            }
+            String fileName=AppUtils.getDateAndTime()+".txt";
+            File file=new File(root,fileName);
+            FileWriter writer=new FileWriter(file);
+            writer.append(body);
+            writer.flush();
+            writer.close();
+
+        }catch (IOException e){
+            e.printStackTrace();
         }
     }
 }

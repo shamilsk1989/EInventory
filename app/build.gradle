@@ -18,6 +18,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+            resValue("string", "PORT_NUMBER", "8081")
+        }
     }
     productFlavors {
     }
@@ -84,6 +87,9 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.github.zomato:androidphotofilters:1.0.2'
 
+//-----< debug: sqlite >------
+    implementation 'com.amitshekhar.android:debug-db:1.0.0'
+//-----</ debug: sqlite >------
 
 
 }

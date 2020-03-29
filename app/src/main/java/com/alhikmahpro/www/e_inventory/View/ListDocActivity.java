@@ -123,6 +123,7 @@ public class ListDocActivity extends AppCompatActivity {
                 model.setTotal(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceive.COL_TOTAL)));
                 model.setDiscount(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceive.COL_DISCOUNT_AMOUNT)));
                 model.setNet(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceive.COL_NET_AMOUNT)));
+                model.setServerInvoice(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_SERVER_INVOICE_NUMBER)));
                 model.setDate(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_DATE_TIME)));
                 model.setPaymentType(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_PAYMENT_TYPE)));
                 model.setIs_sync(cursor.getInt(cursor.getColumnIndex(DataContract.GoodsReceive.COL_IS_SYNC)));

@@ -43,8 +43,9 @@ public class DocAdapter extends RecyclerView.Adapter<DocAdapter.ViewHolder> {
 
         holder.rvDocNo.setText(String.valueOf(itemsModel.getDocNo()));
         holder.rvStaffName.setText(itemsModel.getStaffName());
+        holder.rvServerInvoice.setText(itemsModel.getServerInvoice());
 
-        holder.rvDate.setText(itemsModel.getDate());
+        holder.rvDate.setText(itemsModel.getInvoiceDate());
 
         if(itemsModel.getIs_sync()==DataContract.SYNC_STATUS_FAILED){
             holder.rvImgEdit.setVisibility(View.VISIBLE);
@@ -73,6 +74,8 @@ public class DocAdapter extends RecyclerView.Adapter<DocAdapter.ViewHolder> {
 
         @BindView(R.id.rv_docNo)
         TextView rvDocNo;
+        @BindView(R.id.rv_serverInvoice)
+        TextView rvServerInvoice;
         @BindView(R.id.rv_customerName)
         TextView rvStaffName;
         @BindView(R.id.rv_img_edit)
@@ -81,6 +84,7 @@ public class DocAdapter extends RecyclerView.Adapter<DocAdapter.ViewHolder> {
         TextView rvDate;
         @BindView(R.id.rv_img_sync)
         ImageView rvImgSync;
+
 
         ViewHolder(View view) {
             super(view);

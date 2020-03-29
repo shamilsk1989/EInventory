@@ -138,7 +138,7 @@
                         android:layout_height="40dp"
                         android:layout_weight="1"
                         android:background="@drawable/rounded_edittext"
-                        android:hint="Search Customer"
+                        android:hint="Search Items"
                         android:nextFocusLeft="@id/txtBarcode"
                         android:nextFocusUp="@id/txtBarcode"
                         android:padding="8dp"
@@ -208,7 +208,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="40dp"
                                 android:gravity="center|left"
-                                android:text="product code"
+                                android:text="Product Code"
                                 android:textColor="@android:color/black"
                                 android:textSize="18sp" />
 
@@ -379,14 +379,13 @@
                             </LinearLayout>
 
                             <EditText
-
                                 android:id="@+id/editTextRate"
                                 android:layout_width="match_parent"
                                 android:layout_height="40dp"
                                 android:layout_marginTop="20dp"
                                 android:background="@drawable/rounded_edittext"
                                 android:gravity="center|left"
-                                android:inputType="numberDecimal"
+                                android:inputType="none"
                                 android:padding="5dp"
                                 android:textColor="@android:color/black"
                                 android:textSize="18sp" />
@@ -409,7 +408,7 @@
                                     android:padding="10dp"
                                     android:hint="amount"
                                     android:textColor="@android:color/black"
-                                    android:textSize="18sp"
+                                    android:textSize="14sp"
                                     android:inputType="none" />
                                 <EditText
                                     android:id="@+id/editTextDiscountPercentage"
@@ -423,7 +422,7 @@
                                     android:layout_marginLeft="5dp"
                                     android:hint="%"
                                     android:textColor="@android:color/black"
-                                    android:textSize="18sp"
+                                    android:textSize="14sp"
                                     android:inputType="none"
                                     />
 

@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.ListFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -61,7 +62,7 @@ import butterknife.OnClick;
 
 
 
-public class PriceCheckerActivity extends AppCompatActivity implements BarcodeReaderFragment.BarcodeReaderListener{
+public class PriceCheckerActivity extends AppCompatActivity implements BarcodeReaderFragment.BarcodeReaderListener, ListItemFragment.OnCompleteListener {
 
 
     @BindView(R.id.txtBarcode)
@@ -70,6 +71,8 @@ public class PriceCheckerActivity extends AppCompatActivity implements BarcodeRe
     ImageView imgBarcode;
     @BindView(R.id.imgSearch)
     ImageView imgSearch;
+    @BindView(R.id.imgSubmit)
+    ImageView imgSubmit;
     @BindView(R.id.txtName)
     TextView txtName;
     @BindView(R.id.txtCode)
@@ -82,6 +85,8 @@ public class PriceCheckerActivity extends AppCompatActivity implements BarcodeRe
     EditText txtPrice3;
     @BindView(R.id.txtStock)
     EditText txtStock;
+    @BindView(R.id.txtDescription)
+    EditText txtDescription;
 
     private static final String TAG = "PriceCheckerActivity";
     private static final int BARCODE_READER_ACTIVITY_REQUEST = 100;
@@ -181,6 +186,7 @@ public class PriceCheckerActivity extends AppCompatActivity implements BarcodeRe
         txtPrice2.setEnabled(false);
         txtPrice3.setEnabled(false);
         txtStock.setEnabled(false);
+        txtDescription.setEnabled(false);
         txtPrice2.setVisibility(View.GONE);
         txtPrice3.setVisibility(View.GONE);
 
@@ -201,6 +207,7 @@ public class PriceCheckerActivity extends AppCompatActivity implements BarcodeRe
         txtPrice2.setText("");
         txtPrice3.setText("");
         txtStock.setText("");
+        txtDescription.setText("");
 
     }
 
@@ -229,6 +236,20 @@ public class PriceCheckerActivity extends AppCompatActivity implements BarcodeRe
 
     @OnClick(R.id.imgSearch)
     public void onImgSearchClicked() {
+        String item_key = txtBarcode.getText().toString();
+        if (item_key.length() < 3) {
+            txtBarcode.setError("Minimum 3 letters");
+        } else {
+            Bundle bundle = new Bundle();
+            bundle.putString("ITEM_NAME", item_key);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            ListItemFragment listItemFragment = new ListItemFragment();
+            listItemFragment.setArguments(bundle);
+            listItemFragment.show(fragmentManager, "Items");
+        }
+    }
+    @OnClick(R.id.imgSubmit)
+    public void onImgSubmitClicked() {
         getDataFromVolley();
     }
 
@@ -271,7 +292,8 @@ public class PriceCheckerActivity extends AppCompatActivity implements BarcodeRe
 
             txtCode.setText(response.getString("ProductCode"));
             txtName.setText(response.getString("ProductName"));
-            txtStock.setText("Stock -> " + response.getString("Stock"));
+            txtStock.setText(response.getString("Stock"));
+            txtDescription.setText(response.getString("Remarks"));
             double price1 = response.getDouble("SalesPrice1");
             double price2 = response.getDouble("SalesPrice2");
             double price3 = response.getDouble("SalesPrice3");
@@ -477,5 +499,10 @@ public class PriceCheckerActivity extends AppCompatActivity implements BarcodeRe
     @Override
     public void onCameraPermissionDenied() {
 
+    }
+
+    @Override
+    public void onComplete(String code) {
+        txtBarcode.setText(code);
     }
 }

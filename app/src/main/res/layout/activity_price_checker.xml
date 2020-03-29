@@ -40,7 +40,7 @@
                     android:layout_height="40dp"
                     android:layout_weight="1"
                     android:background="@drawable/rounded_edittext"
-                    android:hint="Search Customer"
+                    android:hint="Search Items"
                     android:nextFocusLeft="@id/txtBarcode"
                     android:nextFocusUp="@id/txtBarcode"
                     android:padding="8dp"
@@ -55,12 +55,6 @@
                     android:padding="@dimen/medium_margin"
                     android:src="@drawable/ic_view_week_black_24dp" />
 
-                <!--                <ImageView-->
-                <!--                    android:id="@+id/imgBarcode"-->
-                <!--                    android:layout_width="0dp"-->
-                <!--                    android:layout_height="40dp"-->
-                <!--                    android:layout_weight=".5"-->
-                <!--                    android:src="@drawable/ic_barcode" />-->
 
                 <ImageView
                     android:id="@+id/imgSearch"
@@ -69,13 +63,14 @@
                     android:layout_marginLeft="10dp"
                     android:background="@drawable/cerclebackgroundpink"
                     android:src="@drawable/ic_search_black_24dp" />
-                <!--                <ImageView-->
-                <!--                    android:id="@+id/imgSubmit"-->
-                <!--                    android:background="@drawable/cerclebackgroundgreen"-->
-                <!--                    android:layout_width="40dp"-->
-                <!--                    android:layout_height="40dp"-->
-                <!--                    android:layout_marginLeft="10dp"-->
-                <!--                    android:src="@drawable/ic_sync_black_24dp" />-->
+
+                <ImageView
+                    android:id="@+id/imgSubmit"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/cerclebackgroundgreen"
+                    android:src="@drawable/ic_sync_black_24dp" />
             </LinearLayout>
         </android.support.v7.widget.CardView>
 
@@ -158,7 +153,7 @@
                             android:layout_height="40dp"
                             android:layout_marginTop="20dp"
                             android:gravity="center|left"
-                            android:text="Total"
+                            android:text="Stock"
                             android:textColor="@android:color/black"
                             android:textSize="18sp" />
 
@@ -243,11 +238,48 @@
             </LinearLayout>
         </android.support.v7.widget.CardView>
 
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/cardView3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/cardView2">
+
+            <LinearLayout
+                android:id="@+id/description_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:text="Remarks">
+
+                </TextView>
+
+                <EditText
+                    android:id="@+id/txtDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/border_line"
+                    android:inputType="textMultiLine">
+
+                </EditText>
+
+
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+
         <Button
             android:id="@+id/btnClear"
             android:layout_width="250dp"
             android:layout_height="@dimen/button_height"
-            android:layout_below="@+id/cardView2"
+            android:layout_below="@+id/cardView3"
             android:layout_alignParentRight="true"
             android:layout_marginTop="10dp"
             android:background="@drawable/rounded_button"

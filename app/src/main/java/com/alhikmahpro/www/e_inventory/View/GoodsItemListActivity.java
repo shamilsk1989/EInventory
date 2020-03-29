@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import com.alhikmahpro.www.e_inventory.Adapter.CartAdapter;
 import com.alhikmahpro.www.e_inventory.Data.Cart;
+import com.alhikmahpro.www.e_inventory.Data.CartModel;
 import com.alhikmahpro.www.e_inventory.Data.Converter;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.ItemModel;
@@ -167,13 +168,7 @@ public class GoodsItemListActivity extends AppCompatActivity {
                             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-
-                                    ItemModel itemModel = Cart.gCart.get(position);
-                                    double amount = itemModel.getNet();
-                                    Cart.gCart.remove(position);
-                                    adapter.notifyDataSetChanged();
-                                    adapter.notifyItemRemoved(position);
-                                    adapter.notifyItemRangeChanged(position, Cart.gCart.size());
+                                    Delete(position);
                                     calculateNet();
 
                                 }
@@ -198,7 +193,20 @@ public class GoodsItemListActivity extends AppCompatActivity {
 
 
     }
+    private void Delete(int position) {
+        ItemModel itemModel = Cart.gCart.get(position);
+        int id = itemModel.get_id();
+        Log.d("LastID", "Deleted: "+id);
+        dbHelper helper = new dbHelper(this);
+        boolean del=helper.deleteGoodsDetailsById(id);
+        if(del){
+            Cart.gCart.remove(position);
+            adapter.notifyDataSetChanged();
+            adapter.notifyItemRemoved(position);
+            adapter.notifyItemRangeChanged(position, Cart.gCart.size());
+        }
 
+    }
     //Calculate total number of items and total amount of cart
     private void calculateNet() {
         // set total count and total amount in cart

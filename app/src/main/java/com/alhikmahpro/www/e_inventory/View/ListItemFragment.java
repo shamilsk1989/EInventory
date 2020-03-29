@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -253,9 +254,12 @@ public class  ListItemFragment extends DialogFragment implements SwipeRefreshLay
     }
     private void loadRecyclerView() {
         Log.d(TAG, "loadRecyclerView: "+itemName);
+        boolean network=isNetworkConnected();
+        Log.d(TAG, "loadRecyclerView: "+network);
         if(!AppUtils.isNetworkAvailable(getContext())){
             Toast.makeText(getContext(), "No Internet", Toast.LENGTH_SHORT).show();
-        }else {
+        }
+        else {
             mSwipeRefreshLayout.setRefreshing(true);
             itemArrayList.clear();
             JSONObject postParam = new JSONObject();
@@ -268,7 +272,11 @@ public class  ListItemFragment extends DialogFragment implements SwipeRefreshLay
             serviceGateway.postDataVolley("POSTCALL", "PriceChecker/item_list.php", postParam);
         }
     }
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
+        return cm.getActiveNetworkInfo() != null;
+    }
     @Override
     public void onDestroyView() {
         super.onDestroyView();

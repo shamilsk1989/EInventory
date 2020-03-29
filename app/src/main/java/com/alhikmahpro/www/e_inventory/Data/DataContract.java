@@ -91,6 +91,9 @@ public class DataContract {
         public static final String COL_DISCOUNT_AMOUNT="discount_amount";
         public static final String COL_DISCOUNT_PERCENTAGE="discount_percentage";
         public static final String COL_NET_AMOUNT="net_amount";
+        public static final String COL_OTHER_AMOUNT="other_amount";
+        public static final String COL_GRAND_TOTAL_AMOUNT="grand_total_amount";
+        public static final String COL_SERVER_INVOICE_NUMBER="server_invoice";
         public static final String COL_PAYMENT_TYPE="payment_type";
         public static final String COL_DATE_TIME="date_time";
         public static final String COL_IS_SYNC="is_sync";
@@ -141,6 +144,9 @@ public class DataContract {
         public static final String COL_DISCOUNT_AMOUNT="discount_amount";
         public static final String COL_DISCOUNT_PERCENTAGE="discount_percentage";
         public static final String COL_NET_AMOUNT="net_amount";
+        public static final String COL_OTHER_AMOUNT="other_amount";
+        public static final String COL_GRAND_TOTAL_AMOUNT="grand_total_amount";
+        public static final String COL_SERVER_INVOICE_NUMBER="server_invoice";
         public static final String COL_PAYMENT_TYPE="payment_type";
         public static final String COL_DATE_TIME="date_time";
         public static final String COL_IS_SYNC="is_sync";

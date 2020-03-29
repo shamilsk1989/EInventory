@@ -16,9 +16,11 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 
 import com.alhikmahpro.www.e_inventory.FileUtils
@@ -41,6 +43,7 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.shockwave.pdfium.PdfiumCore
 import kotlinx.android.synthetic.main.activity_view_pdf.*
 import java.io.*
+import java.nio.file.Files
 import java.text.DecimalFormat
 import java.text.NumberFormat
 
@@ -60,9 +63,14 @@ class ViewPdfActivity : AppCompatActivity() {
     lateinit var salesmanId: String
     lateinit var action: String
     lateinit var paymentMode: String
+    lateinit var serverInvoice:String
     internal var discountAmount: Double = 0.toDouble()
     internal var totalAmount: Double = 0.toDouble()
     internal var netAmount: Double = 0.toDouble()
+    internal var otherAmount: Double = 0.toDouble()
+    internal  var subTotal:Double=0.toDouble()
+    var totalValue:Double=0.toDouble()
+    var discountSum:Double=0.toDouble()
     var TAG = "ViewPdfActivity"
     var PREF_KEY_HEADER1 = "key_header_1"
     var PREF_KEY_HEADER2 = "key_header_2"
@@ -82,7 +90,9 @@ class ViewPdfActivity : AppCompatActivity() {
 
 
         val intent = intent
-        // action = intent.getStringExtra("TYPE")
+        //action = intent.getStringExtra("TYPE")
+        intent?.getStringExtra("ACTION")?.let { action = it }
+                ?: kotlin.run { action = "New" }
         intent?.getStringExtra("CUS_NAME")?.let { customerName = it }
                 ?: kotlin.run { customerName = "customer name" }
 
@@ -106,7 +116,21 @@ class ViewPdfActivity : AppCompatActivity() {
                 ?: kotlin.run { totalAmount = 0.0 }
         intent?.getDoubleExtra("NET", 0.0)?.let { netAmount = it }
                 ?: kotlin.run { netAmount = 0.0 }
+        intent?.getStringExtra("SERVER_INV")?.let { serverInvoice = it }
+                ?: kotlin.run { serverInvoice = "invoice" }
+
+        intent?.getDoubleExtra("OTHER",0.0)?.let { otherAmount = it }
+                ?: kotlin.run { otherAmount = 0.0 }
+
         Log.d(TAG, "Code" + customerCode)
+        subTotal=netAmount-otherAmount
+
+        for (mm in Cart.mCart) {
+            discountSum += mm.discount.toDouble()
+            totalValue += mm.qty.toDouble() * mm.rate.toDouble()
+            Log.d("Loop", "discount: " + discountAmount)
+            Log.d("Loop", "total value : " + totalValue)
+        }
 
         requestPermission();
     }
@@ -121,7 +145,15 @@ class ViewPdfActivity : AppCompatActivity() {
                         report?.let {
                             if (report.areAllPermissionsGranted()) {
                                 Log.d(TAG, "Permission granted")
-                                createPdf(FileUtils.getSubDirPath(mContext, DataContract.DIR_INVOICE), 0f)
+                                if(action == DataContract.ACTION_EDIT){
+                                    Log.d(TAG, "Edit")
+                                    viewPdf()
+
+                                }else{
+                                    Log.d(TAG, "New")
+                                    createPdf(FileUtils.getSubDirPath(mContext, DataContract.DIR_INVOICE), 0f)
+                                }
+
                             }
                         }
                     }
@@ -165,22 +197,46 @@ class ViewPdfActivity : AppCompatActivity() {
         Log.d(TAG, "viewPdf: ")
         // if (fileName != null && !fileName.isEmpty()){
 
-        val name = FileUtils.getSubDirPath(mContext, DataContract.DIR_INVOICE) + invoiceNo + ".pdf"
+
+//        if (name != null && !name.isEmpty()){
+//
+//        }
         //Log.d(TAG, "viewPdf: file name $fName")
+        try {
+            val name = FileUtils.getSubDirPath(mContext, DataContract.DIR_INVOICE) + invoiceNo + ".pdf"
+            var tmp = File(name)
+            if(tmp.exists()){
+                Log.d("File", "found: ")
+                pdfView!!.fromFile(File(name))
+                        .pages(0)
+                        .enableSwipe(true) // allows to block changing pages using swipe
+                        .swipeHorizontal(false)
+                        .enableDoubletap(true)
+                        .defaultPage(0)
+                        .enableAnnotationRendering(false) // render annotations (such as comments, colors or forms)
+                        .password(null)
+                        .scrollHandle(null)
+                        .enableAntialiasing(true) // improve rendering a little bit on low-res screens
+                        .spacing(0)
+                        .load()
+            }else{
+
+                Toast.makeText(this,"File not found",Toast.LENGTH_LONG).show()
+                clearActivity()
+            }
 
 
-        pdfView!!.fromFile(File(name))
-                .pages(0)
-                .enableSwipe(true) // allows to block changing pages using swipe
-                .swipeHorizontal(false)
-                .enableDoubletap(true)
-                .defaultPage(0)
-                .enableAnnotationRendering(false) // render annotations (such as comments, colors or forms)
-                .password(null)
-                .scrollHandle(null)
-                .enableAntialiasing(true) // improve rendering a little bit on low-res screens
-                .spacing(0)
-                .load()
+
+        } catch (ffe: FileNotFoundException) {
+            println(ffe.message)
+            Log.d("Catch", "exception: ")
+        } catch(ioe: IOException) {
+            println(ioe.message)
+            Log.d("Catch", "exception: ")
+        }
+
+
+
         //        }else {
         //            Log.d(TAG, "Invalid file : ");
         //        }
@@ -276,7 +332,17 @@ class ViewPdfActivity : AppCompatActivity() {
 
 
     fun createPdf(dest: String, docsize: Float) {
+//        val builder=AlertDialog.Builder(this)
+//        val dialogView=layoutInflater.inflate(R.layout.progress,null)
+//        val message=dialogView.findViewById<TextView>(R.id.loading_msg)
+//        message.text="Creating Pdf..."
+//        builder.setView(dialogView)
+//        builder.setCancelable(false)
+//        val dialog=builder.create()
+//        dialog.show()
 
+
+        Log.d("Loop", "createPdf: ")
         var paragraph: Paragraph? = null
         val table: PdfPTable
         var cell: PdfPCell
@@ -301,11 +367,7 @@ class ViewPdfActivity : AppCompatActivity() {
             val fontSmall = 26f
             val fontMed = 36f
             val fontBig = 40f
-//            val width = 480f
-//            var max = 300f;
-//            var fontSamll = 28f;
-//            var fontBig = 45f;
-//            var fontMediam = 28f;
+
 
             val baseFont = BaseFont.createFont("assets/brandon_bold.otf", "UTF-8", BaseFont.EMBEDDED)
             val baseFontArial = BaseFont.createFont("assets/fonts/Arial.ttf", "UTF-8", BaseFont.EMBEDDED)
@@ -334,18 +396,11 @@ class ViewPdfActivity : AppCompatActivity() {
             val sqLiteDatabase = helper.getReadableDatabase()
             val cursor = helper.getLogo(sqLiteDatabase)
 
-//            if (cursor.moveToFirst()) {
-//
-//                val img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO))
-//                return try {
-//                    val bitmap = BitmapFactory.decodeByteArray(img, 0, img.size)
-//
-//                } catch (e: Exception) {
-//                    e.printStackTrace()
-//                }
             if (cursor.moveToFirst()) {
                 val img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO))
                 val bitmap = BitmapFactory.decodeByteArray(img, 0, img.size)
+                cursor.close()
+                sqLiteDatabase.close()
             }
             try {
 
@@ -409,9 +464,12 @@ class ViewPdfActivity : AppCompatActivity() {
 
 
 
-            paragraph = Paragraph("InvoiceNo: " + salesmanId + "/" + invoiceNo, mPrintNormal)
+            paragraph = Paragraph("Ref. No: " + salesmanId + "/" + invoiceNo, mPrintNormal)
             paragraph.alignment = Element.ALIGN_LEFT
+            document.add(paragraph)
 
+            paragraph = Paragraph("Invoice No: " + serverInvoice, mPrintNormal)
+            paragraph.alignment = Element.ALIGN_LEFT
             document.add(paragraph)
 
             paragraph = Paragraph("Date:" + currentDate, mPrintNormal)
@@ -463,6 +521,7 @@ class ViewPdfActivity : AppCompatActivity() {
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
+
             cell = PdfPCell(Phrase(Chunk("Total", mPrintNormal)))
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
@@ -479,7 +538,10 @@ class ViewPdfActivity : AppCompatActivity() {
             table.addCell(cell)
             table.headerRows = 1
             var i = 0
+            var c=0
+
             for (mm in Cart.mCart) {
+
                 val item = mm.productCode
                 val itemName = mm.productName
                 val qty = mm.qty.toString()
@@ -487,6 +549,8 @@ class ViewPdfActivity : AppCompatActivity() {
                 val price = decimalFormat.format(mm.rate).toString()
                 val sub_total = decimalFormat.format(mm.net).toString()
                 val item_format = price + " X " + mm.qty
+
+
 
                 cell = PdfPCell(Paragraph(item, mPrintNormal))
                 cell.horizontalAlignment = Element.ALIGN_LEFT
@@ -574,13 +638,13 @@ class ViewPdfActivity : AppCompatActivity() {
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
-            cell = PdfPCell(Phrase("Total", mPrintNormal))
+            cell = PdfPCell(Phrase("Total Value", mPrintNormal))
             cell.colspan = 2
             cell.horizontalAlignment = Element.ALIGN_LEFT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
-            cell = PdfPCell(Phrase((currencyFormatter(totalAmount)
+            cell = PdfPCell(Phrase((currencyFormatter(totalValue)
                     ?: "00.00"), mPrintNormal))
             cell.colspan = 3
             cell.horizontalAlignment = Element.ALIGN_RIGHT
@@ -593,8 +657,8 @@ class ViewPdfActivity : AppCompatActivity() {
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
 
-            cell = PdfPCell(Phrase((currencyFormatter(discountAmount)
-                    ?: "0"), mPrintNormal))
+            cell = PdfPCell(Phrase((currencyFormatter(discountSum)
+                    ?: "00.00"), mPrintNormal))
             cell.colspan = 3
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
@@ -605,6 +669,55 @@ class ViewPdfActivity : AppCompatActivity() {
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
+
+            cell = PdfPCell(Phrase("Grand Total", mPrintNormal))
+            cell.colspan = 2
+            cell.horizontalAlignment = Element.ALIGN_LEFT
+            cell.border = Rectangle.NO_BORDER
+            table.addCell(cell)
+
+            cell = PdfPCell(Phrase((currencyFormatter(totalAmount)
+                    ?: "00.00"), mPrintNormal))
+            cell.colspan = 3
+            cell.horizontalAlignment = Element.ALIGN_RIGHT
+            cell.border = Rectangle.NO_BORDER
+            table.addCell(cell)
+
+            cell = PdfPCell(Phrase("SP:Discount", mPrintNormal))
+            cell.colspan = 2
+            cell.horizontalAlignment = Element.ALIGN_LEFT
+            cell.border = Rectangle.NO_BORDER
+            table.addCell(cell)
+
+            cell = PdfPCell(Phrase((currencyFormatter(discountAmount)
+                    ?: "0"), mPrintNormal))
+            cell.colspan = 3
+            cell.horizontalAlignment = Element.ALIGN_RIGHT
+            cell.border = Rectangle.NO_BORDER
+            table.addCell(cell)
+
+            cell = PdfPCell(Phrase("Round off ", mPrintNormal))
+            cell.colspan = 2
+            cell.horizontalAlignment = Element.ALIGN_LEFT
+            cell.border = Rectangle.NO_BORDER
+            table.addCell(cell)
+
+            cell = PdfPCell(Phrase((currencyFormatter(otherAmount)
+                    ?: "0"), mPrintNormal))
+            cell.colspan = 3
+            cell.horizontalAlignment = Element.ALIGN_RIGHT
+            cell.border = Rectangle.NO_BORDER
+            table.addCell(cell)
+
+
+
+            cell = PdfPCell(Phrase(Chunk(separator1)))
+            cell.colspan = 5
+            cell.horizontalAlignment = Element.ALIGN_RIGHT
+            cell.border = Rectangle.NO_BORDER
+            table.addCell(cell)
+
+
 
 
             cell = PdfPCell(Phrase("Net Total", mPrintMedium))
@@ -618,28 +731,7 @@ class ViewPdfActivity : AppCompatActivity() {
             cell.horizontalAlignment = Element.ALIGN_RIGHT
             cell.border = Rectangle.NO_BORDER
             table.addCell(cell)
-
-
-            //net total arabic
-//            val phrase = Phrase(
-////                    "المجموع الصافي ", mArabicFont)
-////            cell = PdfPCell(phrase)
-////            cell.colspan=2
-////            cell.runDirection = PdfWriter.RUN_DIRECTION_RTL
-////            cell.horizontalAlignment = Element.ALIGN_RIGHT
-////            cell.border = Rectangle.NO_BORDER
-////            table.addCell(cell)
-////
-////            // add empty sapce
-////
-////            cell = PdfPCell(Phrase("", mPrintBoldMediam))
-////            cell.colspan = 2
-////            cell.horizontalAlignment = Element.ALIGN_LEFT
-////            cell.border = Rectangle.NO_BORDER
-////            table.addCell(cell)
-
             document.add(table)
-
             val separatorr = DottedLineSeparator()
 
             cell = PdfPCell(Phrase(Chunk(separator1)))
@@ -662,7 +754,7 @@ class ViewPdfActivity : AppCompatActivity() {
                 //var remove=pg*50f
                 createPdf(dest, tableHeightTotal + 700f)
             } else {
-
+                //dialog.dismiss()
                 viewPdf()
             }
 
@@ -693,6 +785,7 @@ class ViewPdfActivity : AppCompatActivity() {
     }
 
     private fun sharePdf() {
+
         Log.d("share", "clicked");
         val path = FileUtils.getSubDirPath(mContext, DataContract.DIR_INVOICE) + invoiceNo + ".pdf"
         val outputFile = File(path)
@@ -704,8 +797,11 @@ class ViewPdfActivity : AppCompatActivity() {
             share.type = "application/pdf"
             share.putExtra(Intent.EXTRA_STREAM, uri)
             startActivity(Intent.createChooser(share, "Share to :"))
-        } else
+        } else{
             Toast.makeText(this, "File not found", Toast.LENGTH_LONG).show()
+        }
+
+
     }
 
     override fun onBackPressed() {

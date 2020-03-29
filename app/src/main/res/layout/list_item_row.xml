@@ -2,9 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginRight="8dp"
-    android:layout_marginTop="8dp"
-    android:layout_marginLeft="8dp"
+
 
     xmlns:card_view="http://schemas.android.com/apk/res-auto">
 
@@ -22,27 +20,26 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_weight="4"
+                android:padding="10dp"
                 android:id="@+id/rv_layout">
 
                 <TextView
                     android:id="@+id/rv_barcode"
                     android:layout_width="0dp"
-                    android:layout_height="@dimen/edittext_height"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1.5"
                     android:text="barcode"
-                    android:textSize="18sp"
-                    android:padding="10dp"
+
                     android:textColor="@android:color/black"
                     />
 
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_height="@dimen/edittext_height"
+                    android:layout_height="wrap_content"
                     android:text="QTY"
                     android:layout_weight="1"
                     android:id="@+id/txt_quantity"
-                    android:textSize="18sp"
-                    android:padding="10dp"
+
                     android:textColor="@android:color/black"
                     />
 
@@ -50,17 +47,17 @@
                 <TextView
                     android:id="@+id/txtUnit"
                     android:layout_width="0dp"
-                    android:layout_height="@dimen/edittext_height"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="18sp"
+
                     android:text="Unit"
-                    android:padding="10dp"
+
                     android:textColor="@android:color/black" />
 
                 <ImageView
                     android:id="@+id/rv_img_del"
-                    android:layout_width="@dimen/edittext_height"
-                    android:layout_height="@dimen/edittext_height"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
                     android:src="@drawable/delete"
                     android:layout_gravity="right"
                     android:gravity="right"
@@ -74,7 +71,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/rv_layout"
                 android:padding="10dp"
-                android:textSize="16sp"
+
                  />
         </RelativeLayout>
     </android.support.v7.widget.CardView>

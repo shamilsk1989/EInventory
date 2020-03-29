@@ -1,41 +1,39 @@
 {
-  "Goods": [
+  "Invoice": [
     {
-      "document_number": 1,
-      "order_no": "",
-      "supplier_code": "gns sggen",
-      "invoice_no": "nwtsntrns",
-      "invoice_date": "14-11-2019",
-      "staff_name": "rgrgrh",
-      "total": 1728,
-      "discount_amount": 0,
-      "discount_percentage": 0,
-      "net_amount": 1728,
-      "payment_type": "Cash",
-      "date_time": "14-11-2019"
+      "invoice_number": "INV-1",
+      "invoice_date": "28-03-2020",
+      "customer_code": "C0001",
+      "customer_name": "CASH CUSTOMER",
+      "salesman_id": "S001",
+      "total_amount": 820,
+      "discount_amount": 200,
+      "discount_percentage": 24.39,
+      "other_amount": 50,
+      "net_amount": 670,
+      "payment_type": "Cash"
     }
   ],
   "Details": [
     {
       "serial_no": 1,
-      "doc_no": 1,
-      "bar_code": "123456822",
-      "product_code": "P1010 ",
-      "product_name": "Pen",
-      "quantity": 2,
-      "free_quantity": 5,
-      "rate": 960,
-      "discount": 0,
-      "discount_percentage": 10,
-      "net_value": 1728,
-      "um1": "EA",
-      "um2": "DOZ",
-      "um3": "CRT",
-      "selected_unit": "DOZ x 10 x 4",
-      "selected_free_unit": "DOZ x 10 x 4",
-      "um1_qty": 1,
-      "um2_qty": 12,
-      "um3_qty": 4
+      "invoice_number": "INV-1",
+      "bar_code": "5136530",
+      "product_code": "513653",
+      "product_name": "3+1ST ACTIVITY BOOK ENVIRONMENT ",
+      "quantity": 60,
+      "unit1": "EA",
+      "unit2": "",
+      "unit3": "",
+      "selected_unit": "EA",
+      "un_qty1": 1,
+      "un_qty2": 0,
+      "un_qty3": 0,
+      "rate": 15,
+      "discount": 80,
+      "discount_percentage": 8.89,
+      "net_amount": 820,
+      "sale_type": "Sale"
     }
   ]
 }

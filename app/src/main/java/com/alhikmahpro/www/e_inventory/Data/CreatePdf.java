@@ -365,22 +365,22 @@ public class CreatePdf extends AsyncTask<String, Void, String> {
     }
 
     private void openGeneratedPDF() {
-//        File file= new File(FileUtils.getSubDirPath(mContext, DataContract.DIR_REPORTS) + fileName + ".pdf");
-//        Intent intent = new Intent(Intent.ACTION_VIEW);
-//        intent.setDataAndType(Uri.fromFile(file), "application/pdf");
-//        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-//        mContext.startActivity(intent);
+        File file= new File(FileUtils.getSubDirPath(mContext, DataContract.DIR_REPORTS) + fileName + ".pdf");
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.fromFile(file), "application/pdf");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        mContext.startActivity(intent);
 
 
-        File outputFile = new File(FileUtils.getSubDirPath(mContext, DataContract.DIR_REPORTS) + fileName);
-        // Uri uri = Uri.fromFile(outputFile);
-        Uri uri = FileProvider.getUriForFile(mContext, mContext.getPackageName() + ".provider", outputFile);
-
-        Intent share = new Intent();
-        share.setAction(Intent.ACTION_SEND);
-        share.setType("application/pdf");
-        share.putExtra(Intent.EXTRA_STREAM, uri);
-        mContext.startActivity(Intent.createChooser(share, "Share to :"));
+//        File outputFile = new File(FileUtils.getSubDirPath(mContext, DataContract.DIR_REPORTS) + fileName);
+//        // Uri uri = Uri.fromFile(outputFile);
+//        Uri uri = FileProvider.getUriForFile(mContext, mContext.getPackageName() + ".provider", outputFile);
+//
+//        Intent share = new Intent();
+//        share.setAction(Intent.ACTION_SEND);
+//        share.setType("application/pdf");
+//        share.putExtra(Intent.EXTRA_STREAM, uri);
+//        mContext.startActivity(Intent.createChooser(share, "Share to :"));
 
 
     }

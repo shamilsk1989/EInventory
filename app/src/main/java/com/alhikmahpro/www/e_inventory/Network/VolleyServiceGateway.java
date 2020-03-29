@@ -89,6 +89,7 @@ public class VolleyServiceGateway {
                     }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
+                    Log.d(TAG, "onErrorResponse: "+error);
                     HideProgressDialog();
                     HandlingVolleyError(error);
                     if(mListener!=null){

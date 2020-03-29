@@ -15,8 +15,38 @@ public class ItemModel {
     private String customerName;
     private String customerCode;
     private String paymentType;
+
+    public String getServerInvoice() {
+        return serverInvoice;
+    }
+
+    public void setServerInvoice(String serverInvoice) {
+        this.serverInvoice = serverInvoice;
+    }
+
+    private String serverInvoice;
     private double rate;
     private double discount;
+
+    public double getGrandTotal() {
+        return grandTotal;
+    }
+
+    public void setGrandTotal(double grandTotal) {
+        this.grandTotal = grandTotal;
+    }
+
+    private double grandTotal;
+
+    public double getOtherAmount() {
+        return otherAmount;
+    }
+
+    public void setOtherAmount(double otherAmount) {
+        this.otherAmount = otherAmount;
+    }
+
+    private double otherAmount;
 
     public double getDiscountPercentage() {
         return discountPercentage;

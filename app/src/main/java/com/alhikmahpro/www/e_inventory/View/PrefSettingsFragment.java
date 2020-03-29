@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.alhikmahpro.www.e_inventory.Data.DBBackUp;
 import com.alhikmahpro.www.e_inventory.R;
 import com.mocoo.hang.rtprinter.main.MainPrintSettings;
 
@@ -126,6 +127,7 @@ public class PrefSettingsFragment extends PreferenceFragment {
         printerPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
+                Log.d(TAG, "onPreferenceClick: ");
                 Intent intent_printer = new Intent(getActivity(), MainPrintSettings.class);
                 startActivity(intent_printer);
                 return true;
@@ -135,8 +137,21 @@ public class PrefSettingsFragment extends PreferenceFragment {
         logoPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
+                Log.d(TAG, "onPreferenceClick: ");
                 Intent intent_logo = new Intent(getActivity(), AddLogoActivity.class);
                 startActivity(intent_logo);
+
+                return true;
+            }
+        });
+
+        Preference backupPref = findPreference(getString(R.string.key_backup));
+        backupPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Log.d(TAG, "onPreferenceClick: ");
+                DBBackUp backUp=new DBBackUp(getActivity());
+                backUp.copyDatabase(getActivity(),"m-inv");
                 return true;
             }
         });

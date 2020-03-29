@@ -299,17 +299,19 @@ public class CheckCustomerActivity extends AppCompatActivity implements ListCust
 
     @OnClick(R.id.imgSearch)
     public void onImgSearchClicked() {
+
+        String item_key = editTextBarcode.getText().toString();
+        Bundle bundle = new Bundle();
+        bundle.putString("CUS_NAME", item_key);
         FragmentManager fragmentManager = getSupportFragmentManager();
         ListCustomerFragment listCustomerFragment = new ListCustomerFragment();
+        listCustomerFragment.setArguments(bundle);
         listCustomerFragment.show(fragmentManager, "Customer");
     }
 
     @OnClick(R.id.imgSubmit)
     public void onImgSubmitClicked() {
-
         getDataFromVolley();
-
-
     }
 
     @OnClick(R.id.btnInvoice)

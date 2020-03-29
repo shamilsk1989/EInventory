@@ -83,9 +83,14 @@ public class ListSalesActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-//        Intent intent = getIntent();
-//        type= intent.getStringExtra("Type");
-        getSupportActionBar().setTitle("Sales");
+        Intent intent = getIntent();
+        type= intent.getStringExtra("Type");
+        if(type.equals("SAL")){
+            getSupportActionBar().setTitle("Sales");
+        }else if(type.equals("ORD")){
+            getSupportActionBar().setTitle("Order");
+        }
+
         populateRecycler();
 
 
@@ -131,6 +136,9 @@ public class ListSalesActivity extends AppCompatActivity {
                 model.setTotal(cursor.getDouble(cursor.getColumnIndex(DataContract.Invoice.COL_TOTAL_AMOUNT)));
                 model.setDiscount(cursor.getDouble(cursor.getColumnIndex(DataContract.Invoice.COL_DISCOUNT_AMOUNT)));
                 model.setNet(cursor.getDouble(cursor.getColumnIndex(DataContract.Invoice.COL_NET_AMOUNT)));
+                model.setOtherAmount(cursor.getDouble(cursor.getColumnIndex(DataContract.Invoice.COL_OTHER_AMOUNT)));
+                model.setGrandTotal(cursor.getDouble(cursor.getColumnIndex(DataContract.Invoice.COL_GRAND_TOTAL_AMOUNT)));
+                model.setServerInvoice(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_SERVER_INVOICE_NUMBER)));
                 model.setPaymentType(cursor.getString(cursor.getColumnIndex(DataContract.Invoice.COL_PAYMENT_TYPE)));
                 model.setIs_sync(cursor.getInt(cursor.getColumnIndex(DataContract.Invoice.COL_IS_SYNC)));
                 list.add(model);
@@ -210,6 +218,7 @@ public class ListSalesActivity extends AppCompatActivity {
 //        else {
 //            intent = new Intent(ListSalesActivity.this, ViewCartActivity.class);
 //        }
+
         Intent intent = new Intent(ListSalesActivity.this, ViewPdfActivity.class);
         intent.putExtra("ACTION", DataContract.ACTION_EDIT);
         intent.putExtra("TYPE", "SAL");
@@ -220,8 +229,10 @@ public class ListSalesActivity extends AppCompatActivity {
         intent.putExtra("DOC_NO", itemModel.getInvoiceNo());
         intent.putExtra("DOC_DATE", itemModel.getInvoiceDate());
         intent.putExtra("TOTAL", itemModel.getTotal());
+        intent.putExtra("OTHER", itemModel.getOtherAmount());
         intent.putExtra("NET", itemModel.getNet());
         intent.putExtra("PAY_MOD", itemModel.getPaymentType());
+        intent.putExtra("SERVER_INV", itemModel.getServerInvoice());
         startActivity(intent);
     }
 

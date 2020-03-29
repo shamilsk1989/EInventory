@@ -57,8 +57,9 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
             holder.imgEdit.setImageResource(R.drawable.ic_edit);
         }
         holder.invoiceDate.setText(date);
-        holder.invoiceAmount.setText(currencyFormatter(itemModel.getNet()));
+        holder.invoiceAmount.setText(currencyFormatter(itemModel.getGrandTotal()));
         holder.customerName.setText(itemModel.getCustomerName());
+        holder.serverInvoice.setText(itemModel.getServerInvoice());
         holder.imgEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -90,6 +91,7 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
         TextView invoiceDate;
         ImageView imgEdit,imgSync,imgShare;
         TextView customerName;
+        TextView serverInvoice;
 
 
 
@@ -102,6 +104,7 @@ public class SalesListAdapter extends RecyclerView.Adapter<SalesListAdapter.Sale
             imgSync=itemView.findViewById(R.id.rv_img_sync);
             imgShare=itemView.findViewById(R.id.rv_img_share);
             customerName=itemView.findViewById(R.id.rv_customer);
+            serverInvoice=itemView.findViewById(R.id.rv_serverInvoice);
 
         }
     }
