@@ -17,11 +17,8 @@
         app:showAsAction="always"/>
     <item
         android:id="@+id/action_sync"
-        android:icon="@drawable/ic_sync_white"
         android:title="@string/action_sync"
-        app:showAsAction="always" />
-
-
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_clear"
         android:icon="@drawable/ic_close_white"

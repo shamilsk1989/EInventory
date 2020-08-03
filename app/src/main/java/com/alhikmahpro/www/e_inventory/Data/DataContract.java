@@ -19,8 +19,21 @@ public class DataContract {
     public static final String DIR_RECEIPT="Receipt";
     public static final String DIR_INVOICE="Invoice";
     public static final String DIR_REPORTS="Reports";
+    public static final String DIR_ORDER="Order";
+    public static final String DIR_STATEMENT="statement";
+    public static final String DIR_LOGS="Logs";
     public static final String ACTION_EDIT="Edit";
     public static final String ACTION_NEW="New";
+
+
+
+    public  static class AutoIdGenerator{
+        public static final String TABLE_NAME="auto_id_generator";
+        public static final String COL_INVOICE_TABLE="invoice";
+        public static final String COL_ORDER_TABLE="orders";
+        public static final String COL_GOODS_TABLE="goods";
+        public static final String COL_STOCK_TABLE="stocks";
+    }
 
 
     public static class Settings{
@@ -149,13 +162,64 @@ public class DataContract {
         public static final String COL_SERVER_INVOICE_NUMBER="server_invoice";
         public static final String COL_PAYMENT_TYPE="payment_type";
         public static final String COL_DATE_TIME="date_time";
+        public static final String COL_TYPE="type";
         public static final String COL_IS_SYNC="is_sync";
+
 
     }
 
     public static class InvoiceDetails{
 
         public static final String TABLE_NAME="invoice_details";
+        public static final String COL_ID="_id";
+        public static final String COL_INVOICE_NUMBER="invoice_number";
+        public static final String COL_BAR_CODE="bar_code";
+        public static final String COL_PRODUCT_CODE="product_code";
+        public static final String COL_PRODUCT_NAME="product_name";
+        public static final String COL_PRODUCT_NAME_AR="product_name_ar";
+        public static final String COL_UNIT="selected_unit";
+        public static final String COL_QUANTITY="quantity";
+        public static final String COL_UNIT1="unit1";
+        public static final String COL_UNIT2="unit2";
+        public static final String COL_UNIT3="unit3";
+        public static final String COL_UN_QTY1="un_qty1";
+        public static final String COL_UN_QTY2="un_qty2";
+        public static final String COL_UN_QTY3="un_qty3";
+        public static final String COL_RATE="rate";
+        public static final String COL_DISCOUNT="discount";
+        public static final String COL_DISCOUNT_PERCENTAGE="discount_percentage";
+        public static final String COL_NET_AMOUNT="net_amount";
+        public static final String COL_SALE_TYPE="sale_type";
+        public static final String COL_IS_SYNC="is_sync";
+
+    }
+
+    public static class Order{
+
+        public static final String TABLE_NAME="orders";
+        public static final String COL_ID="_id";
+        public static final String COL_INVOICE_NUMBER="invoice_number";
+        public static final String COL_INVOICE_DATE="invoice_date";
+        public static final String COL_SALESMAN_ID="salesman_id";
+        public static final String COL_CUSTOMER_CODE="customer_code";
+        public static final String COL_CUSTOMER_NAME="customer_name";
+        public static final String COL_TOTAL_AMOUNT="total_amount";
+        public static final String COL_DISCOUNT_AMOUNT="discount_amount";
+        public static final String COL_DISCOUNT_PERCENTAGE="discount_percentage";
+        public static final String COL_NET_AMOUNT="net_amount";
+        public static final String COL_OTHER_AMOUNT="other_amount";
+        public static final String COL_GRAND_TOTAL_AMOUNT="grand_total_amount";
+        public static final String COL_SERVER_INVOICE_NUMBER="server_invoice";
+        public static final String COL_PAYMENT_TYPE="payment_type";
+        public static final String COL_DATE_TIME="date_time";
+        public static final String COL_TYPE="type";
+        public static final String COL_IS_SYNC="is_sync";
+
+
+    }
+    public static class OrderDetails{
+
+        public static final String TABLE_NAME="order_details";
         public static final String COL_ID="_id";
         public static final String COL_INVOICE_NUMBER="invoice_number";
         public static final String COL_BAR_CODE="bar_code";
@@ -196,6 +260,7 @@ public class DataContract {
         public static final String TABLE_NAME="receipts";
         public static final String COL_ID="_id";
         public static final String COL_RECEIPT_NUMBER="receipts_number";
+        public static final String COL_SERVER_INVOICE_NUMBER="server_invoice";
         public static final String COL_RECEIPT_DATE="receipts_date";
         public static final String COL_SALESMAN_ID="salesman_id";
         public static final String COL_CUSTOMER_CODE="customer_code";

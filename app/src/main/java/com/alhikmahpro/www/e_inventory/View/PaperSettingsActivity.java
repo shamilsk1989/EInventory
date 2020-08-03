@@ -88,31 +88,31 @@ public class PaperSettingsActivity extends AppCompatActivity implements AdapterV
     }
 
     private void initView() {
-        SQLiteDatabase database = helper.getReadableDatabase();
-        Cursor cursor = helper.getPaperSettings(database);
-        if (cursor.moveToFirst()) {
-            do {
-                //_id=cursor.getInt(cursor.getColumnIndex(DataContract.PaperSettings.COL_ID));
-                txtCompanyName.setText(cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_NAME)));
-                txtCompanyAddress.setText(cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_ADDRESS)));
-                txtCompanyPhone.setText(cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_PHONE)));
-                txtFooter.setText(cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_FOOTER)));
-                byte[] img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO));
-                try {
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(img, 0, img.length);
-                    imgLogo.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 60, 60, false));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        database.close();
-        adapter = ArrayAdapter.createFromResource(this, R.array.paper_size, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(this);
+//        SQLiteDatabase database = helper.getReadableDatabase();
+//        Cursor cursor = helper.getPaperSettings(database);
+//        if (cursor.moveToFirst()) {
+//            do {
+//                //_id=cursor.getInt(cursor.getColumnIndex(DataContract.PaperSettings.COL_ID));
+//                txtCompanyName.setText(cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_NAME)));
+//                txtCompanyAddress.setText(cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_ADDRESS)));
+//                txtCompanyPhone.setText(cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_PHONE)));
+//                txtFooter.setText(cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_FOOTER)));
+//                byte[] img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO));
+//                try {
+//                    Bitmap bitmap = BitmapFactory.decodeByteArray(img, 0, img.length);
+//                    imgLogo.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 60, 60, false));
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//
+//            } while (cursor.moveToNext());
+//        }
+//        cursor.close();
+//        database.close();
+//        adapter = ArrayAdapter.createFromResource(this, R.array.paper_size, android.R.layout.simple_spinner_item);
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        spinner.setAdapter(adapter);
+//        spinner.setOnItemSelectedListener(this);
 
     }
 

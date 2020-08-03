@@ -35,16 +35,20 @@ public class ClearData extends AsyncTask<String,Void,Void> {
 
         String type=strings[0];
         dbHelper helper=new dbHelper(context);
-        if (type.equals("inv")) {
-            helper.deleteInvoice();
-            helper.deleteInvoiceDetails();
+        if (type.equals("SAL")) {
+            helper.deleteAllInvoice();
+            helper.deleteAllInvoiceDetails();
            // Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "doInBackground: Invoice deleted");
 
-        } else if (type.equals("rec")) {
+        } else if (type.equals("REC")) {
             helper.deleteReceipt();
             Log.d(TAG, "doInBackground: Receipt deleted");
             //Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show();
+        }else if(type.equals("ORD")){
+            helper.deleteAllOrder();
+            helper.deleteAllOrderDetails();
+            Log.d(TAG, "doInBackground: Order deleted");
         }
 
         return null;

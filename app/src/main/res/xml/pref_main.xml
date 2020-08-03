@@ -40,12 +40,23 @@
                 android:defaultValue="@string/default_employee_code"
                 android:key="@string/key_employee"
                 android:title="@string/title_employee" />
+            <ListPreference
+                android:key="@string/key_sync_type"
+                android:title="@string/title_sync"
+                android:entries="@array/sync_type"
+                android:entryValues="@array/sync_type_values"
+                android:defaultValue="@string/default_sync_value"
+                android:summary="choose an option to sync data to server">
+
+            </ListPreference>
 
 
+
+<!--            <CheckBoxPreference-->
+<!--                android:defaultValue="false"-->
+<!--                android:key="@string/key_realtime_sync"-->
+<!--                android:title="@string/title_realtime_sync" />-->
         </PreferenceScreen>
-
-
-
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Modules">
@@ -69,11 +80,23 @@
             android:defaultValue="false"
             android:key="@string/key_module_receipts"
             android:title="@string/title_module_receipts" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/key_module_order"
+            android:title="@string/title_module_order" />
+
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/key_module_statement"
+            android:title="@string/title_module_statement" />
+
+
+
+
 
     </PreferenceCategory>
     <PreferenceCategory android:title="Print">
-
-
         <Preference
             android:summary="@string/summery_printer_settings"
             android:title="@string/title_printer_settings"
@@ -101,6 +124,11 @@
             android:summary="@string/default_logo"
             android:title="@string/title_logo"
             android:key="@string/key_logo"
+            />
+        <Preference
+            android:summary="@string/default_id_summary"
+            android:title="@string/title_Id"
+            android:key="@string/key_Auto_Id"
             />
         <EditTextPreference
             android:title="@string/title_footer"

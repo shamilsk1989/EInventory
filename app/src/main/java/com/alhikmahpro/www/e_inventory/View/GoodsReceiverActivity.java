@@ -55,9 +55,7 @@ import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
 import com.alhikmahpro.www.e_inventory.R;
 import com.android.volley.VolleyError;
 import com.google.android.gms.vision.barcode.Barcode;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
-import com.journeyapps.barcodescanner.CaptureActivity;
+
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
@@ -131,18 +129,9 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     EditText editTextStock;
     @BindView(R.id.editTextNet)
     EditText editTextNet;
-    @BindView(R.id.btnAdd)
-    Button btnAdd;
     @BindView(R.id.txtAddedBarcode)
     EditText txtAddedBarcode;
-//    @BindView(R.id.txtAddedPrice)
-//    EditText txtAddedPrice;
-//    @BindView(R.id.txtAddedQuantity)
-//    EditText txtAddedQuantity;
 
-
-    @BindView(R.id.btnNext)
-    Button btnNext;
     private static final int CAMERA_PERMISSION_CODE = 101;
     private static final int BARCODE_READER_ACTIVITY_REQUEST = 100;
     private static final String TAG = "GoodsReceiverActivity";
@@ -172,6 +161,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     dbHelper helper;
     SharedPreferences pref;
     SharedPreferences.Editor editor;
+    MenuItem itemAdd,itemDelete,itemCart;
 
     // public static List<ItemModel>itemCart=new ArrayList<>();
 
@@ -381,49 +371,7 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     }
 
 
-    @OnClick(R.id.btnAdd)
-    public void onBtnAddClicked() {
 
-        if (TextUtils.isEmpty(editTextProductCode.getText())) {
-            editTextProductCode.setError("Invalid Item");
-        } else {
-
-
-            double qty, free_qty;
-            try {
-                qty = Double.valueOf(editTextQuantity.getText().toString());
-                free_qty = Double.valueOf(editTextFreeQuantity.getText().toString());
-
-            } catch (NumberFormatException e) {
-                qty = 0;
-                free_qty = 0;
-            }
-            Log.d(TAG, "onBtnAddClicked: qty=" + qty + "Free=" + free_qty);
-            if (qty == 0 && free_qty < 1) {
-                editTextQuantity.setError("invalid quantity");
-            } else {
-
-                //set added items view
-
-                txtAddedBarcode.setText(barCode + " X " + editTextQuantity.getText().toString() + " X " + editTextSale.getText().toString());
-//                txtAddedQuantity.setText(editTextQuantity.getText().toString());
-//                txtAddedPrice.setText(editTextSale.getText().toString());
-
-                // add items into the cart
-                addToCart();
-                // clear the view and set focus into barcode
-
-                editTextBarcode.setText("");
-                clearView();
-                editTextBarcode.setFocusableInTouchMode(true);
-                editTextBarcode.requestFocus();
-            }
-
-
-        }
-
-
-    }
 
     private void addToCart() {
         double qty = 0, rate = 0, disc = 0, net = 0, free_qty, old_qty = 0, discPercentage;
@@ -489,25 +437,6 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
 
     }
 
-    @OnClick(R.id.btnNext)
-    public void onBtnNextClicked() {
-        txtAddedBarcode.setText("");
-//        txtAddedPrice.setText("");
-//        txtAddedQuantity.setText("");
-
-
-        Intent intent = new Intent(this, GoodsItemListActivity.class);
-        //intent.putExtra("DocNo", Integer.valueOf(txtDocNo.getText().toString()));
-        intent.putExtra("ACTION", "New");
-        intent.putExtra("DOC_NO", mDoc);
-        intent.putExtra("ORD_NO", orderNo);
-        intent.putExtra("SUPP_CODE", supplierCode);
-        intent.putExtra("SUPP_NAME", supplierName);
-        intent.putExtra("INV_NO", invoiceNo);
-        intent.putExtra("INV_DATE", invoiceDate);
-        intent.putExtra("USER", User);
-        startActivity(intent);
-    }
 
     private void clearView() {
 
@@ -789,14 +718,13 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
             }
         }).create().show();
     }
-
-
     private void setDoc() {
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         dbHelper helper = new dbHelper(this);
         mDate = sdf.format(new Date());
-        int last_no = helper.getGoodsLastDocNo();
+        int last_no = helper.getAutoId(DataContract.AutoIdGenerator.COL_GOODS_TABLE);
+                //helper.getLastID(DataContract.GoodsReceive.TABLE_NAME);
         Log.d(TAG, "setDoc: " + last_no);
         mDoc = last_no + 1;
         txtDate.setText(mDate);
@@ -847,6 +775,15 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     public boolean onNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        cart_count=Cart.gCart.size();
+        Log.d(TAG, "onResume: "+cart_count);
+
+        invalidateOptionsMenu();
     }
 
     @Override
@@ -1135,11 +1072,13 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.cart_toolbar, menu);
-        MenuItem menuItem = menu.findItem(R.id.action_cart);
+        itemCart = menu.findItem(R.id.action_cart);
         Log.d(TAG, "onCreateOptionsMenu: " + Converter.convertLayoutToImage(GoodsReceiverActivity.this, cart_count, R.drawable.ic_shopping_cart));
-        menuItem.setIcon(Converter.convertLayoutToImage(GoodsReceiverActivity.this, cart_count, R.drawable.ic_shopping_cart));
-        MenuItem menuItem2 = menu.findItem(R.id.action_delete);
-        menuItem2.setVisible(false);
+        itemCart.setIcon(Converter.convertLayoutToImage(GoodsReceiverActivity.this, cart_count, R.drawable.ic_shopping_cart));
+        itemDelete = menu.findItem(R.id.action_delete);
+        itemDelete.setVisible(false);
+        itemAdd = menu.findItem(R.id.action_add);
+
         return true;
     }
 
@@ -1148,6 +1087,61 @@ public class GoodsReceiverActivity extends AppCompatActivity implements AdapterV
         // Handle item selection
 
         int id = item.getItemId();
+        if(id==R.id.action_cart){
+            txtAddedBarcode.setText("");
+//        txtAddedPrice.setText("");
+//        txtAddedQuantity.setText("");
+
+
+            Intent intent = new Intent(this, GoodsItemListActivity.class);
+            //intent.putExtra("DocNo", Integer.valueOf(txtDocNo.getText().toString()));
+            intent.putExtra("ACTION", "New");
+            intent.putExtra("DOC_NO", mDoc);
+            intent.putExtra("ORD_NO", orderNo);
+            intent.putExtra("SUPP_CODE", supplierCode);
+            intent.putExtra("SUPP_NAME", supplierName);
+            intent.putExtra("INV_NO", invoiceNo);
+            intent.putExtra("INV_DATE", invoiceDate);
+            intent.putExtra("USER", User);
+            startActivity(intent);
+
+        } else if (id==R.id.action_add) {
+
+            if (TextUtils.isEmpty(editTextProductCode.getText())) {
+                editTextProductCode.setError("Invalid Item");
+            } else {
+
+
+                double qty, free_qty;
+                try {
+                    qty = Double.valueOf(editTextQuantity.getText().toString());
+                    free_qty = Double.valueOf(editTextFreeQuantity.getText().toString());
+
+                } catch (NumberFormatException e) {
+                    qty = 0;
+                    free_qty = 0;
+                }
+                Log.d(TAG, "onBtnAddClicked: qty=" + qty + "Free=" + free_qty);
+                if (qty == 0 && free_qty < 1) {
+                    editTextQuantity.setError("invalid quantity");
+                } else {
+
+                    //set added items view
+                    txtAddedBarcode.setText(barCode + " X " + editTextQuantity.getText().toString() + " X " + editTextSale.getText().toString());
+                    // add items into the cart
+                    addToCart();
+                    // clear the view and set focus into barcode
+                    editTextBarcode.setText("");
+                    clearView();
+                    editTextBarcode.setFocusableInTouchMode(true);
+                    editTextBarcode.requestFocus();
+                }
+
+
+            }
+
+
+        }
 
         return super.onOptionsItemSelected(item);
     }

@@ -156,7 +156,16 @@ public class PrefSettingsFragment extends PreferenceFragment {
             }
         });
 
-
+        Preference autoIdPref = findPreference(getString(R.string.key_Auto_Id));
+        autoIdPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Log.d(TAG, "onPreferenceClick: ");
+                Intent intent_id = new Intent(getActivity(), AutoIdSettingsActivity.class);
+                startActivity(intent_id);
+                return true;
+            }
+        });
 
 
 

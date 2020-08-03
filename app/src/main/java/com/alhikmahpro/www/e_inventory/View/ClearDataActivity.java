@@ -69,9 +69,9 @@ public class ClearDataActivity extends AppCompatActivity {
                     ShowProgressDialog();
                     dbHelper helper = new dbHelper(this);
                     if (type.equals("inv")) {
-                        helper.deleteInvoice();
-                        helper.deleteInvoiceDetails();
-                        //Toast.makeText(ClearDataActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
+//                        helper.deleteInvoice();
+//                        helper.deleteInvoiceDetails();
+//                        //Toast.makeText(ClearDataActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
 
                     } else if (type.equals("rec")) {
                         helper.deleteReceipt();

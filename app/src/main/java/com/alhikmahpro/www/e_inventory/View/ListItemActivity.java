@@ -136,27 +136,8 @@ public class ListItemActivity extends AppCompatActivity {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         mDate = sdf.format(new Date());
         Log.d(TAG, "initView: " + RuntimeData.mCartData.size());
-
-        SQLiteDatabase database = helper.getReadableDatabase();
-        Cursor cursor = helper.getStockDetailsByDoc(database, docNo);
-        Log.d(TAG, "initView: cursor " + cursor.getCount());
-        if (cursor.moveToFirst()) {
-            do {
-                ItemModel itemModel = new ItemModel();
-                itemModel.set_id(cursor.getInt(cursor.getColumnIndex(DataContract.StocksDetails.COL_ID)));
-                itemModel.setDocNo(cursor.getInt(cursor.getColumnIndex(DataContract.StocksDetails.COL_DOCUMENT_NUMBER)));
-                itemModel.setBarCode(cursor.getString(cursor.getColumnIndex(DataContract.StocksDetails.COL_BAR_CODE)));
-                itemModel.setProductCode(cursor.getString(cursor.getColumnIndex(DataContract.StocksDetails.COL_PRODUCT_CODE)));
-                itemModel.setProductName(cursor.getString(cursor.getColumnIndex(DataContract.StocksDetails.COL_PRODUCT_NAME)));
-                itemModel.setSelectedPackage(cursor.getString(cursor.getColumnIndex(DataContract.StocksDetails.COL_UNIT)));
-                itemModel.setQty(cursor.getDouble(cursor.getColumnIndex(DataContract.StocksDetails.COL_QUANTITY)));
-                itemModel.setSalePrice(cursor.getDouble(cursor.getColumnIndex(DataContract.StocksDetails.COL_SALES_PRICE)));
-                itemModel.setCostPrice(cursor.getDouble(cursor.getColumnIndex(DataContract.StocksDetails.COL_COST_PRICE)));
-                listItem.add(itemModel);
-            } while (cursor.moveToNext());
-        }
+        listItem = helper.getStockDetailsByDoc(docNo);
         if (listItem.size() > 0) {
-
             txtEmpty.setVisibility(View.GONE);
             //txtCount.setText("Total Items :" + String.valueOf(listItem.size()));
             layoutManager = new LinearLayoutManager(this);
@@ -231,7 +212,8 @@ public class ListItemActivity extends AppCompatActivity {
         Log.d(TAG, "onCreateOptionsMenu: " + Converter.convertLayoutToImage(ListItemActivity.this, cart_count, R.drawable.ic_shopping_cart));
         menuItem.setIcon(Converter.convertLayoutToImage(ListItemActivity.this, cart_count, R.drawable.ic_shopping_cart));
         MenuItem itemDelete = menu.findItem(R.id.action_delete);
-
+        MenuItem itemAdd=menu.findItem(R.id.action_add);
+        itemAdd.setVisible(false);
         return true;
     }
 
@@ -262,7 +244,7 @@ public class ListItemActivity extends AppCompatActivity {
             }
             helper.updateStocks(docNo, total);
 
-            csvWritter writer = new csvWritter(ListItemActivity.this, docNo, mDate);
+            csvWritter writer = new csvWritter(ListItemActivity.this, docNo, mDate,listItem);
             try {
                 writer.exportToCSV(staffName);
             } catch (Exception e) {
@@ -283,35 +265,6 @@ public class ListItemActivity extends AppCompatActivity {
     }
 
 
-    private void alertMessage(String message) {
-
-        new AlertDialog.Builder(ListItemActivity.this)
-                .setTitle("Status")
-                .setMessage(message)
-                .setCancelable(false)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                        RuntimeData.mCartData.clear();
-                        finish();
-
-                    }
-                }).create().show();
-
-    }
-
-    private void writeToCSV() {
-        Log.d(TAG, "writeToCSV: ");
-        csvWritter writer = new csvWritter(ListItemActivity.this, docNo, mDate);
-        try {
-            writer.exportToCSV(staffName);
-            RuntimeData.mCartData.clear();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
 
     private void requestStoragePermission() {
 

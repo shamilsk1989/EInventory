@@ -44,11 +44,11 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
 //    @BindView(R.id.txtTotalCount)
 //    TextView txtTotalCount;
     double total;
-    String customerName, invoiceNo, salesmanId, customerCode, invoiceDate, Action;
+    String customerName, invoiceNo, salesmanId, customerCode, invoiceDate, Action,type;
     private static final String TAG = "ViewCartActivity";
     @BindView(R.id.toolbar)
     Toolbar toolbar;
-    MenuItem itemDelete;
+    MenuItem itemDelete,itemCart,itemAdd;
     private static int cart_count = 0;
 
     @Override
@@ -62,6 +62,7 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
 
 
         Intent intent = getIntent();
+        type=intent.getStringExtra("TYPE");
         Action = intent.getStringExtra("ACTION");
         customerName = intent.getStringExtra("CUS_NAME");
         customerCode = intent.getStringExtra("CUS_CODE");
@@ -98,7 +99,7 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
 
         Intent intent_payment = new Intent(ViewCartActivity.this, PaymentActivity.class);
         intent_payment.putExtra("ACTION", Action);
-        intent_payment.putExtra("TYPE", "SAL");
+        intent_payment.putExtra("TYPE", type);
         intent_payment.putExtra("CUS_NAME", customerName);
         intent_payment.putExtra("CUS_CODE", customerCode);
         intent_payment.putExtra("SALESMAN_ID", salesmanId);
@@ -124,10 +125,11 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
-
-                        Delete(position);
-
+                        if(type.equals("SAL")){
+                            DeleteSale(position);
+                        }else if(type.equals("ORD")){
+                            DeleteOrder(position);
+                        }
                         calculate();
                     }
                 })
@@ -142,11 +144,25 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
 
     }
 
-    private void Delete(int position) {
+    private void DeleteSale(int position) {
         CartModel cartModel=Cart.mCart.get(position);
         int id = cartModel.get_id();
         dbHelper helper = new dbHelper(this);
         boolean del=helper.deleteInvoiceDetailsById(id);
+        if(del){
+            Cart.mCart.remove(position);
+            saleCartAdapter.notifyDataSetChanged();
+            saleCartAdapter.notifyItemRemoved(position);
+            saleCartAdapter.notifyItemRangeChanged(position, Cart.mCart.size());
+            Log.d("LastID", "Deleted: " + id);
+        }
+
+    }
+    private void DeleteOrder(int position) {
+        CartModel cartModel=Cart.mCart.get(position);
+        int id = cartModel.get_id();
+        dbHelper helper = new dbHelper(this);
+        boolean del=helper.deleteOrderDetailsById(id);
         if(del){
             Cart.mCart.remove(position);
             saleCartAdapter.notifyDataSetChanged();
@@ -191,11 +207,13 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.cart_toolbar, menu);
-        MenuItem menuItem = menu.findItem(R.id.action_cart);
+        itemCart = menu.findItem(R.id.action_cart);
         Log.d(TAG, "onCreateOptionsMenu: "+ Converter.convertLayoutToImage(ViewCartActivity.this,cart_count,R.drawable.ic_shopping_cart));
-        menuItem.setIcon(Converter.convertLayoutToImage(ViewCartActivity.this,cart_count,R.drawable.ic_shopping_cart));
+        itemCart.setIcon(Converter.convertLayoutToImage(ViewCartActivity.this,cart_count,R.drawable.ic_shopping_cart));
         itemDelete = menu.findItem(R.id.action_delete);
         itemDelete.setVisible(false);
+        itemAdd = menu.findItem(R.id.action_add);
+        itemAdd.setVisible(false);
         return true;
     }
 
@@ -203,51 +221,10 @@ public class ViewCartActivity extends AppCompatActivity implements SaleCartAdapt
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
 
-        int id = item.getItemId();
-        if(id==R.id.action_delete){
-            //deleteCart();
-        }
+
 
         return super.onOptionsItemSelected(item);
     }
 
-//    private void deleteCart() {
-//        new AlertDialog.Builder(ViewCartActivity.this)
-//                .setTitle("Confirm")
-//                .setMessage("Do you want to delete the cart ?")
-//                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//
-//                        if (type.equals("GDS")) {
-//                            if (Action.equals("EDIT")) {
-//                                helper.deleteGoodsById(docNo);
-//                            }
-//                            // finish all activity and go to home activity
-//                            Cart.gCart.clear();
-//                            Intent intent = new Intent(getApplicationContext(), ListDocActivity.class);
-//                            intent.putExtra("Type", "GDS");
-//                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                            startActivity(intent);
-//
-//                        } else if (type.equals("SAL")) {
-//                            if (Action.equals("EDIT")) {
-//                                helper.deleteInvoiceById(invoiceNo);
-//                            }
-//                            Cart.mCart.clear();
-//                            Intent intent = new Intent(getApplicationContext(), ListSalesActivity.class);
-//                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                            startActivity(intent);
-//                        }
-//                    }
-//                })
-//                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-//                    @Override
-//
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        dialog.cancel();
-//                    }
-//                }).create().show();
-//
-//    }
+
 }

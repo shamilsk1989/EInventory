@@ -121,6 +121,7 @@ public class ReceiptActivity extends AppCompatActivity {
     String action, paymentType;
     String customerName, customerCode,salesmanId;
     double balanceAmount, receivedAmount;
+    String serveNo="NA";
     RadioButton radioButton;
     Calendar myCalendar;
     @BindView(R.id.toolbar)
@@ -301,13 +302,12 @@ public class ReceiptActivity extends AppCompatActivity {
             @Override
             public void notifySuccess(String requestType, JSONObject response) {
                 String result = "Sync Failed !";
-                int syncStatus = DataContract.SYNC_STATUS_FAILED;
+
                 try {
-                    String res = response.getString("Status");
-                    if (res.equals("success")) {
-                        syncStatus = DataContract.SYNC_STATUS_OK;
+                    serveNo= response.getString("Status");
+                    if (!serveNo.equals("failed")) {
                         result = "Sync Successful";
-                        saveToDatabase(syncStatus);
+                        saveToDatabase(DataContract.SYNC_STATUS_OK);
                     }else{
                         Toast.makeText(ReceiptActivity.this, result, Toast.LENGTH_SHORT).show();
                     }
@@ -345,7 +345,7 @@ public class ReceiptActivity extends AppCompatActivity {
         dbHelper helper = new dbHelper(this);
         if (action.equals(DataContract.ACTION_EDIT)) {
             if (helper.updateReceipt(txtReceipt.getText().toString(), mDate, salesmanId, customerCode, customerName, balanceAmount, receivedAmount,
-                    paymentType, editTextChequeDate.getText().toString(), editTextChequeNumber.getText().toString(), editTextRemark.getText().toString(), sync)) {
+                    paymentType, editTextChequeDate.getText().toString(), editTextChequeNumber.getText().toString(), editTextRemark.getText().toString(), sync,serveNo)) {
                 Log.d(TAG, "saveToDatabase: updated");
                 //HideProgressDialog();
                 gotoPdfView();
@@ -353,7 +353,7 @@ public class ReceiptActivity extends AppCompatActivity {
 
         } else {
             if (helper.saveReceipts(txtReceipt.getText().toString(), mDate, salesmanId, customerCode, customerName, balanceAmount, receivedAmount,
-                    paymentType, editTextChequeDate.getText().toString(), editTextChequeNumber.getText().toString(), editTextRemark.getText().toString(), sync)) {
+                    paymentType, editTextChequeDate.getText().toString(), editTextChequeNumber.getText().toString(), editTextRemark.getText().toString(), sync,serveNo)) {
                 Log.d(TAG, "saveToDatabase: Saved");
                 billStatus = true;
                 //HideProgressDialog();
@@ -378,7 +378,7 @@ public class ReceiptActivity extends AppCompatActivity {
         view_pdf.putExtra("RECEIPT_DATE",mDate);
       //  view_pdf.putExtra("BAL_AMOUNT",balanceAmount);
         view_pdf.putExtra("REC_AMOUNT",receivedAmount);
-       // view_pdf.putExtra("PAY_TYPE",paymentType);
+        view_pdf.putExtra("SERVER_INV",serveNo);
 //        view_pdf.putExtra("CHQ_NUMBER",editTextChequeNumber.getText().toString());
 //        view_pdf.putExtra("CHQ_DATE",editTextChequeDate.getText().toString());
 //        view_pdf.putExtra("REMARK",editTextRemark.getText().toString());

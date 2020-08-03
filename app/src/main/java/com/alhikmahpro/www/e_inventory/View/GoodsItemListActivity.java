@@ -97,41 +97,7 @@ public class GoodsItemListActivity extends AppCompatActivity {
             if (Cart.gCart.size() > 0) {
                 Cart.gCart.clear();
             }
-            SQLiteDatabase database = helper.getReadableDatabase();
-            Cursor cursor = helper.getGoodsDetailsByDoc(database, docNo);
-            if (cursor.moveToFirst()) {
-
-                do {
-
-                    ItemModel itemModel = new ItemModel();
-                    itemModel.setDocNo(cursor.getInt(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_DOCUMENT_NUMBER)));
-                    itemModel.setBarCode(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_BAR_CODE)));
-                    itemModel.setProductCode(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_PRODUCT_CODE)));
-                    itemModel.setProductName(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_PRODUCT_NAME)));
-                    itemModel.setQty(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_QUANTITY)));
-                    itemModel.setFreeQty(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_FREE_QUANTITY)));
-                    itemModel.setSelectedPackage(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_UNIT)));
-                    itemModel.setSelectedFreePackage(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_FREE_UNIT)));
-                    itemModel.setRate(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_RATE)));
-                    itemModel.setDiscount(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_DISCOUNT)));
-                    itemModel.setCostPrice(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_COST_PRICE)));
-                    itemModel.setSalePrice(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_SALES_PRICE)));
-                    itemModel.setStock(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_STOCK)));
-                    itemModel.setUnit1(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_UNIT1)));
-                    itemModel.setUnit2(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_UNIT2)));
-                    itemModel.setUnit3(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_UNIT3)));
-                    itemModel.setUnit1Qty(cursor.getInt(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_UN_QTY1)));
-                    itemModel.setUnit2Qty(cursor.getInt(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_UN_QTY2)));
-                    itemModel.setUnit3Qty(cursor.getInt(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_UN_QTY3)));
-                    itemModel.setNet(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceiveDetails.COL_NET_VALUE)));
-                    Cart.gCart.add(itemModel);
-
-                } while (cursor.moveToNext());
-            }
-
-            cursor.close();
-            database.close();
-
+            helper.getGoodsDetailsByDoc(docNo);
         }
         loadRecycler();
         calculateNet();

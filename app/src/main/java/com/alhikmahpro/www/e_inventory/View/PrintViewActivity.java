@@ -136,8 +136,6 @@ public class PrintViewActivity extends AppCompatActivity {
     private String path;
     private File pdfFile;
     private File dir;
-    dbHelper helper;
-
     AlertDialog alertDialog;
     AlertDialog.Builder builder;
 
@@ -161,37 +159,12 @@ public class PrintViewActivity extends AppCompatActivity {
         paymentMode = intent.getStringExtra("PAY_MOD");
         Log.d(TAG, "onCreate: " + customerName);
         invoiceDate = AppUtils.getDateAndTime();
-        helper = new dbHelper(this);
         initView();
 
     }
 
 
     private void initView() {
-
-
-        SQLiteDatabase database = helper.getReadableDatabase();
-        Cursor cursor = helper.getPaperSettings(database);
-
-        if (cursor.moveToFirst()) {
-            companyName = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_NAME));
-            companyAddress = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_ADDRESS));
-            companyPhone = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_COMPANY_PHONE));
-            footer = cursor.getString(cursor.getColumnIndex(DataContract.PaperSettings.COL_FOOTER));
-            byte[] img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO));
-            try {
-                thumbnail = BitmapFactory.decodeByteArray(img, 0, img.length);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        Log.d(TAG, "initView: " + companyName);
-
-        cursor.close();
-        database.close();
-
-
         txtInvoice.setText(invoiceNo);
         txtDate.setText(invoiceDate);
         txtCustomerName.setText(customerName);

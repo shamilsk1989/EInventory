@@ -53,7 +53,6 @@ public class VolleyServiceGateway {
     public static String PREF_KEY_PCODE= "key_period";
     public static String PREF_KEY_DEVICE = "key_employee";
     public static String PREF_KEY_LOCATION = "key_location";
-
     //String companyCode,companyName,deviceId,branchCode,periodCode,locationCode,BASE_URL;
 
     public VolleyServiceGateway(volleyListener mListener, Context context) {
@@ -71,6 +70,7 @@ public class VolleyServiceGateway {
         BASE_URL=BASE_URL.trim();
         Log.d(TAG, "getDataVolley Base url: "+BASE_URL);
         String postUrl="http://" + BASE_URL + "/" + url;
+                //"http://" + BASE_URL + "/" + url;
         Log.d(TAG, "getDataVolley: postUrl"+postUrl);
         Log.d(TAG, "getDataVolley: postData:"+postObj);
 

@@ -58,6 +58,7 @@ class ReceiptPdfViewActivity : AppCompatActivity() {
     lateinit var receiptDate: String
     lateinit var salesmanId: String
     lateinit var action: String
+    lateinit var serverNo: String
     internal var amount: Double = 0.toDouble()
     var PREF_KEY_HEADER1 = "key_header_1"
     var PREF_KEY_HEADER2 = "key_header_2"
@@ -94,6 +95,8 @@ class ReceiptPdfViewActivity : AppCompatActivity() {
                 ?: kotlin.run { salesmanId = "Id" }
         intent?.getDoubleExtra("REC_AMOUNT", 0.0)?.let { amount = it }
                 ?: kotlin.run { amount = 0.0 }
+        intent?.getStringExtra("SERVER_INV")?.let { serverNo = it }
+                ?: kotlin.run { serverNo = "NA" }
 
         Log.d("TAG", "Received " + amount)
 
@@ -450,9 +453,14 @@ class ReceiptPdfViewActivity : AppCompatActivity() {
 
 
 
-            paragraph = Paragraph("Receipt No: " + res, mPrintNormal)
+            paragraph = Paragraph("Ref. No: " + res, mPrintNormal)
             paragraph.alignment = Element.ALIGN_LEFT
             document.add(paragraph)
+
+            paragraph = Paragraph("Receipt No: " + serverNo, mPrintNormal)
+            paragraph.alignment = Element.ALIGN_LEFT
+            document.add(paragraph)
+
             paragraph = Paragraph("Date: " + currentDate, mPrintNormal)
             paragraph.alignment = Element.ALIGN_LEFT
             document.add(paragraph)
@@ -460,9 +468,11 @@ class ReceiptPdfViewActivity : AppCompatActivity() {
             paragraph = Paragraph("Customer Code: " + customerCode, mPrintNormal)
             paragraph.alignment = Element.ALIGN_LEFT
             document.add(paragraph)
+
             paragraph = Paragraph("Customer name: " + customerName, mPrintNormal)
             paragraph.alignment = Element.ALIGN_LEFT
             document.add(paragraph)
+
             document.add(linebreak)
 
             val snWidth = 0f

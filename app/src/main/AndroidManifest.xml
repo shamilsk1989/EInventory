@@ -23,7 +23,12 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:allowBackup">
-        <activity android:name=".View.OrderActivity"></activity>
+        <activity android:name=".View.StatementPdfViewActivity"></activity>
+        <activity android:name=".View.CustomerStatementActivity" />
+        <activity android:name=".View.IdGeneratorActivity" />
+        <activity android:name=".View.AutoIdSettingsActivity" />
+        <activity android:name=".View.ViewOrderPdfActivity" />
+        <activity android:name=".View.OrderActivity" />
         <activity android:name=".View.ReportViewActivity" />
         <activity android:name=".View.ReportActivity" />
         <activity android:name=".View.DashBoardActivity" />

@@ -50,7 +50,7 @@ public class SetupFragment extends Fragment {
     @BindView(R.id.txtDeviceId)
     EditText txtDeviceId;
     private static final String TAG = "SetupFragment";
-    dbHelper helper;
+
 
     FragmentActionListener fragmentActionListener;
     @BindView(R.id.txtLocationCode)
@@ -80,7 +80,7 @@ public class SetupFragment extends Fragment {
         toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         toolbar.setTitle("Setup");
-        helper = new dbHelper(getContext());
+
 
 
         if(SessionHandler.getInstance(getContext()).isSetInventory()){
@@ -111,25 +111,6 @@ public class SetupFragment extends Fragment {
 
     private void initValues() {
 
-
-        Log.d(TAG, "initView: ");
-        SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
-        Cursor cursor = helper.getSettings(sqLiteDatabase);
-        if (cursor.moveToFirst()) {
-
-
-            txtCompanyName.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME)));
-            txtCompanyCode.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_CODE)));
-            txtBranchCode.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_BRANCH_CODE)));
-            txtLocationCode.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_LOCATION_CODE)));
-            txtPeriodCode.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_PERIOD_CODE)));
-            txtDeviceId.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID)));
-            txtHost.setText(SessionHandler.getInstance(getContext()).getHost());
-
-
-        }
-        cursor.close();
-        sqLiteDatabase.close();
     }
 
 

@@ -75,8 +75,10 @@ public class LoginActivity extends AppCompatActivity {
                 gotoHome();
                 finish();
             } else {
-                editText2.setError("User name or Password Error");
+                editText2.setError("Invalid Password");
             }
+        }else{
+            editText.setError("Invalid User Name");
         }
     }
 

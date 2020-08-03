@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -36,6 +37,7 @@ import com.alhikmahpro.www.e_inventory.Data.SaleData;
 import com.alhikmahpro.www.e_inventory.Data.SaveGoods;
 import com.alhikmahpro.www.e_inventory.Data.SaveSales;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
+import com.alhikmahpro.www.e_inventory.FileUtils;
 import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
 import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
 import com.alhikmahpro.www.e_inventory.R;
@@ -54,6 +56,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
@@ -87,8 +90,13 @@ public class PaymentActivity extends AppCompatActivity {
     RadioButton radioButton;
     String paymentMode;
     private static final String TAG = "PaymentActivity";
+    JSONObject resultObject;
+    String url = "";
+    MenuItem itemDelete, itemCart, itemAdd;
 
-    String customerName, invoiceNo, total, invoiceDate, salesmanId, mDate, customerCode, type, orderNo, Action, serverInvoice;
+
+    String customerName, invoiceNo, total, invoiceDate, salesmanId, mDate, customerCode, type, orderNo,serverInvoice, Action;
+
     int docNo;
 //    double totalValue=0;
 //    double discAmount=0;
@@ -115,7 +123,6 @@ public class PaymentActivity extends AppCompatActivity {
     TextView textViewGrantTotal;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,7 +144,8 @@ public class PaymentActivity extends AppCompatActivity {
         cart_count = intent.getIntExtra("TOTAL_ROW", 0);
         double total = intent.getDoubleExtra("TOTAL", 0);
         getSupportActionBar().setTitle(customerName);
-        invoiceDate=invoiceDate.substring(0,10);
+        invoiceDate = invoiceDate.substring(0, 10);
+        resultObject = new JSONObject();
 //        netAmount = base_total;
 //        grandTotal=base_total;
 
@@ -151,9 +159,10 @@ public class PaymentActivity extends AppCompatActivity {
 
         //textViewCustomer.setText(customerName);
         textViewSalesman.setText(salesmanId);
-        textViewNet.setText(String.valueOf(total));
-        textViewTotal.setText(String.valueOf(total));
-       textViewGrantTotal.setText(String.valueOf(total));
+        textViewNet.setText(String.format("%.2f", total));
+        textViewNet.setText(String.format("%.2f", total));
+        textViewTotal.setText(String.format("%.2f", total));
+        textViewGrantTotal.setText(String.format("%.2f", total));
         //textViewTotalRow.setText(String.valueOf(count));
         textViewDate.setText(invoiceDate);
 
@@ -192,8 +201,8 @@ public class PaymentActivity extends AppCompatActivity {
             editTextDiscountPercentage.removeTextChangedListener(percentageWatcher);
             if (!s.toString().equals("")) {
                 double discountAmount = ParseDouble(s.toString());
-                double baseTotal=ParseDouble(textViewTotal.getText().toString());
-                if (discountAmount > 0 && baseTotal>0) {
+                double baseTotal = ParseDouble(textViewTotal.getText().toString());
+                if (discountAmount > 0 && baseTotal > 0) {
                     double discountPercentage = discountAmount / baseTotal * 100;
                     editTextDiscountPercentage.setText(String.format("%.2f", discountPercentage));
                 }
@@ -224,8 +233,8 @@ public class PaymentActivity extends AppCompatActivity {
             editTextDiscount.removeTextChangedListener(amountWatcher);
             if (!s.toString().equals("")) {
                 double discountPercentage = ParseDouble(s.toString());
-                double baseTotal=ParseDouble(textViewTotal.getText().toString());
-                if (discountPercentage > 0 && baseTotal>0) {
+                double baseTotal = ParseDouble(textViewTotal.getText().toString());
+                if (discountPercentage > 0 && baseTotal > 0) {
                     double percentageDecimal = discountPercentage / 100;
                     double discountAmount = percentageDecimal * baseTotal;
                     editTextDiscount.setText(String.format("%.2f", discountAmount));
@@ -246,47 +255,6 @@ public class PaymentActivity extends AppCompatActivity {
         }
     };
 
-//    TextWatcher otherAmountWatcher = new TextWatcher()  {
-//        @Override
-//        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-//
-//        }
-//
-//        @Override
-//        public void onTextChanged(CharSequence s, int i, int i1, int i2) {
-//            editTextOtherAmount.removeTextChangedListener(amountWatcher);
-//            Log.d(TAG, "onTextChanged: "+s);
-//            if (!s.toString().equals("")) {
-//                double otherAmount=0;
-//                 otherAmount = ParseDouble(s.toString());
-//                if (otherAmount > 0)  {
-//                    double gTotal=grandTotal-otherAmount;
-//                    textViewGrantTotal.setText(String.valueOf(gTotal));
-//                } else {
-//                    Log.d(TAG, "inside onTextChanged null: ");
-//                    editTextOtherAmount.setText("0");
-//                    //textViewGrantTotal.setText(String.valueOf(netAmount));
-//                }
-//
-//
-//            } else {
-//               //editTextOtherAmount.setText("0");
-//                Log.d(TAG, "outside onTextChanged to null: ");
-//                textViewGrantTotal.setText(String.valueOf(netAmount));
-//
-//            }
-//           //editTextOtherAmount.addTextChangedListener(otherAmountWatcher);
-//
-//
-//        }
-//
-//        @Override
-//        public void afterTextChanged(Editable editable) {
-//
-//        }
-//    };
-
-
 
     private void initVolleyCallBack() {
 
@@ -297,18 +265,26 @@ public class PaymentActivity extends AppCompatActivity {
             public void notifySuccess(String requestType, JSONObject response) {
                 try {
                     String res = response.getString("Status");
-                    Log.d(TAG, "notifySuccess: "+res);
+                    long id = 0;
+                    Log.d(TAG, "notifySuccess: " + res);
                     if (!res.equals("failed")) {
                         if (type.equals("GDS")) {
-                            serverInvoice=res;
-                            saveGoods(DataContract.SYNC_STATUS_OK);
-
-                        } else {
-                            serverInvoice=res;
-                            saveSales(DataContract.SYNC_STATUS_OK);
+                            serverInvoice = res;
+                            id = saveGoods(DataContract.SYNC_STATUS_OK);
+                        } else if (type.equals("SAL")) {
+                            serverInvoice = res;
+                            id = saveSales(DataContract.SYNC_STATUS_OK);
+                        } else if (type.equals("ORD")) {
+                            serverInvoice = res;
+                            id = saveOrders(DataContract.SYNC_STATUS_OK);
                         }
                     } else {
-                        Toast.makeText(PaymentActivity.this, res, Toast.LENGTH_SHORT).show();
+                        generateLog("Failed To Save Server");
+                        handleError("Failed To Save Server");
+                    }
+
+                    if (id > 0) {
+                        gotoNext();
                     }
 
                 } catch (JSONException e) {
@@ -319,41 +295,67 @@ public class PaymentActivity extends AppCompatActivity {
             @Override
             public void notifyError(String requestType, VolleyError error) {
                 Log.d(TAG, "notifyError: " + error);
-//                if (type.equals("GDS")) {
-//                    serverInvoice="error";
-//                    saveGoods(DataContract.SYNC_STATUS_OK);
-//
-//                } else {
-//                    serverInvoice="error";
-//                    saveSales(DataContract.SYNC_STATUS_OK);
-//                }
-                handleError(error);
+
+
+                String errorDescription = "Error";
+
+                if (error instanceof TimeoutError || error instanceof NoConnectionError) {
+                    // Toast.makeText(PaymentActivity.this, "Network Time Out", Toast.LENGTH_SHORT).show();
+                    errorDescription = "Network Time Out";
+                } else if (error instanceof AuthFailureError) {
+                    //TODO
+                    // Toast.makeText(PaymentActivity.this, "AuthFailure Error", Toast.LENGTH_SHORT).show();
+                    errorDescription = "AuthFailure Error";
+                } else if (error instanceof ServerError) {
+                    //TODO
+                    // Toast.makeText(PaymentActivity.this, "Server Error", Toast.LENGTH_SHORT).show();
+                    errorDescription = "Server Error";
+                } else if (error instanceof NetworkError) {
+                    //TODO
+                    // Toast.makeText(PaymentActivity.this, "NetWork Error", Toast.LENGTH_SHORT).show();
+                    errorDescription = "NetWork Error";
+                } else if (error instanceof ParseError) {
+                    //TODO
+                    // Toast.makeText(PaymentActivity.this, "Parse Error", Toast.LENGTH_SHORT).show();
+                    errorDescription = "Parse Error";
+                }
+                generateLog(errorDescription);
+                handleError(errorDescription);
+
 
             }
         };
 
     }
 
-    private void handleError(VolleyError error) {
-        Log.d(TAG, "handleError: "+error);
+    private void handleError(String errorDescription) {
 
-        if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-            Toast.makeText(PaymentActivity.this, "Network Time Out", Toast.LENGTH_SHORT).show();
-        } else if (error instanceof AuthFailureError) {
-            //TODO
-            Toast.makeText(PaymentActivity.this, "AuthFailure Error", Toast.LENGTH_SHORT).show();
-        } else if (error instanceof ServerError) {
-            //TODO
-            Toast.makeText(PaymentActivity.this, "Server Error", Toast.LENGTH_SHORT).show();
-        } else if (error instanceof NetworkError) {
-            //TODO
-            Toast.makeText(PaymentActivity.this, "NetWork Error", Toast.LENGTH_SHORT).show();
-        } else if (error instanceof ParseError) {
-            //TODO
-            Toast.makeText(PaymentActivity.this, "Parse Error", Toast.LENGTH_SHORT).show();
-        }
-        generateLog(String.valueOf(error));
+        new AlertDialog.Builder(PaymentActivity.this)
+                .setTitle("Server Error")
+                .setMessage(errorDescription + "! Do you want to cancel or retry?")
+                .setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (resultObject.length() > 0) {
+                            sendToServer();
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
 
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        if (type.equals("GDS")) {
+                            cancelGoods();
+                        } else if (type.equals("SAL")) {
+                            cancelSale();
+                        } else if (type.equals("ORD")) {
+                            cancelOrder();
+                        }
+
+                    }
+                }).create().show();
     }
 
 
@@ -369,8 +371,8 @@ public class PaymentActivity extends AppCompatActivity {
             invoiceObject.put(DataContract.Invoice.COL_CUSTOMER_CODE, customerCode);
             invoiceObject.put(DataContract.Invoice.COL_CUSTOMER_NAME, customerName);
             invoiceObject.put(DataContract.Invoice.COL_SALESMAN_ID, salesmanId);
-            invoiceObject.put(DataContract.Invoice.COL_TOTAL_AMOUNT,ParseDouble(textViewTotal.getText().toString()));
-            invoiceObject.put(DataContract.Invoice.COL_DISCOUNT_AMOUNT,ParseDouble(editTextDiscount.getText().toString()));
+            invoiceObject.put(DataContract.Invoice.COL_TOTAL_AMOUNT, ParseDouble(textViewTotal.getText().toString()));
+            invoiceObject.put(DataContract.Invoice.COL_DISCOUNT_AMOUNT, ParseDouble(editTextDiscount.getText().toString()));
             invoiceObject.put(DataContract.Invoice.COL_DISCOUNT_PERCENTAGE, ParseDouble(editTextDiscountPercentage.getText().toString()));
             invoiceObject.put(DataContract.Invoice.COL_OTHER_AMOUNT, ParseDouble(editTextOtherAmount.getText().toString()));
             invoiceObject.put(DataContract.Invoice.COL_NET_AMOUNT, ParseDouble(textViewGrantTotal.getText().toString()));
@@ -443,9 +445,9 @@ public class PaymentActivity extends AppCompatActivity {
             object.put(DataContract.GoodsReceive.COL_INVOICE_DATE, invoiceDate);
             object.put(DataContract.GoodsReceive.COL_STAFF_NAME, salesmanId);
             object.put(DataContract.GoodsReceive.COL_TOTAL, ParseDouble(textViewTotal.getText().toString()));
-            object.put(DataContract.GoodsReceive.COL_DISCOUNT_AMOUNT,  ParseDouble(editTextOtherAmount.getText().toString()));
-            object.put(DataContract.GoodsReceive.COL_DISCOUNT_PERCENTAGE,  ParseDouble(editTextDiscountPercentage.getText().toString()));
-            object.put(DataContract.GoodsReceive.COL_OTHER_AMOUNT,  ParseDouble(editTextOtherAmount.getText().toString()));
+            object.put(DataContract.GoodsReceive.COL_DISCOUNT_AMOUNT, ParseDouble(editTextOtherAmount.getText().toString()));
+            object.put(DataContract.GoodsReceive.COL_DISCOUNT_PERCENTAGE, ParseDouble(editTextDiscountPercentage.getText().toString()));
+            object.put(DataContract.GoodsReceive.COL_OTHER_AMOUNT, ParseDouble(editTextOtherAmount.getText().toString()));
             object.put(DataContract.GoodsReceive.COL_NET_AMOUNT, ParseDouble(textViewGrantTotal.getText().toString()));
             object.put(DataContract.GoodsReceive.COL_PAYMENT_TYPE, paymentMode);
             object.put(DataContract.GoodsReceive.COL_DATE_TIME, mDate.substring(0, 10));
@@ -502,20 +504,40 @@ public class PaymentActivity extends AppCompatActivity {
         return result;
     }
 
+    private void saveToLocal() {
+
+    }
 
     private void gotoNext() {
         Log.d(TAG, "gotoNext: " + type);
         if (type.equals("SAL")) {
             Intent intent_print = new Intent(PaymentActivity.this, ViewPdfActivity.class);
+            intent_print.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent_print.putExtra("ACTION", DataContract.ACTION_NEW);
             intent_print.putExtra("CUS_NAME", customerName);
             intent_print.putExtra("CUS_CODE", customerCode);
             intent_print.putExtra("SALESMAN_ID", salesmanId);
             intent_print.putExtra("DOC_NO", invoiceNo);
             intent_print.putExtra("DOC_DATE", invoiceDate);
-            intent_print.putExtra("DISCOUNT",ParseDouble(editTextDiscount.getText().toString()));
-            intent_print.putExtra("TOTAL",  ParseDouble(textViewTotal.getText().toString()));
-            intent_print.putExtra("OTHER",  ParseDouble(editTextOtherAmount.getText().toString()));
+            intent_print.putExtra("DISCOUNT", ParseDouble(editTextDiscount.getText().toString()));
+            intent_print.putExtra("TOTAL", ParseDouble(textViewTotal.getText().toString()));
+            intent_print.putExtra("OTHER", ParseDouble(editTextOtherAmount.getText().toString()));
+            intent_print.putExtra("NET", ParseDouble(textViewGrantTotal.getText().toString()));
+            intent_print.putExtra("PAY_MOD", paymentMode);
+            intent_print.putExtra("SERVER_INV", serverInvoice);
+            startActivity(intent_print);
+        } else if (type.equals("ORD")) {
+            Intent intent_print = new Intent(PaymentActivity.this, ViewOrderPdfActivity.class);
+            intent_print.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent_print.putExtra("ACTION", DataContract.ACTION_NEW);
+            intent_print.putExtra("CUS_NAME", customerName);
+            intent_print.putExtra("CUS_CODE", customerCode);
+            intent_print.putExtra("SALESMAN_ID", salesmanId);
+            intent_print.putExtra("DOC_NO", invoiceNo);
+            intent_print.putExtra("DOC_DATE", invoiceDate);
+            intent_print.putExtra("DISCOUNT", ParseDouble(editTextDiscount.getText().toString()));
+            intent_print.putExtra("TOTAL", ParseDouble(textViewTotal.getText().toString()));
+            intent_print.putExtra("OTHER", ParseDouble(editTextOtherAmount.getText().toString()));
             intent_print.putExtra("NET", ParseDouble(textViewGrantTotal.getText().toString()));
             intent_print.putExtra("PAY_MOD", paymentMode);
             intent_print.putExtra("SERVER_INV", serverInvoice);
@@ -524,8 +546,8 @@ public class PaymentActivity extends AppCompatActivity {
             // finish all activity and go to home activity
 
             Cart.gCart.clear();
-            SharedPreferences sharedPreferences=getSharedPreferences("Goods",0);
-            SharedPreferences.Editor editor=sharedPreferences.edit();
+            SharedPreferences sharedPreferences = getSharedPreferences("Goods", 0);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.remove("Doc");
             editor.clear();
             editor.apply();
@@ -539,22 +561,21 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void calculateValues() {
-        double totalValue=ParseDouble(textViewTotal.getText().toString());
-        double discAmount=ParseDouble(editTextDiscount.getText().toString());
+        double totalValue = ParseDouble(textViewTotal.getText().toString());
+        double discAmount = ParseDouble(editTextDiscount.getText().toString());
         //double discPers=ParseDouble(editTextDiscountPercentage.getText().toString());
         //double netTotal=ParseDouble(textViewNet.getText().toString());
-        double otherCharge=ParseDouble(editTextOtherAmount.getText().toString());
+        double otherCharge = ParseDouble(editTextOtherAmount.getText().toString());
         //double grandTotal=ParseDouble(textViewGrantTotal.getText().toString());
 
-        double netTotal=totalValue-discAmount;
-        double grandTotal=netTotal+otherCharge;
-        grandTotal=Math.floor(grandTotal * 100) / 100;
+        double netTotal = totalValue - discAmount;
+        double grandTotal = netTotal + otherCharge;
 
-        textViewNet.setText(String.valueOf(netTotal));
-        textViewGrantTotal.setText(String.valueOf(grandTotal));
+        //netTotal=Math.floor(netTotal*100)/100;
+        //grandTotal=Math.floor(grandTotal * 100) / 100;
+        textViewNet.setText(String.format("%.2f", netTotal));
+        textViewGrantTotal.setText(String.format("%.2f", grandTotal));
 
-//        textViewNet.setText(currencyFormatter(netAmount));
-//        textViewGrantTotal.setText(currencyFormatter(grandTotal));
 
     }
 
@@ -565,18 +586,31 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
 
-    public void saveSales(int sync) {
-        Log.d(TAG, "saveSales: disc per " + editTextDiscountPercentage.getText().toString());
-        long id=helper.saveInvoice(invoiceNo,invoiceDate,salesmanId,customerCode,customerName,
-                ParseDouble(textViewTotal.getText().toString()),ParseDouble(editTextDiscount.getText().toString()),
-                ParseDouble(editTextDiscountPercentage.getText().toString()), ParseDouble(textViewNet.getText().toString()),
-                ParseDouble(editTextOtherAmount.getText().toString()), ParseDouble(textViewGrantTotal.getText().toString()),
-                paymentMode,mDate,serverInvoice,sync);
-        //check inserted successfully
-        if(id>0){
-            ClearSale();
-            gotoNext();
+    public long saveSales(int sync) {
+        long id = 0;
+
+        if (helper.checkInvoice(invoiceNo)) {
+            id = helper.updateInvoice(invoiceNo, invoiceDate, salesmanId, customerCode, customerName,
+                    ParseDouble(textViewTotal.getText().toString()), ParseDouble(editTextDiscount.getText().toString()),
+                    ParseDouble(editTextDiscountPercentage.getText().toString()), ParseDouble(textViewNet.getText().toString()),
+                    ParseDouble(editTextOtherAmount.getText().toString()), ParseDouble(textViewGrantTotal.getText().toString()),
+                    paymentMode, mDate, serverInvoice, sync);
+
+
+        } else {
+            id = helper.saveInvoice(invoiceNo, invoiceDate, salesmanId, customerCode, customerName,
+                    ParseDouble(textViewTotal.getText().toString()), ParseDouble(editTextDiscount.getText().toString()),
+                    ParseDouble(editTextDiscountPercentage.getText().toString()), ParseDouble(textViewNet.getText().toString()),
+                    ParseDouble(editTextOtherAmount.getText().toString()), ParseDouble(textViewGrantTotal.getText().toString()),
+                    paymentMode, mDate, serverInvoice, sync);
+            helper.incrementAutoId(DataContract.AutoIdGenerator.COL_INVOICE_TABLE);
+
         }
+
+        //check inserted successfully
+        return id;
+
+
 
 
 
@@ -600,18 +634,54 @@ public class PaymentActivity extends AppCompatActivity {
 
     }
 
-    public void saveGoods(int sync) {
-        Log.d(TAG, "saveGoods: "+serverInvoice);
-        long lastId=helper.saveGoods(docNo,orderNo,customerCode,customerName,invoiceNo,invoiceDate,salesmanId,
-                ParseDouble(editTextOtherAmount.getText().toString()),
-                ParseDouble(editTextDiscount.getText().toString()),
-                ParseDouble(textViewNet.getText().toString()),
-                ParseDouble(editTextOtherAmount.getText().toString()),
-                ParseDouble(textViewGrantTotal.getText().toString()),paymentMode,mDate,serverInvoice,sync);
+    public long saveOrders(int sync) {
+        long id = 0;
+        if (helper.checkOrder(invoiceNo)) {
+            id = helper.updateOrder(invoiceNo, invoiceDate, salesmanId, customerCode, customerName,
+                    ParseDouble(textViewTotal.getText().toString()), ParseDouble(editTextDiscount.getText().toString()),
+                    ParseDouble(editTextDiscountPercentage.getText().toString()), ParseDouble(textViewNet.getText().toString()),
+                    ParseDouble(editTextOtherAmount.getText().toString()), ParseDouble(textViewGrantTotal.getText().toString()),
+                    paymentMode, mDate, serverInvoice, sync);
 
-        if(lastId>0){
-            gotoNext();
+        } else {
+            id = helper.saveOrder(invoiceNo, invoiceDate, salesmanId, customerCode, customerName,
+                    ParseDouble(textViewTotal.getText().toString()), ParseDouble(editTextDiscount.getText().toString()),
+                    ParseDouble(editTextDiscountPercentage.getText().toString()), ParseDouble(textViewNet.getText().toString()),
+                    ParseDouble(editTextOtherAmount.getText().toString()), ParseDouble(textViewGrantTotal.getText().toString()),
+                    paymentMode, mDate, serverInvoice, sync);
+            helper.incrementAutoId(DataContract.AutoIdGenerator.COL_ORDER_TABLE);
         }
+
+        return id;
+
+    }
+
+    public long saveGoods(int sync) {
+        Log.d(TAG, "saveGoods: " + serverInvoice);
+        long id = 0;
+        if (helper.checkGoods(docNo)) {
+            id = helper.updateGoods(docNo, orderNo, customerCode, customerName, invoiceNo, invoiceDate, salesmanId,
+                    ParseDouble(editTextOtherAmount.getText().toString()),
+                    ParseDouble(editTextDiscount.getText().toString()),
+                    ParseDouble(textViewNet.getText().toString()),
+                    ParseDouble(editTextOtherAmount.getText().toString()),
+                    ParseDouble(textViewGrantTotal.getText().toString()), paymentMode, mDate, serverInvoice, sync);
+
+
+        } else {
+            id = helper.saveGoods(docNo, orderNo, customerCode, customerName, invoiceNo, invoiceDate, salesmanId,
+                    ParseDouble(editTextOtherAmount.getText().toString()),
+                    ParseDouble(editTextDiscount.getText().toString()),
+                    ParseDouble(textViewNet.getText().toString()),
+                    ParseDouble(editTextOtherAmount.getText().toString()),
+                    ParseDouble(textViewGrantTotal.getText().toString()), paymentMode, mDate, serverInvoice, sync);
+            helper.incrementAutoId(DataContract.AutoIdGenerator.COL_GOODS_TABLE);
+
+        }
+
+        return id;
+
+    }
 
 //        GoodsData data = new GoodsData(docNo, orderNo, customerCode, customerName,
 //                invoiceNo, invoiceDate, salesmanId, base_total, disc, netAmount,otherAmount,grandTotal,
@@ -631,7 +701,6 @@ public class PaymentActivity extends AppCompatActivity {
 //        };
 //        SaveGoods saveGoods = new SaveGoods(this, listener);
 //        saveGoods.execute(data);
-    }
 
 
     public String currencyFormatter(double val) {
@@ -659,32 +728,16 @@ public class PaymentActivity extends AppCompatActivity {
 
         new AlertDialog.Builder(PaymentActivity.this)
                 .setTitle("Confirm")
-                .setMessage("Do you want to cancel this sale?")
+                .setMessage("Do you want to cancel ?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
                         if (type.equals("GDS")) {
-                            if (Action.equals("EDIT")) {
-                                helper.deleteGoodsById(docNo);
-                            }
-                            // finish all activity and go to home activity
-                            ClearGoods();
-                            Intent intent = new Intent(getApplicationContext(), ListDocActivity.class);
-                            intent.putExtra("Type", "GDS");
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(intent);
-
+                            cancelGoods();
                         } else if (type.equals("SAL")) {
-                            if (Action.equals("EDIT")) {
-                                helper.deleteInvoiceByInvoiceNo(invoiceNo);
-                            }
-//                            helper.deleteInvoiceDetailsByInvoiceNo(invoiceNo);
-                            Cart.mCart.clear();
-                            ClearSale();
-                            Intent intent = new Intent(getApplicationContext(), ListSalesActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(intent);
+                            cancelSale();
+                        } else if (type.equals("ORD")) {
+                            cancelOrder();
                         }
                     }
                 })
@@ -699,54 +752,98 @@ public class PaymentActivity extends AppCompatActivity {
 
     }
 
-    private void ClearSale() {
-        helper.deleteInvoiceDetailsByInvoiceNo(invoiceNo);
-        SharedPreferences sharedPreferences=getSharedPreferences("Invoice",0);
-        SharedPreferences.Editor editor=sharedPreferences.edit();
+    private void cancelOrder() {
+        if (Action.equals("EDIT")) {
+            helper.deleteOrderByInvoiceNo(invoiceNo);
+        }
+        helper.deleteOrderDetailsByInvoiceNo(invoiceNo);
+        Cart.mCart.clear();
+        SharedPreferences sharedPreferences = getSharedPreferences("Invoice", 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove("Inv");
         editor.clear();
         editor.apply();
+        Intent intent = new Intent(getApplicationContext(), ListSalesActivity.class);
+        intent.putExtra("Type", "ORD");
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 
-    private void ClearGoods()
-    {
-        Cart.gCart.clear();
+    private void cancelSale() {
+        if (Action.equals("EDIT")) {
+            helper.deleteInvoiceByInvoiceNo(invoiceNo);
+        }
+        helper.deleteInvoiceDetailsByInvoiceNo(invoiceNo);
+        Cart.mCart.clear();
+        SharedPreferences sharedPreferences = getSharedPreferences("Invoice", 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove("Inv");
+        editor.clear();
+        editor.apply();
+        Intent intent = new Intent(getApplicationContext(), ListSalesActivity.class);
+        intent.putExtra("Type", "SAL");
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
+    private void cancelGoods() {
+        if (Action.equals("EDIT")) {
+            helper.deleteGoodsById(docNo);
+        }
+        // finish all activity and go to home activity
+
         helper.deleteGoodsDetailsByDoc(docNo);
-        SharedPreferences sharedPreferences=getSharedPreferences("Goods",0);
-        SharedPreferences.Editor editor=sharedPreferences.edit();
+        Cart.gCart.clear();
+        SharedPreferences sharedPreferences = getSharedPreferences("Goods", 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove("Doc");
         editor.clear();
         editor.apply();
-
+        Intent intent = new Intent(getApplicationContext(), ListDocActivity.class);
+        intent.putExtra("Type", "GDS");
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
+
 
     @OnClick(R.id.btn_pay)
     public void onBtnPayClicked() {
-        // save into local db without sending to server;only for test purpose
-        //calculateValues();
-//        if (type.equals("GDS")) {
-//            serverInvoice="test001";
-//            saveGoods(DataContract.SYNC_STATUS_OK);
-//
-//        } else {
-//            serverInvoice="test001";
-//            saveSales(DataContract.SYNC_STATUS_OK);
-//        }
 
-//        Log.d(TAG, "onBtnPayClicked: "+otherAmount);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String chooseOption=sharedPreferences.getString(getString(R.string.key_sync_type),"live_sync");
+        if (chooseOption.equals("live_sync")) {
+            sendToServer();
+        } else {
+            long id = 0;
+            if (type.equals("GDS")) {
+                serverInvoice = "NA";
+                id = saveGoods(DataContract.SYNC_STATUS_FAILED);
+            } else if (type.equals("SAL")) {
+                serverInvoice = "NA";
+                id = saveSales(DataContract.SYNC_STATUS_FAILED);
+            } else if (type.equals("ORD")) {
+                serverInvoice = "NA";
+                id = saveOrders(DataContract.SYNC_STATUS_FAILED);
+            }
+            if (id > 0) {
+                gotoNext();
+            }
+        }
+    }
 
-        JSONObject resultObject = new JSONObject();
-        String url = "";
+    private void sendToServer() {
+        //send to volley
         if (type.equals("GDS")) {
             resultObject = generateGoodsJSON();
             url = "PriceChecker/goods_receive.php";
         } else if (type.equals("SAL")) {
             resultObject = generateSalesJSON();
             url = "PriceChecker/sales_invoice.php";
+        } else if (type.equals("ORD")) {
+            resultObject = generateSalesJSON();
+            url = "PriceChecker/sales_order.php";
         }
         if (resultObject.length() > 0) {
-
-            //send to volley
             View view = this.getCurrentFocus();
             AppUtils.hideKeyboard(this, view);
 
@@ -758,21 +855,20 @@ public class PaymentActivity extends AppCompatActivity {
                 serviceGateway = new VolleyServiceGateway(mVolleyListener, this);
                 serviceGateway.postDataVolley("POSTCALL", url, resultObject);
             }
-
         }
-
-
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.cart_toolbar, menu);
-        MenuItem menuItem = menu.findItem(R.id.action_cart);
+        itemCart = menu.findItem(R.id.action_cart);
         Log.d(TAG, "onCreateOptionsMenu: " + Converter.convertLayoutToImage(PaymentActivity.this, cart_count, R.drawable.ic_shopping_cart));
-        menuItem.setIcon(Converter.convertLayoutToImage(PaymentActivity.this, cart_count, R.drawable.ic_shopping_cart));
-        MenuItem itemDelete = menu.findItem(R.id.action_delete);
+        itemCart.setIcon(Converter.convertLayoutToImage(PaymentActivity.this, cart_count, R.drawable.ic_shopping_cart));
+        itemDelete = menu.findItem(R.id.action_delete);
         itemDelete.setVisible(false);
+        itemAdd = menu.findItem(R.id.action_add);
+        itemAdd.setVisible(false);
         return true;
     }
 
@@ -798,22 +894,29 @@ public class PaymentActivity extends AppCompatActivity {
         } else return 0;
     }
 
-    public void generateLog(String error){
+    public void generateLog(String error) {
         Log.d(TAG, "generateLog: ");
-        try{
-            String body="/**PaymentActivity**/"+error;
-            File root=new File(Environment.getExternalStorageDirectory(),"Logs");
-            if(!root.exists()){
-                root.mkdir();
-            }
-            String fileName=AppUtils.getDateAndTime()+".txt";
-            File file=new File(root,fileName);
-            FileWriter writer=new FileWriter(file);
-            writer.append(body);
+        try {
+            String path = FileUtils.getSubDirPath(this, DataContract.DIR_LOGS);
+            String header = "/**PaymentActivity**/";
+            String fileName = "Logs.txt";
+            File file = new File(path, fileName);
+            FileWriter writer = new FileWriter(file);
+            writer.append(header);
+            writer.append("\n");
+            writer.append(AppUtils.getDateAndTime());
+            writer.append("\n");
+            writer.append("Request");
+            writer.append("\n");
+            writer.append("Response");
+            writer.append("\n");
+            writer.append(resultObject.toString());
+            writer.append(error);
+            writer.append("****************End*******");
             writer.flush();
             writer.close();
 
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -838,16 +941,16 @@ public class PaymentActivity extends AppCompatActivity {
                         InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                         im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
                         //editTextOtherAmount.setText(editTextUserInput.getText().toString());
-                        double otherAmt=ParseDouble(editTextUserInput.getText().toString());
-                        if(otherAmt>0){
+                        double otherAmt = ParseDouble(editTextUserInput.getText().toString());
+                        if (otherAmt > 0) {
                             editTextOtherAmount.setText(editTextUserInput.getText().toString());
-                        }else{
+                        } else {
                             editTextOtherAmount.setText("0");
                         }
                         calculateValues();
                         //calculate total
                         //double total=(grandTotal+ParseDouble(editTextOtherAmount.getText().toString()));
-                       // textViewGrantTotal.setText(String.valueOf(total));
+                        // textViewGrantTotal.setText(String.valueOf(total));
 
                     }
                 })

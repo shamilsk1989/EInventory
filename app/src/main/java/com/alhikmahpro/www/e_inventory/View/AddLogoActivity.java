@@ -58,21 +58,12 @@ public class AddLogoActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         helper=new dbHelper(this);
         SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
-        Cursor cursor = helper.getLogo(sqLiteDatabase);
-        if (cursor.moveToFirst()) {
-            id = cursor.getInt(cursor.getColumnIndex(DataContract.Settings.COL_ID));
-            byte[] img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO));
-            try {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(img, 0, img.length);
-                imgLogo.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 60, 60, false));
-            } catch (Exception e) {
+        Bitmap bitmap = helper.getLogo(sqLiteDatabase);
+        try {
+             imgLogo.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 60, 60, false));
+        } catch (Exception e) {
                 e.printStackTrace();
-            }
         }
-        cursor.close();
-        sqLiteDatabase.close();
-
-
     }
 
     private void requestPermissions() {
@@ -215,10 +206,13 @@ public class AddLogoActivity extends AppCompatActivity {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
                 byte[] img_data = stream.toByteArray();
-                if(helper.saveLogo(img_data))
-                Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
-                finish();
-                break;
+                long id=helper.saveLogo(img_data);
+                if(id>0){
+                    Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
+                    finish();
+                    break;
+                }
+
         }
     }
 }

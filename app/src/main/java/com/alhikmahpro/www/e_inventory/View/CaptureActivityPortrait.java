@@ -1,6 +1,8 @@
 package com.alhikmahpro.www.e_inventory.View;
 
-import com.journeyapps.barcodescanner.CaptureActivity;
+import android.app.Activity;
 
-public class CaptureActivityPortrait  extends CaptureActivity {
+//import com.journeyapps.barcodescanner.CaptureActivity;
+
+public class CaptureActivityPortrait  extends Activity {
 }

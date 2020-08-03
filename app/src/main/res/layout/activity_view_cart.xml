@@ -9,9 +9,7 @@
     android:layout_height="match_parent">
 
     <include
-
         layout="@layout/toolbar_layout">
-
     </include>
 
     <ScrollView

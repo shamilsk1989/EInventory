@@ -16,11 +16,18 @@
     <dimen name="fab_margin">16dp</dimen>
 
     <dimen name="medium_padding">10dp</dimen>
-    <dimen name="medium_margin">10dp</dimen>
-    <dimen name="card_width">160dp</dimen>
-    <dimen name="card_height">190dp</dimen>
-    <dimen name="card_width_mob">130dp</dimen>
-    <dimen name="card_height_mob">140dp</dimen>
+    <dimen name="medium_margin">5dp</dimen>
+
+    <dimen name="card_width">140dp</dimen>
+    <dimen name="card_width_double">290dp</dimen>
+    <dimen name="card_height">140dp</dimen>
+
+
+    <dimen name="card_width_mob">110dp</dimen>
+    <dimen name="card_width_mob_double">230dp</dimen>
+    <dimen name="card_height_mob">110dp</dimen>
+
+
     <dimen name="card_height_small">150dp</dimen>
     <dimen name="card_width_large">340dp</dimen>
     <dimen name="card_width_large_mob">280dp</dimen>

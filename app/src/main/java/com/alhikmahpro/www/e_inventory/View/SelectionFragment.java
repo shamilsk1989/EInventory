@@ -58,7 +58,7 @@ public class SelectionFragment extends DialogFragment implements SwipeRefreshLay
     Unbinder unbinder;
     SwipeRefreshLayout mSwipeRefreshLayout;
 
-    dbHelper helper;
+    //dbHelper helper;
     ArrayList<SelectionModel> itemArrayList;
     SelectionAdapter adapter;
     volleyListener mVolleyListener;
@@ -91,22 +91,22 @@ public class SelectionFragment extends DialogFragment implements SwipeRefreshLay
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_selection, container, false);
         unbinder = ButterKnife.bind(this, view);
-
-        helper = new dbHelper(getActivity());
-        itemArrayList = new ArrayList<>();
-        SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
-        Cursor cursor = helper.getSettings(sqLiteDatabase);
-        if (cursor.moveToFirst()) {
-            companyCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_CODE));
-            companyName = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME));
-            deviceId = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID));
-            branchCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_BRANCH_CODE));
-            periodCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_PERIOD_CODE));
-            locationCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_LOCATION_CODE));
-
-        }
-        cursor.close();
-        sqLiteDatabase.close();
+//
+//        helper = new dbHelper(getActivity());
+//        itemArrayList = new ArrayList<>();
+//        SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
+//        Cursor cursor = helper.getSettings(sqLiteDatabase);
+//        if (cursor.moveToFirst()) {
+//            companyCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_CODE));
+//            companyName = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME));
+//            deviceId = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID));
+//            branchCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_BRANCH_CODE));
+//            periodCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_PERIOD_CODE));
+//            locationCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_LOCATION_CODE));
+//
+//        }
+//        cursor.close();
+//        sqLiteDatabase.close();
         rvSelectionList.setHasFixedSize(true);
         rvSelectionList.setLayoutManager(new LinearLayoutManager(getContext()));
 

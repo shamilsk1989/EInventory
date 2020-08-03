@@ -13,7 +13,7 @@ public class SaveGoods extends AsyncTask<GoodsData,Void,String> {
     public static interface TaskListener {
         public abstract void onFinished(String result);
     }
-    Context mContext;
+    private Context mContext;
     private static final String TAG = "SaveGoods";
     private TaskListener taskListener;
     public SaveGoods(Context mContext, TaskListener taskListener) {
@@ -34,40 +34,41 @@ public class SaveGoods extends AsyncTask<GoodsData,Void,String> {
     @Override
     protected String doInBackground(GoodsData... data) {
         Log.d(TAG, "doInBackground: ");
-        dbHelper dbHelper=new dbHelper(mContext);
-        int docNo=data[0].docNo;
-        String orderNo=data[0].orderNo;
-        String customerCode=data[0].customerCode;
-        String customerName=data[0].customerName;
-        String invoiceNo=data[0].invoiceNo;
-        String invoiceDate=data[0].invoiceDate;
-        String salesmanId=data[0].salesmanId;
-        double base_total=data[0].base_total;
-        double disc=data[0].disc;
-        double netAmount=data[0].netAmount;
-        double otherAmount=data[0].otherAmount;
-        double gTotal=data[0].gTotal;
-        String paymentMode=data[0].paymentMode;
-        String mDate=data[0].mDate;
-        String serverInvoice=data[0].serverInvoice;
-        int syncStatus=data[0].syncStatus;
+        //dbHelper dbHelper=new dbHelper(mContext);
+        int docNo = data[0].docNo;
+        String orderNo = data[0].orderNo;
+        String customerCode = data[0].customerCode;
+        String customerName = data[0].customerName;
+        String invoiceNo = data[0].invoiceNo;
+        String invoiceDate = data[0].invoiceDate;
+        String salesmanId = data[0].salesmanId;
+        double base_total = data[0].base_total;
+        double disc = data[0].disc;
+        double netAmount = data[0].netAmount;
+        double otherAmount = data[0].otherAmount;
+        double gTotal = data[0].gTotal;
+        String paymentMode = data[0].paymentMode;
+        String mDate = data[0].mDate;
+        String serverInvoice = data[0].serverInvoice;
+        int syncStatus = data[0].syncStatus;
 
-        SQLiteDatabase database=dbHelper.getReadableDatabase();
-        // check goods_receive table doc no already exist or not
-        if(dbHelper.checkGoods(database,docNo)){
-            database.close();
-            Log.d(TAG, "doInBackground: "+serverInvoice);
-
-           dbHelper.updateGoods(docNo,orderNo,customerCode,customerName,invoiceNo,invoiceDate,salesmanId,base_total,disc,netAmount,otherAmount,gTotal,paymentMode,mDate,serverInvoice, syncStatus);
-           dbHelper.updateGoodsDetails1(docNo,syncStatus);
-           return "Saved";
-        }else {
-            Log.d(TAG, "doInBackground: "+serverInvoice);
-            database.close();
-            dbHelper.saveGoods(docNo,orderNo,customerCode,customerName,invoiceNo,invoiceDate,salesmanId,base_total,disc,netAmount,otherAmount,gTotal,paymentMode,mDate,serverInvoice,syncStatus);
-            dbHelper.saveGoodsDetails1(docNo,syncStatus);
-            return "Saved";
-        }
+//        SQLiteDatabase database=dbHelper.getReadableDatabase();
+//        // check goods_receive table doc no already exist or not
+//        if(dbHelper.checkGoods(docNo)){
+//            database.close();
+//            Log.d(TAG, "doInBackground: "+serverInvoice);
+//
+//           dbHelper.updateGoods(docNo,orderNo,customerCode,customerName,invoiceNo,invoiceDate,salesmanId,base_total,disc,netAmount,otherAmount,gTotal,paymentMode,mDate,serverInvoice, syncStatus);
+//           dbHelper.updateGoodsDetails1(docNo,syncStatus);
+//           return "Saved";
+//        }else {
+//            Log.d(TAG, "doInBackground: "+serverInvoice);
+//            database.close();
+//            dbHelper.saveGoods(docNo,orderNo,customerCode,customerName,invoiceNo,invoiceDate,salesmanId,base_total,disc,netAmount,otherAmount,gTotal,paymentMode,mDate,serverInvoice,syncStatus);
+//            dbHelper.saveGoodsDetails1(docNo,syncStatus);
+//            return "Saved";
+//        }
+    return null;
     }
 
 

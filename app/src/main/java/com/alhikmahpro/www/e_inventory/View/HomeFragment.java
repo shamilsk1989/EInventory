@@ -44,24 +44,24 @@ public class HomeFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         unbinder = ButterKnife.bind(this, view);
-
-
-        dbHelper helper=new dbHelper(getContext());
-        SQLiteDatabase database = helper.getReadableDatabase();
-        Cursor cursor = helper.getSettings(database);
-        if (cursor.moveToFirst()) {
-            txtCompanyName.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME)));
-            byte[] img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO));
-            try {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(img, 0, img.length);
-                imgLogo.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 400, 400, false));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        }
-        cursor.close();
-        database.close();
+//
+//
+//        dbHelper helper=new dbHelper(getContext());
+//        SQLiteDatabase database = helper.getReadableDatabase();
+//        Cursor cursor = helper.getSettings(database);
+//        if (cursor.moveToFirst()) {
+//            txtCompanyName.setText(cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME)));
+//            byte[] img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO));
+//            try {
+//                Bitmap bitmap = BitmapFactory.decodeByteArray(img, 0, img.length);
+//                imgLogo.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 400, 400, false));
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
+//        cursor.close();
+//        database.close();
 
         return view;
     }

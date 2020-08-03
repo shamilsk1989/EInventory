@@ -26,11 +26,12 @@ allprojects {
     }
 
     version = '3.6.0'
-    group = 'com.journeyapps'
+    //group = 'com.journeyapps'
 
     ext.androidBuildTools = '28.0.3'
     ext.androidTargetSdk = 19
-    ext.zxingCore = 'com.google.zxing:core:3.3.2'
+    //ext.zxingCore = 'com.google.zxing:core:3.3.2'
+    //ext.zxingCore = 'com.google.zxing:core:3.6.0'
 }
 
 task clean(type: Delete) {

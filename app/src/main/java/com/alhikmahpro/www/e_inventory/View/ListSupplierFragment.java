@@ -120,19 +120,7 @@ public class ListSupplierFragment extends DialogFragment implements SwipeRefresh
         connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         helper = new dbHelper(getActivity());
         supplierArrayList = new ArrayList<>();
-        SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
-        Cursor cursor = helper.getSettings(sqLiteDatabase);
-        if (cursor.moveToFirst()) {
-            companyCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_CODE));
-            companyName = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_COMPANY_NAME));
-            deviceId = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID));
-            branchCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_BRANCH_CODE));
-            periodCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_PERIOD_CODE));
-            locationCode = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_LOCATION_CODE));
-            BASE_URL = SessionHandler.getInstance(getContext()).getHost();
-        }
-        cursor.close();
-        sqLiteDatabase.close();
+
         rvSupplierList.setHasFixedSize(true);
         rvSupplierList.setLayoutManager(new LinearLayoutManager(getContext()));
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);

@@ -54,9 +54,7 @@ import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.Interface.FragmentActionListener;
 import com.alhikmahpro.www.e_inventory.R;
 import com.alhikmahpro.www.e_inventory.worker.SalesWorker;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
-import com.journeyapps.barcodescanner.CaptureActivity;
+
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -85,14 +83,14 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private static final int STORAGE_PERMISSION_CODE = 100;
     private String scanData = "", user;
     Menu navMenu;
-    MenuItem admin, inventory, goods, sale, receipt;
+    MenuItem admin, inventory, goods, sale, receipt,order;
     ImageView imgLogo;
 
     public static String PREF_KEY_GOODS = "key_module_goods";
     public static String PREF_KEY_SALE = "key_module_sales";
     public static String PREF_KEY_RECEIPT = "key_module_receipts";
     public static String PREF_KEY_INVENTORY = "key_module_inventory";
-
+    public static String PREF_KEY_ORDER= "key_module_order";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,6 +117,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         goods = navMenu.findItem(R.id.nav_goods_receive);
         sale = navMenu.findItem(R.id.nav_sale);
         receipt = navMenu.findItem(R.id.nav_receipt);
+        order=navMenu.findItem(R.id.nav_order);
 
         inventory.setVisible(false);
         goods.setVisible(false);
@@ -547,6 +546,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             receipt.setVisible(true);
         else
             receipt.setVisible(false);
+
+        if(sharedPreferences.getBoolean(PREF_KEY_ORDER,false))
+            order.setVisible(true);
+        else
+            order.setVisible(false);
     }
 
 

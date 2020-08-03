@@ -53,14 +53,13 @@ import com.alhikmahpro.www.e_inventory.Data.CartModel;
 import com.alhikmahpro.www.e_inventory.Data.Converter;
 import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
+import com.alhikmahpro.www.e_inventory.FileUtils;
 import com.alhikmahpro.www.e_inventory.Interface.volleyListener;
 import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
 import com.alhikmahpro.www.e_inventory.R;
 import com.android.volley.VolleyError;
 import com.google.android.gms.vision.barcode.Barcode;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
-import com.journeyapps.barcodescanner.CaptureActivity;
+
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
@@ -127,12 +126,13 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     EditText editTextNet;
     @BindView(R.id.radioGroup)
     RadioGroup radioGroup;
-    @BindView(R.id.btnNext)
-    Button btnNext;
-    @BindView(R.id.btnAdd)
-    Button btnAdd;
+//    @BindView(R.id.btnNext)
+//    Button btnNext;
+//    @BindView(R.id.btnAdd)
+//    Button btnAdd;
     @BindView(R.id.txtAddedBarcode)
     EditText txtAddedBarcode;
+    MenuItem itemCart,itemDelete,itemAdd;
 //    @BindView(R.id.txtAddedPrice)
 //    EditText txtAddedPrice;
 //    @BindView(R.id.txtAddedQuantity)
@@ -152,7 +152,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     RadioButton radioReturn;
     @BindView(R.id.radioFree)
     RadioButton radioFree;
-    private String customerName, salesmanId, customerCode;
+    private String customerName, salesmanId, customerCode,type;
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
 
@@ -162,7 +162,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     String barCode, productCode, productName, saleType, selectedUnit, unit1, unit2, unit3, packing1, packing2, packing3, invoiceDate, invoiceNo;
     ArrayList<String> list;
     private static int cart_count = 0;
-    MenuItem itemCart, itemDelete;
+
     SharedPreferences pref;
     SharedPreferences.Editor editor;
     dbHelper helper;
@@ -247,10 +247,14 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
             saleValue = 0;
 
 
-        double net = (ParseDouble(editTextTotal.getText().toString())- ParseDouble(editTextDiscount.getText().toString()));
+        double total=Double.parseDouble(editTextRate.getText().toString())* ParseDouble(editTextQuantity.getText().toString());
+        double net = total-ParseDouble(editTextDiscount.getText().toString());
+        editTextTotal.setText(String.format("%.2f", total));
+
         //set free, sale, return
         net = net * saleValue;
-        editTextNet.setText(String.valueOf(net));
+        Log.d(TAG, "calculateNetValue: net value"+net);
+        editTextNet.setText(String.format("%.2f", net));
     }
 
 
@@ -306,15 +310,20 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     public void generateLog(String error){
         Log.d(TAG, "generateLog: ");
         try{
-            String body="/**SalesActivity**/"+error;
-            File root=new File(Environment.getExternalStorageDirectory(),"Logs");
-            if(!root.exists()){
-                root.mkdir();
-            }
-            String fileName=AppUtils.getDateAndTime()+".txt";
-            File file=new File(root,fileName);
+            String path= FileUtils.getSubDirPath(this, DataContract.DIR_LOGS);
+            String header="/**SalesActivity**/";
+            String fileName="Logs.txt";
+            File file=new File(path,fileName);
             FileWriter writer=new FileWriter(file);
-            writer.append(body);
+            writer.append(header);
+            writer.append("\n");
+            writer.append(AppUtils.getDateAndTime());
+            writer.append("\n");
+            writer.append("Response");
+            writer.append("\n");
+
+            writer.append(error);
+            writer.append("****************End*******");
             writer.flush();
             writer.close();
 
@@ -322,7 +331,6 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
             e.printStackTrace();
         }
     }
-
     private void showProgressBar() {
         progressBar.setVisibility(View.VISIBLE);
     }
@@ -338,8 +346,8 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         Log.d(TAG, "onRadioButtonClicked: " + radioId);
         radioButton = findViewById(radioId);
         saleType = radioButton.getText().toString();
-        //Toast.makeText(this, "selected radio button" + radioButton.getText(), Toast.LENGTH_SHORT).show();
-        //calculateNetValue();
+        calculateNetValue();
+
     }
 
 
@@ -399,13 +407,6 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     private void scanBarcode() {
 
         Log.d(TAG, "onScannerPressed: ");
-//        IntentIntegrator intentIntegrator = new IntentIntegrator(this);
-//        intentIntegrator.setCameraId(0);
-//        intentIntegrator.setPrompt("Scan code");
-//        intentIntegrator.setBeepEnabled(true);
-//        intentIntegrator.setOrientationLocked(false);
-//        intentIntegrator.setCaptureActivity(CaptureActivity.class);
-//        intentIntegrator.initiateScan();
         Intent launchIntent = BarcodeReaderActivity.getLaunchIntent(this, true, false);
         startActivityForResult(launchIntent,BARCODE_READER_ACTIVITY_REQUEST);
     }
@@ -429,18 +430,21 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
         // add to added items view
         txtAddedBarcode.setText(barCode+ " X "+editTextQuantity.getText().toString()+" X "+editTextRate.getText().toString());
-//        txtAddedQuantity.setText(editTextQuantity.getText().toString());
-//        txtAddedPrice.setText(editTextRate.getText().toString());
 
+        Log.d(TAG, "addToCart: invoice no"+invoiceNo);
+        // save to database
+        long lastId=0;
+        if(type.equals("SAL")){
+            lastId=helper.saveInvoiceDetails(invoiceNo,barCode,productCode,productName,productName,qty,selectedUnit,
+                    unit1,unit2,unit3,unit1Qty,unit2Qty,unit3Qty,rate,disc,discPercentage,net,saleType,
+                    DataContract.SYNC_STATUS_FAILED);
 
-        // add to invoice_details table
-        long lastId=helper.saveInvoiceDetails(invoiceNo,barCode,productCode,productName,productName,qty,selectedUnit,
-                unit1,unit2,unit3,unit1Qty,unit2Qty,unit3Qty,rate,disc,discPercentage,net,saleType,
-                DataContract.SYNC_STATUS_FAILED);
-
+        }else  if(type.equals("ORD")){
+            lastId=helper.saveOrderDetails(invoiceNo,barCode,productCode,productName,productName,qty,selectedUnit,
+                    unit1,unit2,unit3,unit1Qty,unit2Qty,unit3Qty,rate,disc,discPercentage,net,saleType,
+                    DataContract.SYNC_STATUS_FAILED);
+        }
         Log.d("LastID", "Added: "+lastId);
-
-
 
         //add item into cart
         if(lastId>0)//check inserted successfully
@@ -478,10 +482,6 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         //set badge count
         cart_count++;
         invalidateOptionsMenu();
-//        Snackbar.make((CoordinatorLayout)findViewById(R.id.parentlayout), "Removed from cart !!", Snackbar.LENGTH_LONG)
-//                .setAction("Action", null).show();
-
-
     }
 
 
@@ -517,12 +517,16 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
             editTextDiscount.setEnabled(true);
             editTextQuantity.setEnabled(true);
-
-
+            if(type.equals("ORD")){
+                editTextQuantity.setText("1");
+            }
+            String pCode,pName,stock,bCode,p1,p2,p3,u1,u2,u3,uIndex,u1Qty,u2Qty,u3qty,lCost,pk1,pk2,pk3;
             productCode = response.getString("ProductCode");
             productName = response.getString("ProductName");
-            String stock = response.getString("Stock");
+            stock = response.getString("Stock");
 
+            Log.d(TAG, "setValues: SalesPrice1 in double"+response.getDouble("SalesPrice1"));
+            Log.d(TAG, "setValues: SalesPrice1 in string"+response.getString("SalesPrice1"));
 
             barCode = response.getString("BarCode");
             price1 = response.getDouble("SalesPrice1");
@@ -563,6 +567,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     }
 
     private void setSpinner() {
+        Log.d(TAG, "setSpinner: ");
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, list);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
@@ -571,16 +576,6 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         spinner.setSelection(unitIndex);
         spinner.setOnItemSelectedListener(this);
 
-
-        //set discount type spinner
-
-//        ArrayAdapter<String> arrayAdapter1 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, discountType);
-//        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//
-//        arrayAdapter.notifyDataSetChanged();
-//        spinner2.setAdapter(arrayAdapter1);
-//        spinner2.setSelection(0);
-//        spinner2.setOnItemSelectedListener(this);
     }
 
 
@@ -613,7 +608,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         if (Cart.mCart.size() > 0) {
             new android.app.AlertDialog.Builder(SalesActivity.this)
                     .setTitle("Warning")
-                    .setMessage("Do you want to cancel the sales ?")
+                    .setMessage("Do you want to cancel ?")
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -639,7 +634,13 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         Cart.mCart.clear();
         if(pref.contains("Inv")){
             String inv = pref.getString("Inv", "");
-            boolean del = helper.deleteInvoiceDetailsByInvoiceNo(inv);
+            boolean del=false;
+            if(type.equals("SAL")){
+              del = helper.deleteInvoiceDetailsByInvoiceNo(inv);
+            }else if(type.equals("ORD")) {
+              del = helper.deleteOrderDetailsByInvoiceNo(inv);
+            }
+
             if (del) {
                 editor.remove("Inv");
                 editor.clear();
@@ -669,6 +670,24 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         if (requestCode == BARCODE_READER_ACTIVITY_REQUEST && data != null) {
             Barcode barcode = data.getParcelableExtra(BarcodeReaderActivity.KEY_CAPTURED_BARCODE);
             editTextBarcode.setText(barcode.rawValue);
+            if(type.equals("ORD")){
+                clearView();
+                getDataFromVolley();
+
+                if (TextUtils.isEmpty(editTextProductCode.getText())) {
+                    editTextProductCode.setError("Invalid Item");
+                } else {
+                    editTextProductCode.setError(null);
+                    double qty = ParseDouble(editTextQuantity.getText().toString());
+                    if (qty < 1) {
+                        editTextQuantity.setError("invalid quantity");
+                    } else {
+                        editTextQuantity.setError(null);
+                        addToCart();
+                    }
+                }
+
+            } 
         }
     }
 
@@ -676,7 +695,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-        Log.d(TAG, "onItemSelected called");
+        Log.d(TAG, "spinner changed");
         Spinner spin = (Spinner) parent;
         //Spinner spin2 = (Spinner) parent;
         if (spin.getId() == R.id.spinner) {
@@ -692,8 +711,10 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
                 costPrice = cost * unit2Qty * unit3Qty;
             }
             Log.d(TAG, "onItemSelected: Rate " + salePrice);
-            DecimalFormat format = new DecimalFormat("#,###,##0.00");
+            //DecimalFormat format = new DecimalFormat("#,###,##0.00");
             editTextRate.setText(String.valueOf(salePrice));
+            calculateNetValue();
+
         }
 
 //        } else if (spin2.getId() == R.id.spinner2) {
@@ -713,19 +734,26 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
 
     private void initView() {
         // clear the cart before starting
-        ClearCart();
+        Cart.mCart.clear();
+        if (pref.contains("Inv")) {
+            editor.remove("Inv");
+            editor.clear();
+            editor.commit();
+        }
+
         Intent intent = getIntent();
+        type=intent.getStringExtra("Type");
         customerName = intent.getStringExtra("Customer");
         customerCode = intent.getStringExtra("CustomerCode");
         getSupportActionBar().setTitle(customerName);
-        Log.d(TAG, "customer code: " + customerCode);
+        Log.d(TAG, "customer code: " + customerCode+type);
         //get default radio button values
 
         int radioId = radioGroup.getCheckedRadioButtonId();
         Log.d(TAG, "onRadioButtonClicked: " + radioId);
         radioButton = findViewById(radioId);
         saleType = radioButton.getText().toString();
-        Toast.makeText(this, "sale type : " + radioButton.getText(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "sale type : " + radioButton.getText(), Toast.LENGTH_SHORT).show();
 
         //editTextCost.setEnabled(false);
         editTextProductCode.setEnabled(false);
@@ -740,28 +768,33 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         editTextBarcode.requestFocus();
         SharedPreferences sharedPreferences= PreferenceManager.getDefaultSharedPreferences(this);
         salesmanId=sharedPreferences.getString("key_employee","0");
-
-//        dbHelper helper = new dbHelper(this);
-//
-//        SQLiteDatabase sqLiteDatabase = helper.getReadableDatabase();
-//        Cursor cursor = helper.getSettings(sqLiteDatabase);
-//        if (cursor.moveToFirst()) {
-//            salesmanId = cursor.getString(cursor.getColumnIndex(DataContract.Settings.COL_DEVICE_ID));
-//        }
-//        cursor.close();
-//        sqLiteDatabase.close();
-
-
-
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         invoiceDate= sdf.format(new Date());
-        //invoiceDate = AppUtils.getDateAndTime();
         helper = new dbHelper(this);
-        int last_no = helper.getLastInvoiceNo();
-        Log.d(TAG, "setDoc: " + last_no + "***" + invoiceDate);
-        int mDoc = last_no + 1;
         textViewDate.setText(invoiceDate);
-        invoiceNo = "INV" + "-" + mDoc;
+
+        if(type.equals("SAL")){
+            int last_no =helper.getAutoId(DataContract.AutoIdGenerator.COL_INVOICE_TABLE);
+                    //helper.getLastID(DataContract.Invoice.TABLE_NAME);
+
+            Log.d(TAG, "setDoc: " + last_no);
+            int mDoc = last_no + 1;
+            invoiceNo = "INV" + "-" + mDoc;
+            //delete invoiceDetails before first time insertion
+            helper.deleteInvoiceDetailsByInvoiceNo(invoiceNo);
+
+
+        }else if(type.equals("ORD")){
+            int last_no = helper.getAutoId(DataContract.AutoIdGenerator.COL_ORDER_TABLE);
+                    //helper.getLastID(DataContract.Order.TABLE_NAME);
+            Log.d(TAG, "setDoc: " + last_no);
+            int mDoc = last_no + 1;
+            invoiceNo = "ORD" + "-" + mDoc;
+
+            //delete orderDetails before first time insertion
+            helper.deleteOrderDetailsByInvoiceNo(invoiceNo);
+        }
+
         textViewInvoice.setText(invoiceNo);
         //textViewCustomer.setText(customerName);
         textViewSalesman.setText(salesmanId);
@@ -811,21 +844,21 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         } else return 0;
     }
 
-    @OnClick(R.id.btnAdd)
-    public void onBtnAddClicked() {
-        if (TextUtils.isEmpty(editTextProductCode.getText())) {
-            editTextProductCode.setError("Invalid Item");
-        } else {
-            editTextProductCode.setError(null);
-            double qty = ParseDouble(editTextQuantity.getText().toString());
-            if (qty < 1) {
-                editTextQuantity.setError("invalid quantity");
-            } else {
-                editTextQuantity.setError(null);
-                addToCart();
-            }
-        }
-    }
+//    @OnClick(R.id.btnAdd)
+//    public void onBtnAddClicked() {
+//        if (TextUtils.isEmpty(editTextProductCode.getText())) {
+//            editTextProductCode.setError("Invalid Item");
+//        } else {
+//            editTextProductCode.setError(null);
+//            double qty = ParseDouble(editTextQuantity.getText().toString());
+//            if (qty < 1) {
+//                editTextQuantity.setError("invalid quantity");
+//            } else {
+//                editTextQuantity.setError(null);
+//                addToCart();
+//            }
+//        }
+//    }
 
     @OnClick(R.id.imgSubmit)
     public void onImgSubmitClicked() {
@@ -833,23 +866,24 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         getDataFromVolley();
     }
 
-    @OnClick(R.id.btnNext)
-    public void onBtnNextClicked() {
-
-        clearView();
-        txtAddedBarcode.setText("");
-//        txtAddedPrice.setText("0.0");
-//        txtAddedQuantity.setText("0");
-
-        Intent intent = new Intent(SalesActivity.this, ViewCartActivity.class);
-        intent.putExtra("ACTION",DataContract.ACTION_NEW);
-        intent.putExtra("CUS_NAME", customerName);
-        intent.putExtra("CUS_CODE", customerCode);
-        intent.putExtra("SALESMAN_ID", salesmanId);
-        intent.putExtra("DOC_NO", invoiceNo);
-        intent.putExtra("DOC_DATE", invoiceDate);
-        startActivity(intent);
-    }
+//    @OnClick(R.id.btnNext)
+//    public void onBtnNextClicked() {
+//
+//        clearView();
+//        txtAddedBarcode.setText("");
+////        txtAddedPrice.setText("0.0");
+////        txtAddedQuantity.setText("0");
+//
+//        Intent intent = new Intent(SalesActivity.this, ViewCartActivity.class);
+//        intent.putExtra("TYPE",type);
+//        intent.putExtra("ACTION",DataContract.ACTION_NEW);
+//        intent.putExtra("CUS_NAME", customerName);
+//        intent.putExtra("CUS_CODE", customerCode);
+//        intent.putExtra("SALESMAN_ID", salesmanId);
+//        intent.putExtra("DOC_NO", invoiceNo);
+//        intent.putExtra("DOC_DATE", invoiceDate);
+//        startActivity(intent);
+//    }
 
     @Override
     public void onComplete(String code) {
@@ -863,6 +897,7 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         hideProgressBar();
         cart_count=Cart.mCart.size();
         Log.d(TAG, "onResume: "+cart_count);
+        Log.d(TAG, "onResume invoice: "+invoiceNo);
         invalidateOptionsMenu();
     }
 
@@ -885,13 +920,19 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
                     public void onClick(DialogInterface dialog, int i) {
                         InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                         im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
-                        editTextQuantity.setText(editTextUserInput.getText().toString());
-                        //reset discount values
-                        editTextDiscountPercentage.setText("0");
-                        editTextDiscount.setText("0");
-                        //calculate total
-                        double total=(ParseDouble(editTextQuantity.getText().toString()) * ParseDouble(editTextRate.getText().toString()));
-                        editTextTotal.setText(String.valueOf(total));
+
+                        double qty=ParseDouble(editTextUserInput.getText().toString());
+                        if(qty>0){
+                            editTextQuantity.setText(editTextUserInput.getText().toString());
+                            //reset discount values
+                            editTextDiscountPercentage.setText("0");
+                            editTextDiscount.setText("0");
+                        }else{
+                            editTextQuantity.setText("0");
+                            //reset discount values
+                            editTextDiscountPercentage.setText("0");
+                            editTextDiscount.setText("0");
+                        }
                         calculateNetValue();
                     }
                 })
@@ -930,15 +971,17 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
                     public void onClick(DialogInterface dialog, int i) {
                         InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                         im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
-                        editTextDiscount.setText(editTextUserInput.getText().toString());
-                        double total = ParseDouble(editTextTotal.getText().toString());
-                        if(total==0){
-                            editTextDiscountPercentage.setText("0");
-                        }else{
-                            double discountPercentage = ParseDouble(editTextUserInput.getText().toString()) / total * 100;
-                            editTextDiscountPercentage.setText(String.format("%.2f",discountPercentage));
-                        }
 
+                        double disAmount=ParseDouble(editTextUserInput.getText().toString());
+                        double total = ParseDouble(editTextTotal.getText().toString());
+                        if(disAmount>0 && total>0){
+                            editTextDiscount.setText(editTextUserInput.getText().toString());
+                            double discountPercentage=disAmount/total*100;
+                            editTextDiscountPercentage.setText(String.format("%.2f",discountPercentage));
+                        }else{
+                            editTextDiscount.setText("0");
+                            editTextDiscountPercentage.setText("0");
+                        }
                         calculateNetValue();
                     }
                 })
@@ -979,14 +1022,17 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
                         im.hideSoftInputFromWindow(editTextUserInput.getWindowToken(), 0);
 
                         double total=ParseDouble(editTextTotal.getText().toString());
-                        if(total==0){
-                            editTextDiscount.setText("0");
-                        }else{
+                        double discountPercentage=ParseDouble(editTextUserInput.getText().toString());
+                        if(discountPercentage>0 && total>0){
                             editTextDiscountPercentage.setText(editTextUserInput.getText().toString());
-                            discountPercentage = ParseDouble(editTextUserInput.getText().toString());
                             double percentageDecimal = discountPercentage / 100;
-                            double discountAmount = percentageDecimal * ParseDouble(editTextTotal.getText().toString());
+                            double discountAmount = percentageDecimal * total;
                             editTextDiscount.setText(String.format("%.2f",discountAmount));
+
+                        }else{
+
+                           editTextDiscountPercentage.setText("0");
+                           editTextDiscount.setText("0");
                         }
 
 
@@ -1014,11 +1060,12 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.cart_toolbar, menu);
-        MenuItem menuItem = menu.findItem(R.id.action_cart);
-        Log.d(TAG, "onCreateOptionsMenu: "+Converter.convertLayoutToImage(SalesActivity.this,cart_count,R.drawable.ic_shopping_cart));
-        menuItem.setIcon(Converter.convertLayoutToImage(SalesActivity.this,cart_count,R.drawable.ic_shopping_cart));
-        MenuItem menuItem2 = menu.findItem(R.id.action_delete);
-        menuItem2.setVisible(false);
+        itemCart = menu.findItem(R.id.action_cart);
+        Log.d(TAG, "onCreateOptionsMenu: "+Converter.convertLayoutToImage(SalesActivity.this,cart_count,R.drawable.ic_shopping_cart_48dp));
+        itemCart.setIcon(Converter.convertLayoutToImage(SalesActivity.this,cart_count,R.drawable.ic_shopping_cart_48dp));
+        itemDelete= menu.findItem(R.id.action_delete);
+        itemDelete.setVisible(false);
+        itemAdd= menu.findItem(R.id.action_add);
         return true;
     }
 
@@ -1027,6 +1074,37 @@ public class SalesActivity extends AppCompatActivity implements AdapterView.OnIt
         // Handle item selection
 
         int id = item.getItemId();
+        if(id==R.id.action_add){
+            Log.d(TAG, "onOptionsItemSelected: add");
+            if (TextUtils.isEmpty(editTextProductCode.getText())) {
+                editTextProductCode.setError("Invalid Item");
+            } else {
+                editTextProductCode.setError(null);
+                double qty = ParseDouble(editTextQuantity.getText().toString());
+                if (qty < 1) {
+                    editTextQuantity.setError("invalid quantity");
+                } else {
+                    editTextQuantity.setError(null);
+                    addToCart();
+                }
+            }
+        }else if(id==R.id.action_cart){
+            Log.d(TAG, "onOptionsItemSelected: cart");
+            clearView();
+            txtAddedBarcode.setText("");
+//        txtAddedPrice.setText("0.0");
+//        txtAddedQuantity.setText("0");
+
+            Intent intent = new Intent(SalesActivity.this, ViewCartActivity.class);
+            intent.putExtra("TYPE",type);
+            intent.putExtra("ACTION",DataContract.ACTION_NEW);
+            intent.putExtra("CUS_NAME", customerName);
+            intent.putExtra("CUS_CODE", customerCode);
+            intent.putExtra("SALESMAN_ID", salesmanId);
+            intent.putExtra("DOC_NO", invoiceNo);
+            intent.putExtra("DOC_DATE", invoiceDate);
+            startActivity(intent);
+        }
 
         return super.onOptionsItemSelected(item);
     }

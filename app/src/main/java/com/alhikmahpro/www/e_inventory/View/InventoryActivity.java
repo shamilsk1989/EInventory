@@ -46,9 +46,7 @@ import com.alhikmahpro.www.e_inventory.Network.VolleyServiceGateway;
 import com.alhikmahpro.www.e_inventory.R;
 import com.android.volley.VolleyError;
 import com.google.android.gms.vision.barcode.Barcode;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
-import com.journeyapps.barcodescanner.CaptureActivity;
+
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
@@ -96,16 +94,14 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
     EditText txtCost;
     @BindView(R.id.txtSalePrice)
     EditText txtSalePrice;
-    @BindView(R.id.btnAdd)
-    Button btnAdd;
+
     @BindView(R.id.txtAddedBarcode)
     EditText txtAddedBarcode;
 //    @BindView(R.id.txtAddedPrice)
 //    EditText txtAddedPrice;
 //    @BindView(R.id.txtAddedQuantity)
 //    EditText txtAddedQuantity;
-    @BindView(R.id.btnNext)
-    Button btnNext;
+
     private static final String TAG = "InventoryActivity";
     @BindView(R.id.txtUser)
     TextView txtUser;
@@ -126,9 +122,9 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
     private static final int BARCODE_READER_ACTIVITY_REQUEST = 101;
     boolean is_first;
     private static int cart_count=0;
-
     volleyListener mVolleyListener;
     VolleyServiceGateway serviceGateway;
+    MenuItem itemCart,itemDelete,itemAdd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -259,74 +255,6 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
 
 
         //sendToServer();
-    }
-
-    @OnClick(R.id.btnAdd)
-    public void onBtnAddClicked() {
-
-
-        //String code,String p_code, String qty,String cost,String sale
-        if (validate(txtCode.getText().toString(), txtQuantity.getText().toString(), txtCost.getText().toString(), txtSalePrice.getText().toString(), txtUser.getText().toString())) {
-
-            double qty = 0;
-            qty = Double.valueOf(txtQuantity.getText().toString());
-            if (qty < 1) {
-                Toast.makeText(this, "Invalid Quantity", Toast.LENGTH_SHORT).show();
-            } else {
-
-                Log.d(TAG, "onBtnAddClicked: ");
-
-                if (is_first) {//first time..... so insert to Stock table;
-                    double total = 0;//set dummy value
-                    Log.d(TAG, "is first: " + txtUser.getText().toString());
-                    boolean stock_res = helper.saveStocks(mDoc, total, txtUser.getText().toString(), mDate);
-                    if (stock_res) {
-                        is_first = false;
-                    }
-
-                }
-                boolean res = helper.saveStocksDetails(mDoc, barCode, txtCode.getText().toString(),
-                        txtName.getText().toString(), selectedUnit, qty, salePrice, costPrice);
-
-                txtAddedBarcode.setText(barCode +" X "+txtQuantity.getText().toString()+" X "+txtSalePrice.getText().toString());
-                //txtAddedQuantity.setText(txtQuantity.getText().toString());
-                //txtAddedPrice.setText(txtSalePrice.getText().toString());
-                txtBarcode.setText("");
-                clearView();
-                setSpinner(false);
-                txtBarcode.setFocusableInTouchMode(true);
-                txtBarcode.requestFocus();
-                cart_count++;
-                invalidateOptionsMenu();
-
-            }
-
-        }
-        Log.d(TAG, "onBtnAddClicked: Cart size" + RuntimeData.mCartData.size());
-    }
-
-    @OnClick(R.id.btnNext)
-    public void onBtnNextClicked() {
-
-        txtAddedBarcode.setText("");
-        //txtAddedPrice.setText("");
-        //txtAddedQuantity.setText("");
-
-        int docNo;
-        try {
-            docNo = Integer.parseInt(txtDocNo.getText().toString());
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-            docNo = 0;
-        }
-        Log.d(TAG, "onBtnNextClicked: document no :" + docNo);
-        Intent intent = new Intent(InventoryActivity.this, ListItemActivity.class);
-        intent.putExtra("ACTION", "New");
-        intent.putExtra("DOC_NO", docNo);
-        intent.putExtra("USER", txtUser.getText().toString());
-        startActivity(intent);
-
-
     }
 
     @Override
@@ -622,7 +550,8 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         mDate = sdf.format(new Date());
-        int last_no = helper.getLastDocNo();
+        int last_no = helper.getAutoId(DataContract.AutoIdGenerator.COL_STOCK_TABLE);
+                //helper.getLastID(DataContract.Stocks.TABLE_NAME);
         Log.d(TAG, "setDoc: " + last_no);
         mDoc = last_no + 1;
         txtDate.setText(mDate);
@@ -707,11 +636,12 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.cart_toolbar, menu);
-        MenuItem menuItem = menu.findItem(R.id.action_cart);
+        itemCart = menu.findItem(R.id.action_cart);
         Log.d(TAG, "onCreateOptionsMenu: "+ Converter.convertLayoutToImage(InventoryActivity.this,cart_count,R.drawable.ic_shopping_cart));
-        menuItem.setIcon(Converter.convertLayoutToImage(InventoryActivity.this,cart_count,R.drawable.ic_shopping_cart));
-        MenuItem menuItem2 = menu.findItem(R.id.action_delete);
-        menuItem2.setVisible(false);
+        itemCart.setIcon(Converter.convertLayoutToImage(InventoryActivity.this,cart_count,R.drawable.ic_shopping_cart));
+        itemDelete = menu.findItem(R.id.action_delete);
+        itemDelete.setVisible(false);
+        itemAdd=menu.findItem(R.id.action_add);
         return true;
     }
 
@@ -720,6 +650,67 @@ public class InventoryActivity extends AppCompatActivity implements AdapterView.
         // Handle item selection
 
         int id = item.getItemId();
+        if(id==R.id.action_add){
+
+            //String code,String p_code, String qty,String cost,String sale
+            if (validate(txtCode.getText().toString(), txtQuantity.getText().toString(), txtCost.getText().toString(), txtSalePrice.getText().toString(), txtUser.getText().toString())) {
+
+                double qty = 0;
+                qty = Double.valueOf(txtQuantity.getText().toString());
+                if (qty < 1) {
+                    Toast.makeText(this, "Invalid Quantity", Toast.LENGTH_SHORT).show();
+                } else {
+
+                    Log.d(TAG, "onBtnAddClicked: ");
+
+                    if (is_first) {//first time..... so insert to Stock table;
+                        double total = 0;//set dummy value
+                        Log.d(TAG, "is first: " + txtUser.getText().toString());
+                        boolean stock_res = helper.saveStocks(mDoc, total, txtUser.getText().toString(), mDate);
+                        if (stock_res) {
+                            is_first = false;
+                        }
+
+                    }
+                    boolean res = helper.saveStocksDetails(mDoc, barCode, txtCode.getText().toString(),
+                            txtName.getText().toString(), selectedUnit, qty, salePrice, costPrice);
+
+                    txtAddedBarcode.setText(barCode +" X "+txtQuantity.getText().toString()+" X "+txtSalePrice.getText().toString());
+                    //txtAddedQuantity.setText(txtQuantity.getText().toString());
+                    //txtAddedPrice.setText(txtSalePrice.getText().toString());
+                    txtBarcode.setText("");
+                    clearView();
+                    setSpinner(false);
+                    txtBarcode.setFocusableInTouchMode(true);
+                    txtBarcode.requestFocus();
+                    cart_count++;
+                    invalidateOptionsMenu();
+
+                }
+
+            }
+            Log.d(TAG, "onBtnAddClicked: Cart size" + RuntimeData.mCartData.size());
+
+        }else if(id==R.id.action_cart){
+            txtAddedBarcode.setText("");
+            //txtAddedPrice.setText("");
+            //txtAddedQuantity.setText("");
+
+            int docNo;
+            try {
+                docNo = Integer.parseInt(txtDocNo.getText().toString());
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                docNo = 0;
+            }
+            Log.d(TAG, "onBtnNextClicked: document no :" + docNo);
+            Intent intent = new Intent(InventoryActivity.this, ListItemActivity.class);
+            intent.putExtra("ACTION", "New");
+            intent.putExtra("DOC_NO", docNo);
+            intent.putExtra("USER", txtUser.getText().toString());
+            startActivity(intent);
+
+        }
 
         return super.onOptionsItemSelected(item);
     }

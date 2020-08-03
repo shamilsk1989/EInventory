@@ -78,24 +78,7 @@ public class ListDocFragment extends Fragment {
 
     private void initView() {
         dbHelper helper = new dbHelper(getContext());
-        SQLiteDatabase database = helper.getReadableDatabase();
-        Cursor cursor = helper.getStocks(database);
-        Log.d(TAG, "initView: cursor size"+cursor.getCount());
-        final List<ItemModel> list = new ArrayList<>();
-        if (cursor.moveToFirst()) {
-            do {
-                ItemModel model = new ItemModel();
-                Log.d(TAG, "initView: "+cursor.getInt(cursor.getColumnIndex(DataContract.Stocks.COL_DOCUMENT_NUMBER)));
-                model.setDocNo(cursor.getInt(cursor.getColumnIndex(DataContract.Stocks.COL_DOCUMENT_NUMBER)));
-                model.setStaffName(cursor.getString(cursor.getColumnIndex(DataContract.Stocks.COL_STAFF_NAME)));
-                model.setTotal(cursor.getDouble(cursor.getColumnIndex(DataContract.Stocks.COL_TOTAL)));
-                model.setDate(cursor.getString(cursor.getColumnIndex(DataContract.Stocks.COL_DATE_TIME)));
-                list.add(model);
-            } while (cursor.moveToNext());
-
-
-        }
-
+        List<ItemModel> list = helper.getStocks();
         if(list.size()>0){
 
             layoutManager = new LinearLayoutManager(getContext());
@@ -117,9 +100,6 @@ public class ListDocFragment extends Fragment {
 
                 @Override
                 public void OnDeleteClicked(int position) {
-
-
-
                 }
             });
             docListRv.setAdapter(adapter);

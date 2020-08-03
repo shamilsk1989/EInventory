@@ -392,16 +392,16 @@ class ViewPdfActivity : AppCompatActivity() {
             val writer = PdfWriter.getInstance(document, FileOutputStream(fName))
             document.open()
             // add logo
-            val helper = dbHelper(this);
-            val sqLiteDatabase = helper.getReadableDatabase()
-            val cursor = helper.getLogo(sqLiteDatabase)
-
-            if (cursor.moveToFirst()) {
-                val img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO))
-                val bitmap = BitmapFactory.decodeByteArray(img, 0, img.size)
-                cursor.close()
-                sqLiteDatabase.close()
-            }
+//            val helper = dbHelper(this);
+//            val sqLiteDatabase = helper.getReadableDatabase()
+//            val cursor = helper.getLogo(sqLiteDatabase)
+//
+//            if (cursor.moveToFirst()) {
+//                val img = cursor.getBlob(cursor.getColumnIndex(DataContract.Settings.COL_LOGO))
+//                val bitmap = BitmapFactory.decodeByteArray(img, 0, img.size)
+//                cursor.close()
+//                sqLiteDatabase.close()
+//            }
             try {
 
                 val bmp = getBitmapFromAssets("logo.png")
@@ -810,8 +810,14 @@ class ViewPdfActivity : AppCompatActivity() {
 
     private fun clearActivity() {
         Cart.mCart.clear()
+        val sharedPreferences = getSharedPreferences("Invoice", 0)
+        val editor = sharedPreferences.edit()
+        editor.remove("Inv")
+        editor.clear()
+        editor.apply()
         // finish all activity and go to home activity
         val intent = Intent(applicationContext, ListSalesActivity::class.java)
+        intent.putExtra("Type","SAL")
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         startActivity(intent)
     }

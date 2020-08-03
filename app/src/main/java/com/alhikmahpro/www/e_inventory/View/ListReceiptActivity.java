@@ -72,7 +72,7 @@ public class ListReceiptActivity extends AppCompatActivity {
 
     @BindView(R.id.doc_list_rv)
     RecyclerView docListRv;
-//    @BindView(R.id.txtEmpty)
+    //    @BindView(R.id.txtEmpty)
 //    TextView txtEmpty;
     @BindView(R.id.fab)
     FloatingActionButton fab;
@@ -92,7 +92,7 @@ public class ListReceiptActivity extends AppCompatActivity {
     AlertDialog.Builder builder;
     private static final int PERMISSION_CODE = 100;
 
-    MenuItem itemShare,itemClear,itemPrint,itemSync;
+    MenuItem itemShare, itemClear, itemPrint, itemSync;
 
 
     @Override
@@ -130,44 +130,21 @@ public class ListReceiptActivity extends AppCompatActivity {
     }
 
     private void loadReceipts() {
-
-
         list.clear();
-        layoutManager = new LinearLayoutManager(this);
-        docListRv.setLayoutManager(layoutManager);
-        docListRv.setItemAnimator(new DefaultItemAnimator());
-        docListRv.setHasFixedSize(true);
-        dbHelper helper = new dbHelper(ListReceiptActivity.this);
-        SQLiteDatabase database = helper.getReadableDatabase();
-        Cursor cursor = helper.getAllReceipts(database);
-        Log.d(TAG, "loadReceipts: " + cursor.getCount());
-        if (cursor.moveToFirst()) {
-
-            //txtEmpty.setVisibility(View.GONE);
-            do {
-                //Log.d(TAG, "loadReceipts: "+cursor.getInt(cursor.getColumnIndex(DataContract.Stocks.COL_DOCUMENT_NUMBER)));
-                ReceiptModel model = new ReceiptModel();
-                model.setReceiptNo(cursor.getString(cursor.getColumnIndex(DataContract.Receipts.COL_RECEIPT_NUMBER)));
-                model.setReceiptDate(cursor.getString(cursor.getColumnIndex(DataContract.Receipts.COL_RECEIPT_DATE)));
-                model.setSalesmanId(cursor.getString(cursor.getColumnIndex(DataContract.Receipts.COL_SALESMAN_ID)));
-                model.setCustomerCode(cursor.getString(cursor.getColumnIndex(DataContract.Receipts.COL_CUSTOMER_CODE)));
-                model.setCustomerName(cursor.getString(cursor.getColumnIndex(DataContract.Receipts.COL_CUSTOMER_NAME)));
-                model.setReceivedAmount(cursor.getDouble(cursor.getColumnIndex(DataContract.Receipts.COL_RECEIVED_AMOUNT)));
-                model.setBalanceAmount(cursor.getDouble(cursor.getColumnIndex(DataContract.Receipts.COL_BALANCE_AMOUNT)));
-                model.setPaymentType(cursor.getString(cursor.getColumnIndex(DataContract.Receipts.COL_PAYMENT_TYPE)));
-                model.setChequeNumber(cursor.getString(cursor.getColumnIndex(DataContract.Receipts.COL_CHEQUE_NUMBER)));
-                model.setChequeDate(cursor.getString(cursor.getColumnIndex(DataContract.Receipts.COL_CHEQUE_DATE)));
-                model.setRemark(cursor.getString(cursor.getColumnIndex(DataContract.Receipts.COL_REMARK)));
-                model.setIs_sync(cursor.getInt(cursor.getColumnIndex(DataContract.Receipts.COL_IS_SYNC)));
-                list.add(model);
-            } while (cursor.moveToNext());
+        dbHelper helper = new dbHelper(this);
+        list = helper.getAllReceipts();
+        if (list.size() > 0) {
+            layoutManager = new LinearLayoutManager(this);
+            docListRv.setLayoutManager(layoutManager);
+            docListRv.setItemAnimator(new DefaultItemAnimator());
+            docListRv.setHasFixedSize(true);
 
 
             adapter = new ReceiptAdapter(this, list, new OnListAdapterClickListener() {
                 @Override
                 public void OnEditClicked(int position) {
 
-                   // ReceiptModel receiptModel = list.get(position);
+                    // ReceiptModel receiptModel = list.get(position);
 //                    customerName = receiptModel.getCustomerName();
 //                    customerCode = receiptModel.getCustomerCode();
 //                    salesman = receiptModel.getSalesmanId();
@@ -221,23 +198,19 @@ public class ListReceiptActivity extends AppCompatActivity {
             docListRv.setAdapter(adapter);
             ViewCompat.setNestedScrollingEnabled(docListRv, false);
 
-        } else {
-            //txtEmpty.setVisibility(View.VISIBLE);
         }
-        cursor.close();
-        database.close();
     }
 
     private void gotoViewPdf(int position) {
         Intent view_pdf = new Intent(this, ReceiptPdfViewActivity.class);
         ReceiptModel receiptModel = list.get(position);
-        view_pdf.putExtra("CUSTOMER_NAME",receiptModel.getCustomerName());
-        view_pdf.putExtra("CUSTOMER_CODE",receiptModel.getCustomerCode());
-        view_pdf.putExtra("SALESMAN_ID",receiptModel.getSalesmanId());
-        view_pdf.putExtra("RECEIPT_NO",receiptModel.getReceiptNo());
-        view_pdf.putExtra("RECEIPT_DATE",receiptModel.getReceiptDate());
+        view_pdf.putExtra("CUSTOMER_NAME", receiptModel.getCustomerName());
+        view_pdf.putExtra("CUSTOMER_CODE", receiptModel.getCustomerCode());
+        view_pdf.putExtra("SALESMAN_ID", receiptModel.getSalesmanId());
+        view_pdf.putExtra("RECEIPT_NO", receiptModel.getReceiptNo());
+        view_pdf.putExtra("RECEIPT_DATE", receiptModel.getReceiptDate());
         //view_pdf.putExtra("BAL_AMOUNT",receiptModel.getBalanceAmount());
-        view_pdf.putExtra("REC_AMOUNT",receiptModel.getReceivedAmount());
+        view_pdf.putExtra("REC_AMOUNT", receiptModel.getReceivedAmount());
 //        view_pdf.putExtra("PAY_TYPE",receiptModel.getPaymentType());
 //        view_pdf.putExtra("CHQ_NUMBER",receiptModel.getChequeNumber());
 //        view_pdf.putExtra("CHQ_DATE",receiptModel.getChequeDate());
@@ -245,7 +218,6 @@ public class ListReceiptActivity extends AppCompatActivity {
         startActivity(view_pdf);
 
     }
-
 
 
     @OnClick(R.id.fab)
@@ -257,17 +229,17 @@ public class ListReceiptActivity extends AppCompatActivity {
     }
 
     private void sharePdf(String no) {
-        String fileName=null;
-        fileName=FileUtils.getSubDirPath(this,DataContract.DIR_RECEIPT)+no + ".pdf";
+        String fileName = null;
+        fileName = FileUtils.getSubDirPath(this, DataContract.DIR_RECEIPT) + no + ".pdf";
         File outputFile = new File(fileName);
-        if(outputFile.exists()){
+        if (outputFile.exists()) {
             Uri uri = FileProvider.getUriForFile(ListReceiptActivity.this, ListReceiptActivity.this.getPackageName() + ".provider", outputFile);
             Intent share = new Intent();
             share.setAction(Intent.ACTION_SEND);
             share.setType("application/pdf");
             share.putExtra(Intent.EXTRA_STREAM, uri);
             startActivity(Intent.createChooser(share, "Share to :"));
-        }else {
+        } else {
             Toast.makeText(this, "File not found", Toast.LENGTH_SHORT).show();
         }
 
@@ -283,7 +255,7 @@ public class ListReceiptActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        getMenuInflater().inflate(R.menu.tool_bar,menu);
+        getMenuInflater().inflate(R.menu.tool_bar, menu);
         itemPrint = menu.findItem(R.id.action_print);
         itemSync = menu.findItem(R.id.action_sync);
         itemShare = menu.findItem(R.id.action_share);
@@ -294,15 +266,15 @@ public class ListReceiptActivity extends AppCompatActivity {
         itemShare.setVisible(false);
 
 
-
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
 
-        int id=item.getItemId();
-        if(id==R.id.action_clear){
+        int id = item.getItemId();
+        if (id == R.id.action_clear) {
             alertDialog();
         }
         return super.onOptionsItemSelected(item);
@@ -320,8 +292,8 @@ public class ListReceiptActivity extends AppCompatActivity {
 
     private void clearReceipt() {
 
-        ClearData clearData=new ClearData(ListReceiptActivity.this);
-        clearData.execute("rec");
+        ClearData clearData = new ClearData(ListReceiptActivity.this);
+        clearData.execute("REC");
         loadReceipts();
     }
 

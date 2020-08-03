@@ -46,6 +46,7 @@ public class ListDocActivity extends AppCompatActivity {
     Toolbar toolbar;
     private String type;
     List<ItemModel> list;
+    dbHelper helper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +56,7 @@ public class ListDocActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-
+        helper = new dbHelper(ListDocActivity.this);
         Log.d(TAG, "onCreate: ");
 
         Intent mIntent = getIntent();
@@ -77,86 +77,53 @@ public class ListDocActivity extends AppCompatActivity {
 
     }
 
-    private void loadInventory() {
+    private List<ItemModel> loadInventory() {
 
-        list.clear();
-        dbHelper helper = new dbHelper(ListDocActivity.this);
-        SQLiteDatabase database = helper.getReadableDatabase();
-        Cursor cursor = helper.getStocks(database);
-        if (cursor.moveToFirst()) {
+        List<ItemModel>list;
+        list = helper.getStocks();
+        return list;
 
-            //txtEmpty.setVisibility(View.GONE);
-            do {
-                Log.d(TAG, "loadInventory: " + cursor.getInt(cursor.getColumnIndex(DataContract.Stocks.COL_DOCUMENT_NUMBER)));
-                ItemModel model = new ItemModel();
-                model.setDocNo(cursor.getInt(cursor.getColumnIndex(DataContract.Stocks.COL_DOCUMENT_NUMBER)));
-                model.setStaffName(cursor.getString(cursor.getColumnIndex(DataContract.Stocks.COL_STAFF_NAME)));
-                model.setTotal(cursor.getDouble(cursor.getColumnIndex(DataContract.Stocks.COL_TOTAL)));
-                model.setDate(cursor.getString(cursor.getColumnIndex(DataContract.Stocks.COL_DATE_TIME)));
-                model.setIs_sync(cursor.getInt(cursor.getColumnIndex(DataContract.Stocks.COL_IS_SYNC)));
-                list.add(model);
-            } while (cursor.moveToNext());
-        } else {
-            //txtEmpty.setVisibility(View.VISIBLE);
-        }
-        cursor.close();
-        database.close();
     }
 
-    private void loadGoods() {
-        list.clear();
-        dbHelper helper = new dbHelper(ListDocActivity.this);
-        SQLiteDatabase database = helper.getReadableDatabase();
-        Cursor cursor = helper.getGoods(database);
-        if (cursor.moveToFirst()) {
-
-            //txtEmpty.setVisibility(View.GONE);
-            do {
-                ItemModel model = new ItemModel();
-                model.setDocNo(cursor.getInt(cursor.getColumnIndex(DataContract.GoodsReceive.COL_DOCUMENT_NUMBER)));
-                model.setOrderNo(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_ORDER_NUMBER)));
-                model.setSupplierCode(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_SUPPLIER_CODE)));
-                model.setSupplierName(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_SUPPLIER_NAME)));
-                model.setInvoiceNo(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_INVOICE_NUMBER)));
-                model.setInvoiceDate(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_INVOICE_DATE)));
-                model.setStaffName(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_STAFF_NAME)));
-                model.setTotal(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceive.COL_TOTAL)));
-                model.setDiscount(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceive.COL_DISCOUNT_AMOUNT)));
-                model.setNet(cursor.getDouble(cursor.getColumnIndex(DataContract.GoodsReceive.COL_NET_AMOUNT)));
-                model.setServerInvoice(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_SERVER_INVOICE_NUMBER)));
-                model.setDate(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_DATE_TIME)));
-                model.setPaymentType(cursor.getString(cursor.getColumnIndex(DataContract.GoodsReceive.COL_PAYMENT_TYPE)));
-                model.setIs_sync(cursor.getInt(cursor.getColumnIndex(DataContract.GoodsReceive.COL_IS_SYNC)));
-                list.add(model);
-            } while (cursor.moveToNext());
-        } else {
-            //txtEmpty.setVisibility(View.VISIBLE);
-        }
-        cursor.close();
-        database.close();
+    private List<ItemModel> loadGoods() {
+        List<ItemModel>list;
+        list = helper.getGoods();
+        return list;
     }
 
 
     private void populateRecycler() {
+        if(list.size()>0){
+            list.clear();
+        }
+        RuntimeData.mCartData.clear();
+        if (type.equals("INV")) {
+            toolbar.setTitle("Inventory");
+            list=loadInventory();
+        } else if (type.equals("GDS")) {
+            toolbar.setTitle("Goods Receive");
+            list=loadGoods();
+        }
+        if(list.size()>0){
+            layoutManager = new LinearLayoutManager(this);
+            docListRv.setLayoutManager(layoutManager);
+            docListRv.setItemAnimator(new DefaultItemAnimator());
+            docListRv.setHasFixedSize(true);
 
-        layoutManager = new LinearLayoutManager(this);
-        docListRv.setLayoutManager(layoutManager);
-        docListRv.setItemAnimator(new DefaultItemAnimator());
-        docListRv.setHasFixedSize(true);
-        adapter = new DocAdapter(list, new OnAdapterClickListener() {
-            @Override
-            public void OnItemClicked(int position) {
-                editDoc(position);
-            }
+            adapter = new DocAdapter(list, new OnAdapterClickListener() {
+                @Override
+                public void OnItemClicked(int position) {
+                    editDoc(position);
+                }
 
-            @Override
-            public void OnDeleteClicked(int position) {
-                //use as share button click event
-            }
-        });
-
-        docListRv.setAdapter(adapter);
-        ViewCompat.setNestedScrollingEnabled(docListRv, false);
+                @Override
+                public void OnDeleteClicked(int position) {
+                    //use as share button click event
+                }
+            });
+            docListRv.setAdapter(adapter);
+            ViewCompat.setNestedScrollingEnabled(docListRv, false);
+        }
     }
 
     private void editDoc(int position) {
@@ -187,19 +154,7 @@ public class ListDocActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        RuntimeData.mCartData.clear();
-        if (type.equals("INV")) {
-            toolbar.setTitle("Inventory");
-            loadInventory();
 
-        } else if (type.equals("GDS")) {
-            toolbar.setTitle("Goods Receive");
-            loadGoods();
-        }
-//        else if(type.equals("REC")){
-//            getSupportActionBar().setTitle("Receipt");
-//
-//        }
         populateRecycler();
     }
 

@@ -36,7 +36,8 @@ public class DashBoardActivity extends AppCompatActivity {
     CardView goodsCard;
     @BindView(R.id.checkCard)
     CardView checkCard;
-
+    @BindView(R.id.orderCard)
+    CardView orderCard;
     @BindView(R.id.layBase)
     LinearLayout layBase;
     private static final String TAG = "DashBoardActivity";
@@ -45,8 +46,12 @@ public class DashBoardActivity extends AppCompatActivity {
     public static String PREF_KEY_SALE = "key_module_sales";
     public static String PREF_KEY_RECEIPT = "key_module_receipts";
     public static String PREF_KEY_INVENTORY = "key_module_inventory";
+    public static String PREF_KEY_ORDER = "key_module_order";
+    public static String PREF_KEY_STATEMENT = "key_module_statement";
     @BindView(R.id.reportCard)
     CardView reportCard;
+    @BindView(R.id.statementCard)
+    CardView statementCard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +70,8 @@ public class DashBoardActivity extends AppCompatActivity {
 
     private void readSettings() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String chooseOption = sharedPreferences.getString(getString(R.string.key_sync_type), "live_sync");
+        Log.d(TAG, "readSettings: " + chooseOption);
 
         if (sharedPreferences.getBoolean(PREF_KEY_GOODS, false))
             goodsCard.setVisibility(View.VISIBLE);
@@ -82,14 +89,29 @@ public class DashBoardActivity extends AppCompatActivity {
             receiptCard.setVisibility(View.VISIBLE);
         else
             receiptCard.setVisibility(View.GONE);
+        if (sharedPreferences.getBoolean(PREF_KEY_ORDER, false))
+            orderCard.setVisibility(View.VISIBLE);
+        else
+            orderCard.setVisibility(View.GONE);
+        if(sharedPreferences.getBoolean(PREF_KEY_RECEIPT,false))
+            statementCard.setVisibility(View.VISIBLE);
+        else
+            statementCard.setVisibility(View.GONE);
     }
 
-    @OnClick({R.id.saleCard, R.id.receiptCard, R.id.inventoryCard, R.id.goodsCard, R.id.checkCard,R.id.reportCard})
+    @OnClick({R.id.saleCard, R.id.receiptCard, R.id.inventoryCard, R.id.goodsCard, R.id.checkCard,
+            R.id.reportCard, R.id.orderCard,R.id.statementCard})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.saleCard:
                 Intent intent_sale = new Intent(DashBoardActivity.this, ListSalesActivity.class);
+                intent_sale.putExtra("Type", "SAL");
                 startActivity(intent_sale);
+                break;
+            case R.id.orderCard:
+                Intent intent_order = new Intent(DashBoardActivity.this, ListSalesActivity.class);
+                intent_order.putExtra("Type", "ORD");
+                startActivity(intent_order);
                 break;
             case R.id.receiptCard:
                 Intent intent_rec = new Intent(DashBoardActivity.this, ListReceiptActivity.class);
@@ -113,6 +135,11 @@ public class DashBoardActivity extends AppCompatActivity {
                 Log.d(TAG, "onViewClicked: ");
                 Intent report = new Intent(DashBoardActivity.this, ReportActivity.class);
                 startActivity(report);
+                break;
+            case R.id.statementCard:
+                Intent statement = new Intent(DashBoardActivity.this, CustomerStatementActivity.class);
+
+                startActivity(statement);
                 break;
 
 

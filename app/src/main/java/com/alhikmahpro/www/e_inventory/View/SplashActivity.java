@@ -9,10 +9,13 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.alhikmahpro.www.e_inventory.Data.AutoIdModel;
+import com.alhikmahpro.www.e_inventory.Data.DataContract;
 import com.alhikmahpro.www.e_inventory.Data.SessionHandler;
 import com.alhikmahpro.www.e_inventory.Data.dbHelper;
 import com.alhikmahpro.www.e_inventory.R;
 
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -29,6 +32,7 @@ public class SplashActivity extends AppCompatActivity {
     TextView txtView;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,10 +42,19 @@ public class SplashActivity extends AppCompatActivity {
         Animation animation= AnimationUtils.loadAnimation(this,R.anim.splashanim);
         image.setAnimation(animation);
         txtView.setAnimation(animation);
+        ArrayList<AutoIdModel>idModels=new ArrayList<>();
+        String[]tableName={DataContract.Stocks.TABLE_NAME,DataContract.Order.TABLE_NAME,DataContract.Invoice.TABLE_NAME,DataContract.GoodsReceive.TABLE_NAME};
         dbHelper helper=new dbHelper(this);
         if(!SessionHandler.getInstance(SplashActivity.this).isAppFirstTime()){
             Log.d(TAG, "App running first time: ");
             helper.saveLogin(DEFAULT_ADMIN_PASSWORD);
+//            for(int i=0;i<tableName.length;i++){
+//                AutoIdModel model=new AutoIdModel();
+//                model.setTableName(tableName[i]);
+//                model.setId(0);
+//                idModels.add(model);
+//            }
+            helper.saveAutoGeneratorId(0,0,0,0);
             SessionHandler.getInstance(SplashActivity.this).setAppFirstTime(true);
         }
         moveToNextScreen();

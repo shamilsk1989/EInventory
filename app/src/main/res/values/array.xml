@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="sync_type">
+        <item>Live Sync</item>
+        <item>Auto Sync</item>
+        <item>Manual Sync </item>
+    </string-array>
+
+    <string-array name="sync_type_values">
+        <item>live_sync</item>
+        <item>auto_sync</item>
+        <item>manual_sync</item>
+    </string-array>
+</resources>

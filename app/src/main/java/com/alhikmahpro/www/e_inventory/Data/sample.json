@@ -1,38 +1,34 @@
 {
   "Invoice": [
     {
-      "invoice_number": "INV-1",
-      "invoice_date": "28-03-2020",
+      "invoice_number": "INV-4",
+      "invoice_date": "02-04-2020",
       "customer_code": "C0001",
       "customer_name": "CASH CUSTOMER",
       "salesman_id": "S001",
-      "total_amount": 820,
-      "discount_amount": 200,
-      "discount_percentage": 24.39,
-      "other_amount": 50,
-      "net_amount": 670,
+      "total_amount": 150,
+      "discount_amount": 0,
+      "discount_percentage": 0,
+      "other_amount": 0,
+      "net_amount": 150,
       "payment_type": "Cash"
     }
   ],
   "Details": [
     {
       "serial_no": 1,
-      "invoice_number": "INV-1",
+      "invoice_number": "INV-4",
       "bar_code": "5136530",
       "product_code": "513653",
       "product_name": "3+1ST ACTIVITY BOOK ENVIRONMENT ",
-      "quantity": 60,
-      "unit1": "EA",
-      "unit2": "",
-      "unit3": "",
+      "quantity": 10,
       "selected_unit": "EA",
-      "un_qty1": 1,
+      "un_qty1": 0,
       "un_qty2": 0,
       "un_qty3": 0,
       "rate": 15,
-      "discount": 80,
-      "discount_percentage": 8.89,
-      "net_amount": 820,
+      "discount": 0,
+      "net_amount": 150,
       "sale_type": "Sale"
     }
   ]
